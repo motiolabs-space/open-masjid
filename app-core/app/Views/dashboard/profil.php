@@ -311,7 +311,6 @@
                 }
             </script>
         </div>
-    </div>
 
     <!-- Section 3: Pengurus Masjid -->
     <div class="bg-white dark:bg-white/5 rounded-xl border border-[#e5e7eb] dark:border-white/10 overflow-hidden mb-8">
@@ -369,7 +368,7 @@
     </div>
 
     <!-- Section 4: Informasi Pendukung -->
-    <div class="space-y-6 pb-24">
+    <div class="space-y-8 pb-24">
         <!-- Vision & Mission -->
         <div class="bg-white dark:bg-white/5 rounded-xl border border-[#e5e7eb] dark:border-white/10 overflow-hidden">
             <div class="p-6 border-b border-[#e5e7eb] dark:border-white/10 flex items-center justify-between cursor-pointer">
