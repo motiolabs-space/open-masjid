@@ -12,10 +12,10 @@
             <div class="bg-white dark:bg-white/5 p-4 rounded-xl border border-[#e5e7eb] dark:border-white/10 min-w-[320px]">
                 <div class="flex justify-between items-center mb-2">
                     <p class="text-[#111816] dark:text-white text-sm font-semibold">Kelengkapan Profil</p>
-                    <p class="text-primary text-sm font-bold">70%</p>
+                    <p class="text-primary text-sm font-bold"><?= $percentage ?>%</p>
                 </div>
                 <div class="h-2 w-full bg-[#dbe6e3] dark:bg-white/10 rounded-full overflow-hidden">
-                    <div class="h-full bg-primary" style="width: 70%;"></div>
+                    <div class="h-full bg-primary" style="width: <?= $percentage ?>%;"></div>
                 </div>
                 <p class="text-[#608a7e] text-xs mt-2 italic">Semakin lengkap profil, semakin mudah transparansi & koordinasi.</p>
             </div>
