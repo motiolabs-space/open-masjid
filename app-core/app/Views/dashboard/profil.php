@@ -152,8 +152,27 @@
                         </div>
                     </div>
                 </div>
+                <div class="lg:col-span-5 space-y-6">
+                    <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-1.5">Titik Lokasi (Pin Map)</label>
+                    <div id="map" class="relative rounded-xl overflow-hidden h-[240px] bg-[#f0f5f3] dark:bg-white/5 border border-[#e5e7eb] dark:border-white/10">
+                        <div class="absolute inset-0 flex items-center justify-center bg-slate-100 dark:bg-white/5">
+                            <p class="text-xs text-[#608a7e]">Memuat Peta...</p>
+                        </div>
+                    </div>
+                    <input type="hidden" name="latitude" id="latInput" value="<?= esc($masjid['latitude'] ?? '') ?>">
+                    <input type="hidden" name="longitude" id="lngInput" value="<?= esc($masjid['longitude'] ?? '') ?>">
+                    
+                    <button type="button" onclick="getCurrentLocation()" class="w-full bg-white dark:bg-white/5 border border-[#e5e7eb] dark:border-white/10 px-3 py-2.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 hover:bg-[#f0f5f3] transition-all">
+                        <span class="material-symbols-outlined text-sm">my_location</span>
+                        Gunakan Lokasi Saat Ini
+                    </button>
+                    <p class="text-[10px] text-[#608a7e] italic mt-1">Klik pada peta untuk menggeser PIN ke lokasi tepat masjid Anda.</p>
+                </div>
             </div>
             <script>
+                let map;
+                let marker;
+
                 async function loadRegencies(provinceId, selectedName = null) {
                     const regencySelect = document.getElementById('regencySelect');
                     if (!provinceId) {
@@ -168,7 +187,7 @@
                         regencySelect.innerHTML = '<option value="">Pilih Kota/Kabupaten</option>';
                         regencies.forEach(r => {
                             const option = document.createElement('option');
-                            option.value = r.name; // Save the name as the value to match current schema
+                            option.value = r.name;
                             option.textContent = r.name;
                             if (selectedName && r.name === selectedName) {
                                 option.selected = true;
@@ -180,27 +199,73 @@
                     }
                 }
 
-                // Initial load if province is selected
+                function initMap() {
+                    const latInput = document.getElementById('latInput');
+                    const lngInput = document.getElementById('lngInput');
+                    const lat = parseFloat(latInput.value) || -6.2088; 
+                    const lng = parseFloat(lngInput.value) || 106.8456;
+                    
+                    const myLatLng = { lat: lat, lng: lng };
+
+                    map = new google.maps.Map(document.getElementById("map"), {
+                        zoom: 15,
+                        center: myLatLng,
+                        mapTypeControl: false,
+                        streetViewControl: false,
+                        fullscreenControl: false
+                    });
+
+                    marker = new google.maps.Marker({
+                        position: myLatLng,
+                        map,
+                        draggable: true,
+                        title: "Lokasi Masjid",
+                    });
+
+                    marker.addListener("dragend", () => {
+                        const position = marker.getPosition();
+                        latInput.value = position.lat().toFixed(8);
+                        lngInput.value = position.lng().toFixed(8);
+                    });
+
+                    map.addListener("click", (mapsMouseEvent) => {
+                        const position = mapsMouseEvent.latLng;
+                        marker.setPosition(position);
+                        latInput.value = position.lat().toFixed(8);
+                        lngInput.value = position.lng().toFixed(8);
+                    });
+                }
+
+                function getCurrentLocation() {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(
+                            (position) => {
+                                const pos = {
+                                    lat: position.coords.latitude,
+                                    lng: position.coords.longitude,
+                                };
+                                map.setCenter(pos);
+                                marker.setPosition(pos);
+                                document.getElementById('latInput').value = pos.lat.toFixed(8);
+                                document.getElementById('lngInput').value = pos.lng.toFixed(8);
+                            },
+                            () => {
+                                alert("Error: The Geolocation service failed.");
+                            }
+                        );
+                    } else {
+                        alert("Error: Your browser doesn't support geolocation.");
+                    }
+                }
+
                 document.addEventListener('DOMContentLoaded', function() {
                     const provinceSelect = document.getElementById('provinceSelect');
-                    if (provinceSelect.value) {
+                    if (provinceSelect && provinceSelect.value) {
                         loadRegencies(provinceSelect.value, '<?= esc($masjid['kabupaten'] ?? '') ?>');
                     }
                 });
             </script>
-                <div class="lg:col-span-5 space-y-6">
-                    <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-1.5">Titik Lokasi (Pin Map)</label>
-                    <div class="relative rounded-xl overflow-hidden h-[240px] bg-[#f0f5f3] dark:bg-white/5 border border-[#e5e7eb] dark:border-white/10">
-                        <div class="absolute inset-0 bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA-45eMSdAdWCBSbz6yjVW5B_SDjNn7WlOsPX8hxQdJ12yckej5gyjBMKCrfM1Dfs7WIjIqd_9DJmxDlX7irioiFbsyoOCl46FGXt2BKwtPAiEzBNyHT-Gkish3xZsllpHB6WYKGaalviOkTCfvv2yMQbuVipfTxnx1CKaRIl4RQ-Wve9NN71XpWLNxCVvU0dn1wdTuXaW-xE7B5REA_zHqxCeV_5gF7cJuGqUjUJHCYhp5NDzX6_1ogo20rEmH5ELsazR7j2YF7n0H");'></div>
-                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                            <span class="material-symbols-outlined text-red-600 text-4xl" style="font-variation-settings: 'FILL' 1">location_on</span>
-                        </div>
-                        <button class="absolute bottom-4 right-4 bg-white dark:bg-[#1a2e28] px-3 py-1.5 rounded-lg shadow-lg text-xs font-bold flex items-center gap-1.5">
-                            <span class="material-symbols-outlined text-sm">my_location</span>
-                            Presisikan Pin
-                        </button>
-                    </div>
-                </div>
+            <script async defer src="https://maps.googleapis.com/maps/api/js?key=<?= env('GOOGLE_MAPS_API_KEY') ?>&callback=initMap"></script>
             </div>
             <div class="mt-8 pt-8 border-t border-[#e5e7eb] dark:border-white/10">
                 <h3 class="text-sm font-bold text-[#111816] dark:text-white mb-4">Wilayah Layanan</h3>
