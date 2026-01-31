@@ -5,6 +5,7 @@
     <?php $seo = config('SEO'); ?>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link rel="icon" type="image/png" href="<?= base_url('public/ico_masjid.png') ?>">
     
     <!-- SEO Tags -->
     <title><?= $title ?? $seo->title ?></title>
