@@ -6,8 +6,9 @@ class Admin extends BaseController
 {
     public function index(): string
     {
+        $name = session()->get('masjid_name') ?? session()->get('user_name') ?? 'User';
         $data = [
-            'title' => 'Dashboard Utama - Masjid Amanah'
+            'title' => 'Dashboard Utama - ' . $name
         ];
         return view('dashboard/index', $data);
     }

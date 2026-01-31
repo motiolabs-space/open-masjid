@@ -16,6 +16,7 @@ $routes->get('privacy-policy', 'Home::privacy');
 $routes->get('term', 'Home::term');
 $routes->get('/login', 'Home::login');
 $routes->get('/register', 'Home::register');
+$routes->get('/logout', 'Auth::logout');
 $routes->post('/register/masjid', 'Auth::registerMasjid');
 $routes->post('/register/jamaah', 'Auth::registerJamaah');
 $routes->get('dashboard', 'Admin::index');

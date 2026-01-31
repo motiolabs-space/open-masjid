@@ -14,6 +14,18 @@
     </div>
     <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow">
         <div class="flex justify-between items-start mb-4">
+            <div class="p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl text-emerald-600">
+                <span class="material-symbols-outlined">groups</span>
+            </div>
+            <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">+12 Aktif</span>
+        </div>
+        <p class="text-slate-500 text-sm font-medium">Jamaah Terdata</p>
+        <h3 class="text-3xl font-bold mt-1">1,482</h3>
+    </div>
+    
+    <?php if (session()->get('role') === 'pengurus'): ?>
+    <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex justify-between items-start mb-4">
             <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-blue-600">
                 <span class="material-symbols-outlined">account_balance_wallet</span>
             </div>
@@ -21,6 +33,8 @@
         <p class="text-slate-500 text-sm font-medium">Dana Amanah Aktif</p>
         <h3 class="text-3xl font-bold mt-1">Rp 128.5M</h3>
     </div>
+    <?php endif; ?>
+
     <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow">
         <div class="flex justify-between items-start mb-4">
             <div class="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-xl text-amber-600">
@@ -30,6 +44,8 @@
         <p class="text-slate-500 text-sm font-medium">Program Berjalan</p>
         <h3 class="text-3xl font-bold mt-1">14</h3>
     </div>
+
+    <?php if (session()->get('role') === 'pengurus'): ?>
     <div class="bg-red-50 dark:bg-red-950/30 p-6 rounded-xl border-2 border-red-200 dark:border-red-900/50 shadow-sm flex flex-col justify-between">
         <div>
             <div class="flex items-center gap-2 text-red-600 mb-2">
@@ -43,6 +59,21 @@
             Lihat & Tindak Lanjut <span class="material-symbols-outlined text-sm">arrow_forward</span>
         </button>
     </div>
+    <?php else: ?>
+    <div class="bg-emerald-50 dark:bg-emerald-950/30 p-6 rounded-xl border-2 border-emerald-200 dark:border-emerald-900/50 shadow-sm flex flex-col justify-between">
+        <div>
+            <div class="flex items-center gap-2 text-emerald-600 mb-2">
+                <span class="material-symbols-outlined text-xl">volunteer_activism</span>
+                <span class="text-xs font-bold uppercase tracking-wider">Aksi Kebaikan</span>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white">Mari Berbagi</h3>
+            <p class="text-xs text-slate-600 dark:text-slate-400 mt-1 italic">Lihat program bantuan yang tersedia</p>
+        </div>
+        <a href="<?= base_url('kebaikan') ?>" class="mt-4 w-full py-2 bg-primary text-white rounded-lg text-xs font-bold hover:bg-primary/90 transition-colors flex items-center justify-center gap-2">
+            Ikut Berkontribusi <span class="material-symbols-outlined text-sm">favorite</span>
+        </a>
+    </div>
+    <?php endif; ?>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">

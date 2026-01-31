@@ -3,8 +3,8 @@
 <div class="flex items-center gap-3">
 <img src="<?= base_url('public/logo.png') ?>" alt="Logo Masj.id" class="h-10">
 <div>
-<h1 class="text-base font-bold leading-tight">Masjid Amanah</h1>
-<p class="text-[11px] text-slate-500 font-medium">Kota Administrasi</p>
+<h1 class="text-base font-bold leading-tight"><?= session()->get('masjid_name') ?? 'Masj.id User' ?></h1>
+<p class="text-[11px] text-slate-500 font-medium"><?= session()->get('role') === 'pengurus' ? 'Pengelola Masjid' : 'Jamaah' ?></p>
 </div>
 </div>
 </div>
@@ -16,6 +16,8 @@
 <span class="material-symbols-outlined text-xl">dashboard</span>
 <span class="text-sm font-semibold">Dashboard</span>
 </a>
+
+<?php if (session()->get('role') === 'pengurus'): ?>
 <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="<?= base_url('dashboard/profil') ?>">
 <span class="material-symbols-outlined text-xl">account_balance</span>
 <span class="text-sm font-medium">Profil Masjid</span>
@@ -36,8 +38,20 @@
 <span class="material-symbols-outlined text-xl">groups_3</span>
 <span class="text-sm font-medium">Data Warga & Bantuan</span>
 </a>
+<?php else: ?>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-xl">volunteer_activism</span>
+<span class="text-sm font-medium">Riwayat Donasi</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-xl">favorite</span>
+<span class="text-sm font-medium">Program Diikuti</span>
+</a>
+<?php endif; ?>
 </nav>
 </div>
+
+<?php if (session()->get('role') === 'pengurus'): ?>
 <div>
 <p class="px-3 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Laporan & Sistem</p>
 <nav class="flex flex-col gap-1">
@@ -55,9 +69,10 @@
 </a>
 </nav>
 </div>
+<?php endif; ?>
 </div>
 <div class="p-4 border-t border-slate-100 dark:border-slate-800">
-<a href="<?= base_url('login') ?>" class="flex w-full items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+<a href="<?= base_url('logout') ?>" class="flex w-full items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
 <span class="material-symbols-outlined text-xl">logout</span>
 <span class="text-sm font-semibold">Keluar</span>
 </a>

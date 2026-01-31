@@ -58,7 +58,19 @@ class Auth extends BaseController
                 return redirect()->back()->withInput()->with('error', 'Terjadi kesalahan saat pendaftaran.');
             }
 
-            return redirect()->to('/login')->with('success', 'Pendaftaran masjid berhasil. Silakan masuk.');
+            // 4. Auto Login
+            $session = session();
+            $session->set([
+                'isLoggedIn' => true,
+                'user_id'    => $userId,
+                'user_name'  => $userData['name'],
+                'user_email' => $userData['email'],
+                'role'       => 'pengurus',
+                'masjid_id'  => $masjidId,
+                'masjid_name'=> $masjidData['name']
+            ]);
+
+            return redirect()->to('/dashboard')->with('success', 'Pendaftaran masjid berhasil. Selamat datang!');
 
         } catch (\Exception $e) {
             $db->transRollback();
@@ -78,10 +90,25 @@ class Auth extends BaseController
             'role'          => 'user'
         ];
 
-        if ($userModel->insert($userData)) {
-            return redirect()->to('/login')->with('success', 'Pendaftaran berhasil. Silakan masuk.');
+        if ($userId = $userModel->insert($userData)) {
+            $session = session();
+            $session->set([
+                'isLoggedIn' => true,
+                'user_id'    => $userId,
+                'user_name'  => $userData['name'],
+                'user_email' => $userData['email'],
+                'role'       => 'jamaah'
+            ]);
+
+            return redirect()->to('/dashboard')->with('success', 'Pendaftaran berhasil. Selamat datang!');
         }
 
         return redirect()->back()->withInput()->with('error', 'Gagal mendaftarkan akun.');
+    }
+
+    public function logout()
+    {
+        session()->destroy();
+        return redirect()->to('/login')->with('success', 'Berhasil keluar.');
     }
 }
