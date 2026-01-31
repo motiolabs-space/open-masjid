@@ -41,5 +41,6 @@ $routes->post('dashboard/berita/category/delete', 'Admin::deleteNewsCategory');
 $routes->get('dashboard/keuangan', 'Admin::keuangan');
 
 // Public Profile (Catch-all)
+$routes->get('(:any)/berita', 'Home::newsList/$1');
 $routes->get('(:any)/berita/(:any)', 'Home::newsDetail/$1/$2');
 $routes->get('(:any)', 'Home::masjid/$1');

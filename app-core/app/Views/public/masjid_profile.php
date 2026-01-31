@@ -210,7 +210,7 @@
                 <?php endforeach; ?>
             </div>
             <div class="text-center mt-12">
-                <a href="#" class="inline-flex items-center gap-2 text-primary font-bold hover:underline">
+                <a href="<?= base_url($masjid['username'] . '/berita') ?>" class="inline-flex items-center gap-2 text-primary font-bold hover:underline">
                     Lihat Semua Berita
                     <span class="material-symbols-outlined text-sm">arrow_forward</span>
                 </a>

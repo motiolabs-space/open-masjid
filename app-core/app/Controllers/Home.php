@@ -141,4 +141,41 @@ class Home extends BaseController
             'storage' => new \App\Libraries\Storage()
         ]);
     }
+
+    public function newsList($username): string
+    {
+        $masjidModel = new \App\Models\MasjidModel();
+        $masjid = $masjidModel->where('username', $username)->first();
+
+        if (!$masjid) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Masjid tidak ditemukan.");
+        }
+
+        $newsModel = new \App\Models\MasjidNewsModel();
+        $categoryModel = new \App\Models\MasjidNewsCategoryModel();
+
+        // Get filter from GET
+        $catSlug = $this->request->getGet('category');
+        
+        $query = $newsModel->select('masjid_news.*, masjid_news_categories.name as category_name')
+            ->join('masjid_news_categories', 'masjid_news_categories.id = masjid_news.category_id', 'left')
+            ->where(['masjid_news.masjid_id' => $masjid['id'], 'masjid_news.status' => 'published'])
+            ->orderBy('masjid_news.created_at', 'DESC');
+
+        if ($catSlug) {
+            $query->where('masjid_news_categories.slug', $catSlug);
+        }
+
+        $news = $query->findAll();
+        $categories = $categoryModel->where('masjid_id', $masjid['id'])->findAll();
+
+        return view('public/news_list', [
+            'title'      => 'Berita & Kegiatan - ' . esc($masjid['name']),
+            'masjid'     => $masjid,
+            'news'       => $news,
+            'categories' => $categories,
+            'activeCat'  => $catSlug,
+            'storage'    => new \App\Libraries\Storage()
+        ]);
+    }
 }
