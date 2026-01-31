@@ -153,7 +153,13 @@ class Admin extends BaseController
         // Handle External Service Toggle
         $data['is_external_service'] = isset($data['is_external_service']) ? 1 : 0;
 
-        // Handle Wilayah Layanan (Service Areas)
+    // Handle Menu Toggles
+    $data['menu_berita']  = isset($data['menu_berita']) ? 1 : 0;
+    $data['menu_program'] = isset($data['menu_program']) ? 1 : 0;
+    $data['menu_laporan'] = isset($data['menu_laporan']) ? 1 : 0;
+    $data['menu_kontak']  = isset($data['menu_kontak']) ? 1 : 0;
+
+    // Handle Wilayah Layanan (Service Areas)
         $wilayahData = $this->request->getPost('wilayah') ?? [];
         unset($data['wilayah']);
 

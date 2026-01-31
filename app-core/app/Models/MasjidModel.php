@@ -16,7 +16,7 @@ class MasjidModel extends Model
         'name', 'nama_resmi', 'username', 'tahun_berdiri', 'jenis_masjid', 
         'no_sk', 'address', 'provinsi', 'kabupaten', 'kecamatan', 'kelurahan', 
         'visi', 'misi', 'foto_utama', 'latitude', 'longitude', 'is_external_service',
-        'username_updated_at'
+        'username_updated_at', 'menu_berita', 'menu_program', 'menu_laporan', 'menu_kontak'
     ];
 
     // Dates

@@ -12,10 +12,18 @@
         </a>
         <nav class="hidden md:flex items-center gap-8">
             <a class="text-sm font-semibold hover:text-primary transition-colors" href="<?= base_url($masjid['username']) ?>">Beranda</a>
-            <a class="text-sm font-semibold hover:text-primary transition-colors" href="#tentang">Tentang</a>
-            <a class="text-sm font-semibold hover:text-primary transition-colors" href="#pengurus">Pengurus</a>
-            <a class="text-sm font-semibold hover:text-primary transition-colors" href="#galeri">Galeri</a>
-            <a class="text-sm font-semibold hover:text-primary transition-colors" href="#kontak">Lokasi</a>
+            <?php if ($masjid['menu_berita'] ?? 1): ?>
+                <a class="text-sm font-semibold hover:text-primary transition-colors" href="#berita">Berita & Kegiatan</a>
+            <?php endif; ?>
+            <?php if ($masjid['menu_program'] ?? 1): ?>
+                <a class="text-sm font-semibold hover:text-primary transition-colors" href="#program">Program</a>
+            <?php endif; ?>
+            <?php if ($masjid['menu_laporan'] ?? 1): ?>
+                <a class="text-sm font-semibold hover:text-primary transition-colors" href="#laporan">Laporan</a>
+            <?php endif; ?>
+            <?php if ($masjid['menu_kontak'] ?? 1): ?>
+                <a class="text-sm font-semibold hover:text-primary transition-colors" href="#kontak">Kontak</a>
+            <?php endif; ?>
         </nav>
         <div class="flex items-center gap-4">
             <a href="<?= base_url('login') ?>" class="hidden sm:block text-xs font-bold text-[#608a7e] hover:text-primary uppercase tracking-wider">Portal Admin</a>

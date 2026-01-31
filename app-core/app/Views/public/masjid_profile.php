@@ -164,6 +164,48 @@
 </section>
 <?php endif; ?>
 
+<!-- Berita & Kegiatan Section (Placeholder) -->
+<?php if ($masjid['menu_berita'] ?? 1): ?>
+<section id="berita" class="py-24 px-6 bg-background-light dark:bg-background-dark/50 overflow-hidden">
+    <div class="max-w-[1200px] mx-auto text-center">
+        <h2 class="text-sm font-bold text-primary uppercase tracking-[0.2em] mb-3">Warta Masjid</h2>
+        <h3 class="text-3xl md:text-5xl font-black mb-8">Berita & Kegiatan</h3>
+        <div class="p-12 bg-white dark:bg-[#1a2e25] rounded-[2.5rem] border border-dashed border-[#dbe6e1] dark:border-[#1e3a2f]">
+            <span class="material-symbols-outlined text-6xl text-primary/20 mb-4 font-light">edit_calendar</span>
+            <p class="text-[#608a7e] font-medium">Belum ada berita atau kegiatan terbaru yang dipublikasikan.</p>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
+
+<!-- Program Section (Placeholder) -->
+<?php if ($masjid['menu_program'] ?? 1): ?>
+<section id="program" class="py-24 px-6 bg-white dark:bg-background-dark overflow-hidden">
+    <div class="max-w-[1200px] mx-auto text-center">
+        <h2 class="text-sm font-bold text-primary uppercase tracking-[0.2em] mb-3">Layanan Kami</h2>
+        <h3 class="text-3xl md:text-5xl font-black mb-8">Program Unggulan</h3>
+        <div class="p-12 bg-background-light dark:bg-[#11241d] rounded-[2.5rem] border border-dashed border-[#dbe6e1] dark:border-[#1e3a2f]">
+            <span class="material-symbols-outlined text-6xl text-primary/20 mb-4 font-light">volunteer_activism</span>
+            <p class="text-[#608a7e] font-medium">Informasi program sedang disiapkan oleh pengurus masjid.</p>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
+
+<!-- Laporan Section (Placeholder) -->
+<?php if ($masjid['menu_laporan'] ?? 1): ?>
+<section id="laporan" class="py-24 px-6 bg-background-light dark:bg-background-dark/50 overflow-hidden">
+    <div class="max-w-[1200px] mx-auto text-center">
+        <h2 class="text-sm font-bold text-primary uppercase tracking-[0.2em] mb-3">Transparansi</h2>
+        <h3 class="text-3xl md:text-5xl font-black mb-8">Laporan Keuangan</h3>
+        <div class="p-12 bg-white dark:bg-[#1a2e25] rounded-[2.5rem] border border-dashed border-[#dbe6e1] dark:border-[#1e3a2f]">
+            <span class="material-symbols-outlined text-6xl text-primary/20 mb-4 font-light">account_balance_wallet</span>
+            <p class="text-[#608a7e] font-medium">Laporan keuangan bulanan akan segera ditampilkan di sini.</p>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
+
 <!-- Gallery Section -->
 <?php if (!empty($gallery)): ?>
 <section id="galeri" class="py-24 px-6 bg-white dark:bg-background-dark overflow-hidden">
@@ -226,6 +268,7 @@
 <?php endif; ?>
 
 <!-- Location Section -->
+<?php if ($masjid['menu_kontak'] ?? 1): ?>
 <section id="kontak" class="py-24 px-6 bg-background-light dark:bg-background-dark/50">
     <div class="max-w-[1200px] mx-auto">
         <div class="flex flex-col lg:flex-row gap-16">
@@ -321,5 +364,6 @@
         });
     }
 </script>
+<?php endif; ?>
 
 <?= $this->endSection() ?>

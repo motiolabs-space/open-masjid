@@ -125,6 +125,50 @@
         </div>
     </div>
 
+    <!-- Section: Pengaturan Menu Publik -->
+    <div class="bg-white dark:bg-white/5 rounded-xl border border-[#e5e7eb] dark:border-white/10 overflow-hidden mb-8">
+        <div class="p-6 border-b border-[#e5e7eb] dark:border-white/10 flex items-center justify-between">
+            <h2 class="text-xl font-bold text-[#111816] dark:text-white flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">menu</span>
+                Pengaturan Menu Publik
+            </h2>
+            <span class="text-[10px] px-2 py-1 bg-emerald-100 text-emerald-700 rounded-lg font-bold uppercase">Konfigurasi Web</span>
+        </div>
+        <div class="p-8">
+            <p class="text-sm text-[#608a7e] mb-6">Aktifkan atau nonaktifkan menu yang akan ditampilkan pada halaman profil publik masjid Anda.</p>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <label class="flex items-center gap-3 p-4 bg-[#f0f5f3] dark:bg-white/5 rounded-xl cursor-pointer hover:bg-primary/5 transition-all border border-transparent hover:border-primary/20">
+                    <input name="menu_berita" type="checkbox" <?= ($masjid['menu_berita'] ?? 1) ? 'checked' : '' ?> class="rounded text-primary focus:ring-primary border-[#dbe6e3]"/>
+                    <div class="flex flex-col">
+                        <span class="text-sm font-bold">Berita & Kegiatan</span>
+                        <span class="text-[10px] text-[#608a7e]">Informasi artikel</span>
+                    </div>
+                </label>
+                <label class="flex items-center gap-3 p-4 bg-[#f0f5f3] dark:bg-white/5 rounded-xl cursor-pointer hover:bg-primary/5 transition-all border border-transparent hover:border-primary/20">
+                    <input name="menu_program" type="checkbox" <?= ($masjid['menu_program'] ?? 1) ? 'checked' : '' ?> class="rounded text-primary focus:ring-primary border-[#dbe6e3]"/>
+                    <div class="flex flex-col">
+                        <span class="text-sm font-bold">Program</span>
+                        <span class="text-[10px] text-[#608a7e]">Layanan kebaikan</span>
+                    </div>
+                </label>
+                <label class="flex items-center gap-3 p-4 bg-[#f0f5f3] dark:bg-white/5 rounded-xl cursor-pointer hover:bg-primary/5 transition-all border border-transparent hover:border-primary/20">
+                    <input name="menu_laporan" type="checkbox" <?= ($masjid['menu_laporan'] ?? 1) ? 'checked' : '' ?> class="rounded text-primary focus:ring-primary border-[#dbe6e3]"/>
+                    <div class="flex flex-col">
+                        <span class="text-sm font-bold">Laporan</span>
+                        <span class="text-[10px] text-[#608a7e]">Transparansi dana</span>
+                    </div>
+                </label>
+                <label class="flex items-center gap-3 p-4 bg-[#f0f5f3] dark:bg-white/5 rounded-xl cursor-pointer hover:bg-primary/5 transition-all border border-transparent hover:border-primary/20">
+                    <input name="menu_kontak" type="checkbox" <?= ($masjid['menu_kontak'] ?? 1) ? 'checked' : '' ?> class="rounded text-primary focus:ring-primary border-[#dbe6e3]"/>
+                    <div class="flex flex-col">
+                        <span class="text-sm font-bold">Kontak</span>
+                        <span class="text-[10px] text-[#608a7e]">Lokasi & bantuan</span>
+                    </div>
+                </label>
+            </div>
+        </div>
+    </div>
+
     <!-- Section 2: Lokasi & Wilayah -->
     <div class="bg-white dark:bg-white/5 rounded-xl border border-[#e5e7eb] dark:border-white/10 overflow-hidden mb-8">
         <div class="p-6 border-b border-[#e5e7eb] dark:border-white/10">
