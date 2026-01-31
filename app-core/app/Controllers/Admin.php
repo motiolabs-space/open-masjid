@@ -4,6 +4,8 @@ namespace App\Controllers;
 
 use App\Models\MasjidModel;
 use App\Models\MasjidWilayahModel;
+use App\Models\MasjidPengurusModel;
+use App\Models\UserModel;
 use App\Models\ProvinceModel;
 use App\Models\RegencyModel;
 use App\Libraries\Storage;
@@ -161,5 +163,58 @@ class Admin extends BaseController
         $regencyModel = new RegencyModel();
         $regencies = $regencyModel->where('province_id', $provinceId)->findAll();
         return $this->response->setJSON($regencies);
+    }
+
+    public function searchUsers()
+    {
+        $query = $this->request->getGet('q');
+        if (empty($query)) {
+            return $this->response->setJSON([]);
+        }
+
+        $userModel = new UserModel();
+        $users = $userModel->like('name', $query)
+            ->orLike('phone', $query)
+            ->limit(10)
+            ->findAll();
+
+        return $this->response->setJSON($users);
+    }
+
+    public function addPengurus()
+    {
+        $masjidId = session()->get('masjid_id');
+        $userId = $this->request->getPost('user_id');
+        $role = $this->request->getPost('role');
+        $title = $this->request->getPost('title');
+
+        if (empty($userId) || empty($role)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Data tidak lengkap.']);
+        }
+
+        $pengurusModel = new MasjidPengurusModel();
+        
+        // Check if already exist
+        $exists = $pengurusModel->where([
+            'masjid_id' => $masjidId,
+            'user_id'   => $userId
+        ])->first();
+
+        if ($exists) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Pengguna ini sudah menjadi pengurus.']);
+        }
+
+        $data = [
+            'masjid_id' => $masjidId,
+            'user_id'   => $userId,
+            'role'      => $role,
+            'title'     => $title
+        ];
+
+        if ($pengurusModel->insert($data)) {
+            return $this->response->setJSON(['status' => 'success', 'message' => 'Pengurus berhasil ditambahkan.']);
+        }
+
+        return $this->response->setJSON(['status' => 'error', 'message' => 'Gagal menambahkan pengurus.']);
     }
 }

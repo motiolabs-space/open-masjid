@@ -24,6 +24,8 @@ $routes->get('dashboard', 'Admin::index');
 $routes->get('dashboard/profil', 'Admin::profil');
 $routes->post('dashboard/profil', 'Admin::updateProfile');
 $routes->get('dashboard/regencies/(:num)', 'Admin::getRegencies/$1');
+$routes->get('dashboard/users/search', 'Admin::searchUsers');
+$routes->post('dashboard/pengurus/add', 'Admin::addPengurus');
 $routes->get('dashboard/program', 'Admin::program');
 $routes->get('dashboard/berita', 'Admin::berita');
 $routes->get('dashboard/keuangan', 'Admin::keuangan');

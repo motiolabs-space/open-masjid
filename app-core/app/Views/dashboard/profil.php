@@ -316,7 +316,7 @@
     <div class="bg-white dark:bg-white/5 rounded-xl border border-[#e5e7eb] dark:border-white/10 overflow-hidden mb-8">
         <div class="p-6 border-b border-[#e5e7eb] dark:border-white/10 flex justify-between items-center">
             <h2 class="text-xl font-bold text-[#111816] dark:text-white">Pengurus Masjid</h2>
-            <button class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all">
+            <button type="button" onclick="openAddPengurusModal()" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all">
                 <span class="material-symbols-outlined text-lg">person_add</span>
                 Tambah Pengurus
             </button>
@@ -343,7 +343,7 @@
                                 <span class="text-sm font-semibold text-[#111816] dark:text-white"><?= esc($p['user_name']) ?></span>
                             </div>
                         </td>
-                        <td class="px-6 py-4 text-sm text-[#608a7e]"><?= esc($p['role'] == 'pengurus' ? 'Pengurus' : $p['role']) ?></td>
+                        <td class="px-6 py-4 text-sm text-[#608a7e]"><?= esc($p['title'] ?? (ucfirst($p['role']))) ?></td>
                         <td class="px-6 py-4 text-sm text-[#111816] dark:text-white"><?= esc($p['user_phone'] ?? '-') ?></td>
                         <td class="px-6 py-4">
                             <div class="flex justify-center">
@@ -351,7 +351,7 @@
                             </div>
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <button class="text-[#608a7e] hover:text-primary transition-colors">
+                            <button type="button" class="text-[#608a7e] hover:text-primary transition-colors">
                                 <span class="material-symbols-outlined">edit</span>
                             </button>
                         </td>
@@ -451,4 +451,194 @@
     </div>
 </footer>
 </form>
+<!-- Modal Tambah Pengurus -->
+<div id="addPengurusModal" class="fixed inset-0 bg-black/50 z-[100] hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-[#1a2e28] rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
+        <div class="p-6 border-b border-[#e5e7eb] dark:border-white/10 flex justify-between items-center bg-primary/5">
+            <h3 class="text-lg font-bold text-[#111816] dark:text-white flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">person_add</span>
+                Tambah Pengurus Baru
+            </h3>
+            <button onclick="closeAddPengurusModal()" class="text-[#608a7e] hover:text-red-500 transition-colors">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="p-6 space-y-5">
+            <!-- Search User -->
+            <div>
+                <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-2">Cari Jamaah (Nama/HP)</label>
+                <div class="relative">
+                    <input type="text" id="userSearchInput" oninput="searchUsers(this.value)" class="w-full rounded-xl border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary pl-10" placeholder="Ketik nama atau nomor HP...">
+                    <span class="material-symbols-outlined absolute left-3 top-2.5 text-[#608a7e] text-xl">search</span>
+                </div>
+                <div id="searchResults" class="mt-2 max-h-40 overflow-y-auto border border-[#dbe6e3] dark:border-white/10 rounded-xl hidden bg-white dark:bg-[#111816] divide-y dark:divide-white/5 shadow-lg">
+                    <!-- Results will appear here -->
+                </div>
+            </div>
+
+            <!-- Selected User Display -->
+            <div id="selectedUserDisplay" class="hidden p-4 bg-primary/5 border border-primary/20 rounded-xl items-center gap-3">
+                <div class="size-10 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+                    <span class="material-symbols-outlined">person</span>
+                </div>
+                <div class="flex-1">
+                    <p id="selectedUserName" class="text-sm font-bold text-[#111816] dark:text-white"></p>
+                    <p id="selectedUserPhone" class="text-xs text-[#608a7e]"></p>
+                    <input type="hidden" id="selectedUserId">
+                </div>
+                <button onclick="clearSelectedUser()" class="text-red-400 hover:text-red-600">
+                    <span class="material-symbols-outlined text-sm">close</span>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-2">Jabatan</label>
+                    <input type="text" id="pengurusTitle" list="jabatanList" class="w-full rounded-xl border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary" placeholder="Contoh: Ketua, Sekretaris, Bendahara...">
+                    <datalist id="jabatanList">
+                        <option value="Ketua">
+                        <option value="Sekretaris">
+                        <option value="Bendahara">
+                        <option value="Penasihat">
+                        <option value="Humas">
+                        <option value="Imam Besar">
+                    </datalist>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-2">Role Akses</label>
+                    <select id="pengurusRole" class="w-full rounded-xl border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary">
+                        <option value="pengurus">Pengurus (Hanya Lihat)</option>
+                        <option value="admin">Admin (Bisa Edit Profil)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="p-6 bg-slate-50 dark:bg-white/5 flex gap-3">
+            <button onclick="closeAddPengurusModal()" class="flex-1 px-4 py-2.5 text-[#608a7e] font-bold text-sm hover:bg-[#f0f5f3] dark:hover:bg-white/5 rounded-xl transition-all border border-[#dbe6e3] dark:border-white/10">Batal</button>
+            <button onclick="submitAddPengurus()" id="submitBtn" class="flex-1 px-4 py-2.5 bg-primary hover:bg-primary/90 text-white font-bold text-sm rounded-xl shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2">
+                Simpan
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openAddPengurusModal() {
+        document.getElementById('addPengurusModal').classList.remove('hidden');
+        document.getElementById('addPengurusModal').classList.add('flex');
+    }
+
+    function closeAddPengurusModal() {
+        document.getElementById('addPengurusModal').classList.add('hidden');
+        document.getElementById('addPengurusModal').classList.remove('flex');
+        clearAddPengurusForm();
+    }
+
+    function clearAddPengurusForm() {
+        document.getElementById('userSearchInput').value = '';
+        document.getElementById('searchResults').classList.add('hidden');
+        clearSelectedUser();
+        document.getElementById('pengurusTitle').value = '';
+        document.getElementById('pengurusRole').value = 'pengurus';
+    }
+
+    function clearSelectedUser() {
+        document.getElementById('selectedUserDisplay').classList.add('hidden');
+        document.getElementById('selectedUserDisplay').classList.remove('flex');
+        document.getElementById('selectedUserId').value = '';
+        document.getElementById('userSearchInput').parentElement.classList.remove('hidden');
+    }
+
+    let searchTimeout;
+    async function searchUsers(q) {
+        clearTimeout(searchTimeout);
+        if (q.length < 2) {
+            document.getElementById('searchResults').classList.add('hidden');
+            return;
+        }
+
+        searchTimeout = setTimeout(async () => {
+            try {
+                const response = await fetch('<?= base_url('dashboard/users/search') ?>?q=' + encodeURIComponent(q));
+                const users = await response.json();
+                
+                const resultsDiv = document.getElementById('searchResults');
+                resultsDiv.innerHTML = '';
+                
+                if (users.length > 0) {
+                    users.forEach(user => {
+                        const div = document.createElement('div');
+                        div.className = 'p-3 hover:bg-primary/5 cursor-pointer transition-colors';
+                        div.innerHTML = `
+                            <p class="text-sm font-bold text-[#111816] dark:text-white">${user.name}</p>
+                            <p class="text-xs text-[#608a7e]">${user.phone || '-'}</p>
+                        `;
+                        div.onclick = () => selectUser(user);
+                        resultsDiv.appendChild(div);
+                    });
+                    resultsDiv.classList.remove('hidden');
+                } else {
+                    resultsDiv.innerHTML = '<p class="p-3 text-xs text-slate-500 italic">User tidak ditemukan.</p>';
+                    resultsDiv.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error searching users:', error);
+            }
+        }, 300);
+    }
+
+    function selectUser(user) {
+        document.getElementById('selectedUserId').value = user.id;
+        document.getElementById('selectedUserName').innerText = user.name;
+        document.getElementById('selectedUserPhone').innerText = user.phone || '-';
+        
+        document.getElementById('selectedUserDisplay').classList.remove('hidden');
+        document.getElementById('selectedUserDisplay').classList.add('flex');
+        document.getElementById('userSearchInput').parentElement.classList.add('hidden');
+        document.getElementById('searchResults').classList.add('hidden');
+    }
+
+    async function submitAddPengurus() {
+        const userId = document.getElementById('selectedUserId').value;
+        const role = document.getElementById('pengurusRole').value;
+        const title = document.getElementById('pengurusTitle').value;
+        const submitBtn = document.getElementById('submitBtn');
+
+        if (!userId || !role) {
+            alert('Pilih jamaah dan role terlebih dahulu.');
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Menyimpan...';
+
+        try {
+            const formData = new FormData();
+            formData.append('user_id', userId);
+            formData.append('role', role);
+            formData.append('title', title);
+            formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+
+            const response = await fetch('<?= base_url('dashboard/pengurus/add') ?>', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            
+            if (result.status === 'success') {
+                location.reload();
+            } else {
+                alert(result.message);
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Simpan';
+            }
+        } catch (error) {
+            console.error('Error adding pengurus:', error);
+            alert('Gagal menambahkan pengurus.');
+            submitBtn.disabled = false;
+            submitBtn.innerText = 'Simpan';
+        }
+    }
+</script>
 <?= $this->endSection() ?>
