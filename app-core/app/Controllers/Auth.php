@@ -46,9 +46,11 @@ class Auth extends BaseController
 
             // 3. Link User to Masjid as Pengurus
             $pengurusData = [
-                'masjid_id' => $masjidId,
-                'user_id'   => $userId,
-                'role'      => 'pengurus'
+                'masjid_id'  => $masjidId,
+                'user_id'    => $userId,
+                'role'       => 'admin',
+                'title'      => 'Admin Utama',
+                'is_creator' => 1
             ];
             $pengurusModel->insert($pengurusData);
 

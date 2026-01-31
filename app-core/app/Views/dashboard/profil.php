@@ -327,7 +327,7 @@
                     <tr>
                         <th class="px-6 py-4">Nama Lengkap</th>
                         <th class="px-6 py-4">Jabatan</th>
-                        <th class="px-6 py-4">WhatsApp</th>
+                        <th class="px-6 py-4">Kontak</th>
                         <th class="px-6 py-4 text-center">Status</th>
                         <th class="px-6 py-4 text-right">Aksi</th>
                     </tr>
@@ -337,20 +337,56 @@
                     <tr class="hover:bg-[#f0f5f3]/50 dark:hover:bg-white/5 transition-colors">
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
-                                <div class="bg-center bg-no-repeat bg-cover rounded-full size-8 bg-slate-200 flex items-center justify-center">
+                                <div class="bg-center bg-no-repeat bg-cover rounded-full size-8 bg-slate-200 flex items-center justify-center relative">
                                     <span class="material-symbols-outlined text-slate-400 text-sm">person</span>
+                                    <?php if (($p['is_creator'] ?? 0) == 1): ?>
+                                        <div class="absolute -top-1 -right-1 size-3 bg-primary border-2 border-white rounded-full title="Admin Utama"></div>
+                                    <?php endif; ?>
                                 </div>
-                                <span class="text-sm font-semibold text-[#111816] dark:text-white"><?= esc($p['user_name']) ?></span>
+                                <div class="flex flex-col">
+                                    <span class="text-sm font-semibold text-[#111816] dark:text-white flex items-center gap-1">
+                                        <?= esc($p['user_name']) ?>
+                                        <?php if (($p['is_creator'] ?? 0) == 1): ?>
+                                            <span class="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary rounded font-bold uppercase">Utama</span>
+                                        <?php endif; ?>
+                                    </span>
+                                </div>
                             </div>
                         </td>
-                        <td class="px-6 py-4 text-sm text-[#608a7e]"><?= esc($p['title'] ?? (ucfirst($p['role']))) ?></td>
-                        <td class="px-6 py-4 text-sm text-[#111816] dark:text-white"><?= esc($p['user_phone'] ?? '-') ?></td>
+                        <td class="px-6 py-4 text-sm text-[#608a7e]">
+                            <span class="flex flex-col">
+                                <span><?= esc($p['title'] ?? (ucfirst($p['role']))) ?></span>
+                                <span class="text-[10px] text-slate-400 uppercase font-bold"><?= esc($p['role']) ?></span>
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-[#111816] dark:text-white">
+                            <div class="flex flex-col gap-1">
+                                <?php if (!empty($p['user_phone'])): 
+                                    $waPhone = preg_replace('/[^0-9]/', '', $p['user_phone']);
+                                    if (strpos($waPhone, '0') === 0) $waPhone = '62' . substr($waPhone, 1);
+                                    elseif (strpos($waPhone, '62') !== 0) $waPhone = '62' . $waPhone;
+                                ?>
+                                    <a href="https://wa.me/<?= $waPhone ?>" target="_blank" class="flex items-center gap-1.5 text-green-600 hover:underline">
+                                        <span class="material-symbols-outlined text-sm">chat</span>
+                                        <?= esc($p['user_phone']) ?>
+                                    </a>
+                                <?php endif; ?>
+                                
+                                <?php if (!empty($p['user_email'])): ?>
+                                    <a href="mailto:<?= esc($p['user_email']) ?>" class="flex items-center gap-1.5 text-primary hover:underline">
+                                        <span class="material-symbols-outlined text-sm">mail</span>
+                                        <?= esc($p['user_email']) ?>
+                                    </a>
+                                <?php endif; ?>
+                            </div>
+                        </td>
                         <td class="px-6 py-4">
                             <div class="flex justify-center">
                                 <span class="px-2.5 py-1 bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 text-xs font-bold rounded-full">Aktif</span>
                             </div>
                         </td>
                         <td class="px-6 py-4 text-right">
+                            <?php if (($p['is_creator'] ?? 0) == 0): ?>
                             <div class="flex justify-end gap-2">
                                 <button type="button" 
                                     onclick='openEditPengurusModal(<?= json_encode([
@@ -367,6 +403,9 @@
                                     <span class="material-symbols-outlined">delete</span>
                                 </button>
                             </div>
+                            <?php else: ?>
+                                <span class="text-xs text-slate-400 italic">Terkunci</span>
+                            <?php endif; ?>
                         </td>
                     </tr>
                     <?php endforeach; ?>

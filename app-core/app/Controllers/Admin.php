@@ -237,6 +237,10 @@ class Admin extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => 'Data tidak ditemukan.']);
         }
 
+        if (($pengurus['is_creator'] ?? 0) == 1) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Akun Admin Utama tidak dapat diubah.']);
+        }
+
         $data = [
             'role'  => $role,
             'title' => $title
@@ -263,6 +267,10 @@ class Admin extends BaseController
         $pengurus = $pengurusModel->where(['id' => $id, 'masjid_id' => $masjidId])->first();
         if (!$pengurus) {
             return $this->response->setJSON(['status' => 'error', 'message' => 'Data tidak ditemukan atau bukan milik Anda.']);
+        }
+
+        if (($pengurus['is_creator'] ?? 0) == 1) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Akun Admin Utama tidak dapat dihapus.']);
         }
 
         if ($pengurusModel->delete($id)) {

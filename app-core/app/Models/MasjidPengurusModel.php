@@ -12,7 +12,7 @@ class MasjidPengurusModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['masjid_id', 'user_id', 'role', 'title'];
+    protected $allowedFields    = ['masjid_id', 'user_id', 'role', 'title', 'is_creator'];
 
     // Dates
     protected $useTimestamps = true;
