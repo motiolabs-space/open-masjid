@@ -2,7 +2,6 @@
     <div class="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
         <a href="<?= base_url() ?>" class="flex items-center gap-2">
             <img src="<?= base_url('public/logo.png') ?>" alt="Logo Masj.id" class="h-8">
-            <h2 class="text-xl font-bold tracking-tight text-primary">Masj.id</h2>
         </a>
         <nav class="hidden md:flex items-center gap-8">
             <a class="text-sm font-medium hover:text-primary transition-colors" href="<?= base_url() ?>">Beranda</a>
