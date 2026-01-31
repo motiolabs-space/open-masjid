@@ -217,4 +217,58 @@ class Admin extends BaseController
 
         return $this->response->setJSON(['status' => 'error', 'message' => 'Gagal menambahkan pengurus.']);
     }
+
+    public function updatePengurus()
+    {
+        $id = $this->request->getPost('id');
+        $role = $this->request->getPost('role');
+        $title = $this->request->getPost('title');
+
+        if (empty($id) || empty($role)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Data tidak lengkap.']);
+        }
+
+        $pengurusModel = new MasjidPengurusModel();
+        $masjidId = session()->get('masjid_id');
+
+        // Verify ownership
+        $pengurus = $pengurusModel->where(['id' => $id, 'masjid_id' => $masjidId])->first();
+        if (!$pengurus) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Data tidak ditemukan.']);
+        }
+
+        $data = [
+            'role'  => $role,
+            'title' => $title
+        ];
+
+        if ($pengurusModel->update($id, $data)) {
+            return $this->response->setJSON(['status' => 'success', 'message' => 'Data pengurus berhasil diperbarui.']);
+        }
+
+        return $this->response->setJSON(['status' => 'error', 'message' => 'Gagal memperbarui data pengurus.']);
+    }
+
+    public function deletePengurus()
+    {
+        $id = $this->request->getPost('id');
+        if (empty($id)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'ID tidak ditemukan.']);
+        }
+
+        $pengurusModel = new MasjidPengurusModel();
+        $masjidId = session()->get('masjid_id');
+
+        // Verify ownership
+        $pengurus = $pengurusModel->where(['id' => $id, 'masjid_id' => $masjidId])->first();
+        if (!$pengurus) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Data tidak ditemukan atau bukan milik Anda.']);
+        }
+
+        if ($pengurusModel->delete($id)) {
+            return $this->response->setJSON(['status' => 'success', 'message' => 'Pengurus berhasil dihapus.']);
+        }
+
+        return $this->response->setJSON(['status' => 'error', 'message' => 'Gagal menghapus pengurus.']);
+    }
 }

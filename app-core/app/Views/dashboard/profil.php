@@ -351,9 +351,22 @@
                             </div>
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <button type="button" class="text-[#608a7e] hover:text-primary transition-colors">
-                                <span class="material-symbols-outlined">edit</span>
-                            </button>
+                            <div class="flex justify-end gap-2">
+                                <button type="button" 
+                                    onclick='openEditPengurusModal(<?= json_encode([
+                                        "id" => $p["id"],
+                                        "name" => $p["user_name"],
+                                        "phone" => $p["user_phone"] ?? "-",
+                                        "title" => $p["title"],
+                                        "role" => $p["role"]
+                                    ]) ?>)' 
+                                    class="text-[#608a7e] hover:text-primary transition-colors">
+                                    <span class="material-symbols-outlined">edit</span>
+                                </button>
+                                <button type="button" onclick="confirmDeletePengurus(<?= $p['id'] ?>, '<?= esc($p['user_name']) ?>')" class="text-[#608a7e] hover:text-red-500 transition-colors">
+                                    <span class="material-symbols-outlined">delete</span>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -456,16 +469,17 @@
     <div class="bg-white dark:bg-[#1a2e28] rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
         <div class="p-6 border-b border-[#e5e7eb] dark:border-white/10 flex justify-between items-center bg-primary/5">
             <h3 class="text-lg font-bold text-[#111816] dark:text-white flex items-center gap-2">
-                <span class="material-symbols-outlined text-primary">person_add</span>
-                Tambah Pengurus Baru
+                <span class="material-symbols-outlined text-primary" id="modalIcon">person_add</span>
+                <span id="modalTitle">Tambah Pengurus Baru</span>
             </h3>
             <button onclick="closeAddPengurusModal()" class="text-[#608a7e] hover:text-red-500 transition-colors">
                 <span class="material-symbols-outlined">close</span>
             </button>
         </div>
         <div class="p-6 space-y-5">
-            <!-- Search User -->
-            <div>
+            <input type="hidden" id="editPengurusId">
+            <!-- Search User Section -->
+            <div id="searchUserSection">
                 <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-2">Cari Jamaah (Nama/HP)</label>
                 <div class="relative">
                     <input type="text" id="userSearchInput" oninput="searchUsers(this.value)" class="w-full rounded-xl border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary pl-10" placeholder="Ketik nama atau nomor HP...">
@@ -524,6 +538,33 @@
 
 <script>
     function openAddPengurusModal() {
+        document.getElementById('modalTitle').innerText = 'Tambah Pengurus Baru';
+        document.getElementById('modalIcon').innerText = 'person_add';
+        document.getElementById('editPengurusId').value = '';
+        document.getElementById('searchUserSection').classList.remove('hidden');
+        document.getElementById('selectedUserDisplay').classList.add('hidden');
+        document.getElementById('addPengurusModal').classList.remove('hidden');
+        document.getElementById('addPengurusModal').classList.add('flex');
+    }
+
+    function openEditPengurusModal(data) {
+        document.getElementById('modalTitle').innerText = 'Edit Pengurus';
+        document.getElementById('modalIcon').innerText = 'edit';
+        document.getElementById('editPengurusId').value = data.id;
+        
+        // Setup selected user display
+        document.getElementById('selectedUserName').innerText = data.name;
+        document.getElementById('selectedUserPhone').innerText = data.phone;
+        document.getElementById('selectedUserId').value = ''; // Not needed for update
+        
+        document.getElementById('searchUserSection').classList.add('hidden');
+        document.getElementById('selectedUserDisplay').classList.remove('hidden');
+        document.getElementById('selectedUserDisplay').classList.add('flex');
+        
+        // Set values
+        document.getElementById('pengurusTitle').value = data.title || '';
+        document.getElementById('pengurusRole').value = data.role;
+        
         document.getElementById('addPengurusModal').classList.remove('hidden');
         document.getElementById('addPengurusModal').classList.add('flex');
     }
@@ -540,6 +581,7 @@
         clearSelectedUser();
         document.getElementById('pengurusTitle').value = '';
         document.getElementById('pengurusRole').value = 'pengurus';
+        document.getElementById('editPengurusId').value = '';
     }
 
     function clearSelectedUser() {
@@ -547,6 +589,7 @@
         document.getElementById('selectedUserDisplay').classList.remove('flex');
         document.getElementById('selectedUserId').value = '';
         document.getElementById('userSearchInput').parentElement.classList.remove('hidden');
+        document.getElementById('searchUserSection').classList.remove('hidden');
     }
 
     let searchTimeout;
@@ -594,18 +637,19 @@
         
         document.getElementById('selectedUserDisplay').classList.remove('hidden');
         document.getElementById('selectedUserDisplay').classList.add('flex');
-        document.getElementById('userSearchInput').parentElement.classList.add('hidden');
+        document.getElementById('searchUserSection').classList.add('hidden');
         document.getElementById('searchResults').classList.add('hidden');
     }
 
     async function submitAddPengurus() {
+        const editId = document.getElementById('editPengurusId').value;
         const userId = document.getElementById('selectedUserId').value;
         const role = document.getElementById('pengurusRole').value;
         const title = document.getElementById('pengurusTitle').value;
         const submitBtn = document.getElementById('submitBtn');
 
-        if (!userId || !role) {
-            alert('Pilih jamaah dan role terlebih dahulu.');
+        if (!editId && !userId) {
+            alert('Pilih jamaah terlebih dahulu.');
             return;
         }
 
@@ -614,12 +658,19 @@
 
         try {
             const formData = new FormData();
-            formData.append('user_id', userId);
+            const url = editId ? '<?= base_url('dashboard/pengurus/update') ?>' : '<?= base_url('dashboard/pengurus/add') ?>';
+            
+            if (editId) {
+                formData.append('id', editId);
+            } else {
+                formData.append('user_id', userId);
+            }
+            
             formData.append('role', role);
             formData.append('title', title);
             formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
 
-            const response = await fetch('<?= base_url('dashboard/pengurus/add') ?>', {
+            const response = await fetch(url, {
                 method: 'POST',
                 body: formData
             });
@@ -634,10 +685,35 @@
                 submitBtn.innerText = 'Simpan';
             }
         } catch (error) {
-            console.error('Error adding pengurus:', error);
-            alert('Gagal menambahkan pengurus.');
+            console.error('Error saving pengurus:', error);
+            alert('Gagal menyimpan data pengurus.');
             submitBtn.disabled = false;
             submitBtn.innerText = 'Simpan';
+        }
+    }
+
+    async function confirmDeletePengurus(id, name) {
+        if (confirm(`Apakah Anda yakin ingin menghapus ${name} dari daftar pengurus?`)) {
+            try {
+                const formData = new FormData();
+                formData.append('id', id);
+                formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+
+                const response = await fetch('<?= base_url('dashboard/pengurus/delete') ?>', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (result.status === 'success') {
+                    location.reload();
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                console.error('Error deleting pengurus:', error);
+                alert('Gagal menghapus pengurus.');
+            }
         }
     }
 </script>
