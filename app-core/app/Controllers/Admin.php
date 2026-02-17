@@ -920,9 +920,9 @@ class Admin extends BaseController
         $data = [
             'masjid_id'       => $masjidId,
             'name'            => $this->request->getPost('name'),
-            'nik'             => $this->request->getPost('nik'),
-            'kk'              => $this->request->getPost('kk'),
-            'phone'           => $this->request->getPost('phone'),
+            'nik'             => $this->request->getPost('nik') ?: null,
+            'kk'              => $this->request->getPost('kk') ?: null,
+            'phone'           => $this->request->getPost('phone') ?: null,
             'address'         => $this->request->getPost('address'),
             'economic_status' => $this->request->getPost('economic_status'),
             'status'          => $this->request->getPost('status'),
@@ -930,10 +930,20 @@ class Admin extends BaseController
         ];
 
         if ($id) {
-            $wargaModel->update($id, $data);
+            // Security Check: Ensure owned by this masjid
+            $oldWarga = $wargaModel->where(['id' => $id, 'masjid_id' => $masjidId])->first();
+            if (!$oldWarga) {
+                return redirect()->to('dashboard/warga')->with('error', 'Data tidak ditemukan atau bukan milik Anda.');
+            }
+            
+            if (!$wargaModel->update($id, $data)) {
+                return redirect()->back()->withInput()->with('error', 'Gagal memperbarui data. Periksa inputan Anda.');
+            }
             $message = 'Data warga berhasil diperbarui.';
         } else {
-            $wargaModel->insert($data);
+            if (!$wargaModel->insert($data)) {
+                return redirect()->back()->withInput()->with('error', 'Gagal menyimpan data. Periksa inputan Anda.');
+            }
             $message = 'Data warga berhasil ditambahkan.';
         }
 

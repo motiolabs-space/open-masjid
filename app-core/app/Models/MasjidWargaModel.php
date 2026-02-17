@@ -27,6 +27,9 @@ class MasjidWargaModel extends Model
     protected $validationRules      = [
         'masjid_id' => 'required',
         'name'      => 'required|min_length[3]|max_length[100]',
+        'nik'       => 'permit_empty|numeric|min_length[16]|max_length[16]',
+        'kk'        => 'permit_empty|numeric|min_length[16]|max_length[16]',
+        'phone'     => 'permit_empty|numeric|min_length[10]|max_length[15]',
         'status'    => 'required|in_list[active,inactive,moved,deceased]',
         'economic_status' => 'required|in_list[mampu,cukup,kurang_mampu,fakir,miskin,yatim]',
     ];
