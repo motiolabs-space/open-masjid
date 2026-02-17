@@ -48,6 +48,95 @@
     </div>
 </section>
 
+<!-- Worship Schedule Section -->
+<?php if (!empty($todaySchedules) || !empty($fridaySchedule)): ?>
+<section class="py-12 bg-[#0C1512] text-white relative overflow-hidden">
+    <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/arabesque.png')] opacity-5"></div>
+    <div class="max-w-[1200px] mx-auto px-6 relative z-10">
+        <div class="flex flex-col md:flex-row gap-8 items-stretch">
+            
+            <!-- Today's Schedule -->
+            <div class="flex-1 bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-sm">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="size-10 bg-emerald-500/20 rounded-xl flex items-center justify-center text-emerald-400">
+                        <span class="material-symbols-outlined">calendar_today</span>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg">Petugas Sholat Hari Ini</h3>
+                        <p class="text-white/60 text-xs"><?= date('l, d F Y') ?></p>
+                    </div>
+                </div>
+
+                <?php if (empty($todaySchedules)): ?>
+                    <p class="text-white/40 italic text-sm">Belum ada jadwal petugas untuk hari ini.</p>
+                <?php else: ?>
+                    <div class="space-y-4">
+                        <?php foreach ($todaySchedules as $sched): ?>
+                            <div class="flex items-center justify-between border-b border-white/5 pb-3 last:border-0 last:pb-0">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-xs font-black uppercase text-emerald-400 w-16"><?= $sched['prayer_type'] ?></span>
+                                    <div>
+                                        <?php if ($sched['imam_name']): ?>
+                                            <div class="text-sm font-bold flex items-center gap-1">
+                                                <span class="material-symbols-outlined text-[10px] opacity-50">person</span>
+                                                <?= esc($sched['imam_name']) ?>
+                                            </div>
+                                        <?php endif; ?>
+                                        <?php if ($sched['muadzin_name']): ?>
+                                            <div class="text-xs text-white/60 flex items-center gap-1">
+                                                <span class="material-symbols-outlined text-[10px] opacity-50">campaign</span>
+                                                <?= esc($sched['muadzin_name']) ?>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- Friday Schedule -->
+            <?php if ($fridaySchedule): ?>
+            <div class="flex-1 bg-gradient-to-br from-emerald-900 to-emerald-950 border border-emerald-800 rounded-3xl p-8 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-32 bg-emerald-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+                
+                <div class="relative z-10">
+                    <div class="flex items-center gap-3 mb-8">
+                        <div class="size-10 bg-white/10 rounded-xl flex items-center justify-center text-white">
+                            <span class="material-symbols-outlined">mosque</span>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg text-emerald-100">Jumat Berkah</h3>
+                            <p class="text-emerald-200/60 text-xs"><?= date('d F Y', strtotime($fridaySchedule['date'])) ?></p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div>
+                            <p class="text-emerald-400 text-xs font-bold uppercase tracking-widest mb-1">Khatib</p>
+                            <h4 class="text-2xl font-black text-white"><?= esc($fridaySchedule['khatib_name']) ?></h4>
+                        </div>
+                        <div>
+                            <p class="text-emerald-400 text-xs font-bold uppercase tracking-widest mb-1">Imam</p>
+                            <h4 class="text-xl font-bold text-white/90"><?= esc($fridaySchedule['imam_name']) ?></h4>
+                        </div>
+                        <?php if ($fridaySchedule['muadzin_name']): ?>
+                        <div>
+                            <p class="text-emerald-400 text-xs font-bold uppercase tracking-widest mb-1">Muadzin/Bilal</p>
+                            <h4 class="text-lg font-medium text-white/80"><?= esc($fridaySchedule['muadzin_name']) ?> <?= $fridaySchedule['bilal_name'] ? ' / ' . esc($fridaySchedule['bilal_name']) : '' ?></h4>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+
+        </div>
+    </div>
+</section>
+<?php endif; ?>
+
 <!-- Vision & Mission -->
 <section id="tentang" class="py-24 px-6 bg-white dark:bg-background-dark">
     <div class="max-w-[1200px] mx-auto">
@@ -375,6 +464,31 @@
     }
 </script>
 <?php endif; ?>
+
+<!-- Newsletter Subscription -->
+<section id="subscribe" class="py-24 px-6 bg-gradient-to-br from-indigo-900 to-slate-900 relative overflow-hidden text-white">
+    <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+    <div class="max-w-[1200px] mx-auto relative z-10 text-center">
+        <span class="material-symbols-outlined text-6xl text-emerald-400 mb-6 animate-bounce">mark_email_unread</span>
+        <h2 class="text-sm font-bold text-emerald-400 uppercase tracking-[0.2em] mb-3">Newsletter</h2>
+        <h3 class="text-3xl md:text-5xl font-black mb-6">Jangan Lewatkan Info Terbaru</h3>
+        <p class="text-white/70 text-lg mb-12 max-w-2xl mx-auto">Dapatkan update jadwal kajian, laporan keuangan, dan kegiatan sosial <?= esc($masjid['name']) ?> langsung di email Anda.</p>
+
+        <form action="<?= base_url('subscribe') ?>" method="POST" class="max-w-md mx-auto flex flex-col gap-4">
+            <?= csrf_field() ?>
+            <input type="hidden" name="masjid_username" value="<?= esc($masjid['username']) ?>">
+            
+            <input type="text" name="name" required placeholder="Nama Lengkap" class="w-full px-6 py-4 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:ring-2 focus:ring-emerald-400 focus:border-transparent backdrop-blur-sm transition-all text-center font-bold">
+            
+            <input type="email" name="email" required placeholder="Alamat Email Anda" class="w-full px-6 py-4 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:ring-2 focus:ring-emerald-400 focus:border-transparent backdrop-blur-sm transition-all text-center font-bold">
+            
+            <button type="submit" class="bg-emerald-500 hover:bg-emerald-400 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest transition-all shadow-lg shadow-emerald-500/30 transform hover:scale-105">
+                Berlangganan Sekarang
+            </button>
+            <p class="text-xs text-white/40 mt-2">Kami menjaga privasi data Anda. Unsubscribe kapan saja.</p>
+        </form>
+    </div>
+</section>
 
 <!-- Location Section -->
 <?php if ($masjid['menu_kontak'] ?? 1): ?>

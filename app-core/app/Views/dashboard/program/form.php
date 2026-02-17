@@ -100,6 +100,14 @@
                         </div>
 
                         <div>
+                            <label class="block text-sm font-bold mb-2">Target Donasi (Rp)</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#608a7e] text-xs font-bold">Rp</span>
+                                <input type="text" name="target_donation" value="<?= isset($program['target_donation']) && $program['target_donation'] > 0 ? number_format($program['target_donation'], 0, ',', '.') : '' ?>" placeholder="0" onkeyup="formatCurrency(this)" class="w-full bg-[#f0f5f3] dark:bg-white/5 border-none rounded-xl text-xs focus:ring-2 focus:ring-primary py-3 pl-8 pr-3">
+                            </div>
+                        </div>
+
+                        <div>
                             <label class="block text-sm font-bold mb-2">Status</label>
                             <div class="grid grid-cols-2 gap-2">
                                 <label class="cursor-pointer">
@@ -162,6 +170,12 @@
             }
             reader.readAsDataURL(input.files[0]);
         }
+    }
+
+    function formatCurrency(input) {
+        let value = input.value.replace(/\D/g, '');
+        let formatted = new Intl.NumberFormat('id-ID').format(value);
+        input.value = formatted;
     }
 </script>
 <style>

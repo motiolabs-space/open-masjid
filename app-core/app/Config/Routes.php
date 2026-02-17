@@ -21,6 +21,7 @@ $routes->get('/logout', 'Auth::logout');
 $routes->post('/register/masjid', 'Auth::registerMasjid');
 $routes->post('/register/jamaah', 'Auth::registerJamaah');
 $routes->get('dashboard', 'Admin::index');
+$routes->post('subscribe', 'Home::subscribe');
 $routes->get('dashboard/profil', 'Admin::profil');
 $routes->post('dashboard/profil', 'Admin::updateProfile');
 $routes->get('dashboard/regencies/(:num)', 'Admin::getRegencies/$1');
@@ -57,6 +58,55 @@ $routes->get('dashboard/warga/new', 'Admin::createWarga');
 $routes->get('dashboard/warga/edit/(:num)', 'Admin::editWarga/$1');
 $routes->post('dashboard/warga/save', 'Admin::saveWarga');
 $routes->get('dashboard/warga/delete/(:num)', 'Admin::deleteWarga/$1');
+
+// Broadcast Newsletter
+$routes->get('dashboard/subscribers', 'Admin::subscribers');
+$routes->get('dashboard/subscribers/delete/(:num)', 'Admin::deleteSubscriber/$1');
+$routes->get('dashboard/broadcast', 'Admin::broadcasts');
+$routes->get('dashboard/broadcast/new', 'Admin::createBroadcast');
+$routes->post('dashboard/broadcast/send', 'Admin::sendBroadcast');
+
+// Aid Distribution (Penyaluran)
+$routes->get('dashboard/distribution', 'Admin::distributions');
+$routes->get('dashboard/distribution/new', 'Admin::createDistribution');
+$routes->get('dashboard/distribution/edit/(:num)', 'Admin::editDistribution/$1');
+$routes->post('dashboard/distribution/save', 'Admin::saveDistribution');
+$routes->get('dashboard/distribution/delete/(:num)', 'Admin::deleteDistribution/$1');
+
+// Reporting (Laporan)
+$routes->get('dashboard/reports', 'Admin::reports');
+$routes->get('dashboard/reports/finance', 'Admin::generateFinanceReport');
+$routes->get('dashboard/reports/program', 'Admin::generateProgramReport');
+$routes->get('dashboard/reports/inventory', 'Admin::generateInventoryReport');
+
+// Inventory Management
+$routes->get('dashboard/inventory', 'Admin::inventory');
+$routes->get('dashboard/inventory/new', 'Admin::createInventory');
+$routes->get('dashboard/inventory/edit/(:num)', 'Admin::editInventory/$1');
+$routes->post('dashboard/inventory/save', 'Admin::saveInventory');
+$routes->get('dashboard/inventory/delete/(:num)', 'Admin::deleteInventory/$1');
+
+// Payment Settings
+$routes->get('dashboard/settings/payment', 'Admin::paymentSettings');
+$routes->post('dashboard/settings/payment/save', 'Admin::savePaymentSettings');
+
+// Schedule Management
+$routes->get('dashboard/schedules', 'Admin::schedules');
+$routes->get('dashboard/schedules/new', 'Admin::createSchedule');
+$routes->get('dashboard/schedules/edit/(:num)', 'Admin::editSchedule/$1');
+$routes->post('dashboard/schedules/save', 'Admin::saveSchedule');
+$routes->get('dashboard/schedules/delete/(:num)', 'Admin::deleteSchedule/$1');
+
+// Donation & Payment
+$routes->get('donation/(:segment)/form', 'Donation::create/$1');
+$routes->get('donation/(:segment)/form/(:segment)', 'Donation::create/$1/$2'); // With Program Slug
+$routes->post('donation/process', 'Donation::store');
+$routes->get('donation/manual/(:segment)', 'Donation::manual/$1'); // Manual Payment Instruction
+
+// Payment Simulation (Dummy)
+$routes->get('payment/simulation/(:segment)', 'Payment::simulation/$1');
+$routes->post('payment/callback', 'Payment::callback');
+$routes->get('payment/success/(:segment)', 'Payment::success/$1');
 
 // Public Profile (Catch-all)
 $routes->get('(:any)/berita', 'Home::newsList/$1');

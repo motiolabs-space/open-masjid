@@ -266,10 +266,11 @@ class Admin extends BaseController
         if (!$newsId) {
             $slug = $slugPrefix . '-' . substr(md5(uniqid()), 0, 6);
         } else {
-            // Keep existing slug for SEO if updating, 
-            // unless we want to regenerate it. Let's keep it unless title changed significantly.
-            // For simplicity in this task, let's just use the current one if it exists or create one if not.
-            $oldNews = $newsModel->find($newsId);
+            // SECURITY CHECK
+            $oldNews = $newsModel->where(['id' => $newsId, 'masjid_id' => $masjidId])->first();
+            if (!$oldNews) {
+                return redirect()->to('/dashboard/berita')->with('error', 'Data tidak ditemukan atau akses ditolak.');
+            }
             $slug = $oldNews['slug'] ?? ($slugPrefix . '-' . substr(md5(uniqid()), 0, 6));
         }
 
@@ -342,6 +343,10 @@ class Admin extends BaseController
 
         $id = $this->request->getPost('id');
         if ($id) {
+            // SECURITY CHECK
+            $exists = $categoryModel->where(['id' => $id, 'masjid_id' => $masjidId])->first();
+            if (!$exists) return redirect()->back()->with('error', 'Akses ditolak.');
+
             $categoryModel->update($id, $data);
         } else {
             $categoryModel->insert($data);
@@ -404,18 +409,29 @@ class Admin extends BaseController
 
     public function searchUsers()
     {
-        $query = $this->request->getGet('q');
-        if (empty($query)) {
-            return $this->response->setJSON([]);
-        }
+        $term = $this->request->getGet('q') ?? $this->request->getGet('term');
+        $masjidId = session()->get('masjid_id');
 
-        $userModel = new UserModel();
-        $users = $userModel->like('name', $query)
-            ->orLike('phone', $query)
-            ->limit(10)
-            ->findAll();
+        if (empty($term)) return $this->response->setJSON([]);
 
-        return $this->response->setJSON($users);
+        $db = \Config\Database::connect();
+        
+        // Get generic users NOT already in this masjid committee
+        $builder = $db->table('users');
+        $builder->select('id, name, email, phone, avatar')
+                ->groupStart()
+                    ->like('name', $term)
+                    ->orLike('email', $term)
+                    ->orLike('phone', $term)
+                ->groupEnd()
+                ->whereNotIn('id', function($subquery) use ($masjidId) {
+                    $subquery->select('user_id')->from('masjid_pengurus')->where('masjid_id', $masjidId);
+                })
+                ->limit(10);
+        
+        $results = $builder->get()->getResultArray();
+
+        return $this->response->setJSON($results);
     }
 
     public function addPengurus()
@@ -635,7 +651,11 @@ class Admin extends BaseController
         if (!$programId) {
             $slug = $slugPrefix . '-' . substr(md5(uniqid()), 0, 6);
         } else {
-            $oldProgram = $programModel->find($programId);
+            // SECURITY CHECK
+            $oldProgram = $programModel->where(['id' => $programId, 'masjid_id' => $masjidId])->first();
+            if (!$oldProgram) {
+                return redirect()->back()->with('error', 'Data tidak ditemukan atau akses ditolak.');
+            }
             $slug = $oldProgram['slug'] ?? ($slugPrefix . '-' . substr(md5(uniqid()), 0, 6));
         }
 
@@ -650,6 +670,7 @@ class Admin extends BaseController
             'location'          => $this->request->getPost('location'),
             'registration_link' => $this->request->getPost('registration_link'),
             'quota'             => $this->request->getPost('quota') ?: null,
+            'target_donation'   => $this->request->getPost('target_donation') ? str_replace(['.', ','], ['', '.'], $this->request->getPost('target_donation')) : null,
             'status'            => $this->request->getPost('status') ?: 'published'
         ];
 
@@ -710,6 +731,10 @@ class Admin extends BaseController
         ];
 
         if ($id) {
+            // SECURITY CHECK
+            $exists = $categoryModel->where(['id' => $id, 'masjid_id' => $masjidId])->first();
+            if (!$exists) return redirect()->back()->with('error', 'Akses ditolak.');
+
             $categoryModel->update($id, $data);
             $message = 'Kategori berhasil diperbarui.';
         } else {
@@ -753,6 +778,10 @@ class Admin extends BaseController
         ];
 
         if ($id) {
+            // SECURITY CHECK
+            $exists = $categoryModel->where(['id' => $id, 'masjid_id' => $masjidId])->first();
+            if (!$exists) return redirect()->back()->with('error', 'Akses ditolak.');
+
             $categoryModel->update($id, $data);
             $message = 'Kategori keuangan berhasil diperbarui.';
         } else {
@@ -817,6 +846,10 @@ class Admin extends BaseController
         }
 
         if ($id) {
+            // SECURITY CHECK
+            $exists = $transactionModel->where(['id' => $id, 'masjid_id' => $masjidId])->first();
+            if (!$exists) return redirect()->back()->with('error', 'Akses ditolak.');
+
             $transactionModel->update($id, $data);
             $message = 'Transaksi berhasil diperbarui.';
         } else {
@@ -962,5 +995,663 @@ class Admin extends BaseController
         }
 
         return redirect()->to('dashboard/warga')->with('error', 'Data warga tidak ditemukan.');
+    }
+
+    // --------------------------------------------------------------------
+    // INVENTORY MANAGEMENT
+    // --------------------------------------------------------------------
+
+    public function inventory()
+    {
+        $masjidId = session()->get('masjid_id');
+        $invModel = new \App\Models\MasjidInventoryModel();
+
+        $search = $this->request->getGet('q');
+        $condition = $this->request->getGet('condition');
+
+        $query = $invModel->where('masjid_id', $masjidId);
+
+        if ($search) {
+            $query->like('name', $search);
+        }
+
+        if ($condition) {
+            $query->where('condition', $condition);
+        }
+
+        return view('dashboard/inventory/index', [
+            'title'     => 'Inventaris Masjid - Masj.id',
+            'inventory' => $query->orderBy('name', 'ASC')->findAll(),
+            'storage'   => new Storage()
+        ]);
+    }
+
+    public function createInventory()
+    {
+        return view('dashboard/inventory/form', [
+            'title'   => 'Tambah Aset - Masj.id',
+            'item'    => null,
+            'storage' => new Storage()
+        ]);
+    }
+
+    public function editInventory($id)
+    {
+        $masjidId = session()->get('masjid_id');
+        $invModel = new \App\Models\MasjidInventoryModel();
+        $item = $invModel->where(['id' => $id, 'masjid_id' => $masjidId])->first();
+
+        if (!$item) {
+            return redirect()->to('dashboard/inventory')->with('error', 'Aset tidak ditemukan.');
+        }
+
+        return view('dashboard/inventory/form', [
+            'title'   => 'Edit Aset - Masj.id',
+            'item'    => $item,
+            'storage' => new Storage()
+        ]);
+    }
+
+    public function saveInventory()
+    {
+        $masjidId = session()->get('masjid_id');
+        $invModel = new \App\Models\MasjidInventoryModel();
+        $id = $this->request->getPost('id');
+
+        $data = [
+            'masjid_id'      => $masjidId,
+            'name'           => $this->request->getPost('name'),
+            'brand'          => $this->request->getPost('brand'),
+            'quantity'       => $this->request->getPost('quantity'),
+            'unit'           => $this->request->getPost('unit'),
+            'condition'      => $this->request->getPost('condition'),
+            'purchase_date'  => $this->request->getPost('purchase_date') ?: null,
+            'purchase_price' => $this->request->getPost('purchase_price') ? str_replace(['.', ','], ['', '.'], $this->request->getPost('purchase_price')) : null,
+            'description'    => $this->request->getPost('description'),
+        ];
+
+        // Handle Photo
+        $file = $this->request->getFile('photo');
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            $storage = new Storage();
+            if ($id) {
+                $oldItem = $invModel->find($id);
+                if (!empty($oldItem['photo'])) {
+                    $storage->delete($oldItem['photo']);
+                }
+            }
+            $fileName = $storage->upload($file, 'inventory');
+            $data['photo'] = $fileName;
+        }
+
+        if ($id) {
+             // Security Check
+             $oldItem = $invModel->where(['id' => $id, 'masjid_id' => $masjidId])->first();
+             if (!$oldItem) {
+                 return redirect()->to('dashboard/inventory')->with('error', 'Aset tidak ditemukan.');
+             }
+
+            if (!$invModel->update($id, $data)) {
+                return redirect()->back()->withInput()->with('error', 'Gagal update.');
+            }
+            $message = 'Aset berhasil diperbarui.';
+        } else {
+            if (!$invModel->insert($data)) {
+                return redirect()->back()->withInput()->with('error', 'Gagal menyimpan.');
+            }
+            $message = 'Aset berhasil ditambahkan.';
+        }
+
+        return redirect()->to('dashboard/inventory')->with('success', $message);
+    }
+
+    public function deleteInventory($id)
+    {
+        $masjidId = session()->get('masjid_id');
+        $invModel = new \App\Models\MasjidInventoryModel();
+
+        $item = $invModel->where(['id' => $id, 'masjid_id' => $masjidId])->first();
+        if ($item) {
+            if (!empty($item['photo'])) {
+                (new Storage())->delete($item['photo']);
+            }
+            $invModel->delete($id);
+            return redirect()->to('dashboard/inventory')->with('success', 'Aset berhasil dihapus.');
+        }
+
+        return redirect()->to('dashboard/inventory')->with('error', 'Aset tidak ditemukan.');
+    }
+
+    // --------------------------------------------------------------------
+    // PAYMENT SETTINGS
+    // --------------------------------------------------------------------
+
+    public function paymentSettings()
+    {
+        $masjidId = session()->get('masjid_id');
+        $payModel = new \App\Models\MasjidPaymentModel();
+        
+        $settings = $payModel->where('masjid_id', $masjidId)->first();
+
+        return view('dashboard/settings/payment', [
+            'title'    => 'Pengaturan Pembayaran - Masj.id',
+            'settings' => $settings,
+            'storage'  => new Storage()
+        ]);
+    }
+
+    public function savePaymentSettings()
+    {
+        $masjidId = session()->get('masjid_id');
+        $payModel = new \App\Models\MasjidPaymentModel();
+        
+        $currentSettings = $payModel->where('masjid_id', $masjidId)->first();
+        $id = $currentSettings['id'] ?? null;
+
+        $data = [
+            'masjid_id'           => $masjidId,
+            'payment_mode'        => $this->request->getPost('payment_mode'),
+            'bank_name'           => $this->request->getPost('bank_name'),
+            'bank_account_name'   => $this->request->getPost('bank_account_name'),
+            'bank_account_number' => $this->request->getPost('bank_account_number'),
+            'multipay_api_key'    => $this->request->getPost('multipay_api_key'),
+            'multipay_secret_key' => $this->request->getPost('multipay_secret_key'),
+        ];
+
+        // Handle QRIS Image
+        $file = $this->request->getFile('qris_image');
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            $storage = new Storage();
+            if ($id && !empty($currentSettings['qris_image'])) {
+                $storage->delete($currentSettings['qris_image']);
+            }
+            $fileName = $storage->upload($file, 'qris');
+            $data['qris_image'] = $fileName;
+        }
+
+        if ($id) {
+            $payModel->update($id, $data);
+        } else {
+            $payModel->insert($data);
+        }
+
+        return redirect()->to('dashboard/settings/payment')->with('success', 'Pengaturan pembayaran berhasil disimpan.');
+    }
+
+    // --------------------------------------------------------------------
+    // SCHEDULE MANAGEMENT (Jadwal Peribadatan)
+    // --------------------------------------------------------------------
+
+    public function schedules()
+    {
+        $masjidId = session()->get('masjid_id');
+        $schedModel = new \App\Models\MasjidScheduleModel();
+        
+        $month = $this->request->getGet('month') ?: date('m');
+        $year  = $this->request->getGet('year') ?: date('Y');
+
+        $start = "$year-$month-01";
+        $end   = date("Y-m-t", strtotime($start));
+
+        $schedules = $schedModel->where('masjid_id', $masjidId)
+                                ->where('date >=', $start)
+                                ->where('date <=', $end)
+                                ->orderBy('date', 'ASC')
+                                ->orderBy('prayer_type', 'ASC') // Rough ordering, might need custom sort
+                                ->findAll();
+
+        // Group by Date for Calendar/List View
+        $grouped = [];
+        foreach ($schedules as $s) {
+            $grouped[$s['date']][] = $s;
+        }
+
+        return view('dashboard/schedule/index', [
+            'title'     => 'Jadwal Peribadatan - Masj.id',
+            'schedules' => $grouped,
+            'month'     => $month,
+            'year'      => $year
+        ]);
+    }
+
+    public function createSchedule()
+    {
+        return view('dashboard/schedule/form', [
+            'title' => 'Tambah Jadwal - Masj.id',
+            'data'  => []
+        ]);
+    }
+
+    public function editSchedule($id)
+    {
+        $masjidId = session()->get('masjid_id');
+        $schedModel = new \App\Models\MasjidScheduleModel();
+        $data = $schedModel->where(['id' => $id, 'masjid_id' => $masjidId])->first();
+
+        if (!$data) {
+            return redirect()->to('dashboard/schedules')->with('error', 'Jadwal tidak ditemukan.');
+        }
+
+        return view('dashboard/schedule/form', [
+            'title' => 'Edit Jadwal - Masj.id',
+            'data'  => $data
+        ]);
+    }
+
+    public function saveSchedule()
+    {
+        $masjidId = session()->get('masjid_id');
+        $schedModel = new \App\Models\MasjidScheduleModel();
+        $id = $this->request->getPost('id');
+
+        $data = [
+            'masjid_id'    => $masjidId,
+            'date'         => $this->request->getPost('date'),
+            'prayer_type'  => $this->request->getPost('prayer_type'),
+            'imam_name'    => $this->request->getPost('imam_name'),
+            'khatib_name'  => $this->request->getPost('khatib_name'),
+            'muadzin_name' => $this->request->getPost('muadzin_name'),
+            'bilal_name'   => $this->request->getPost('bilal_name'),
+        ];
+
+        if ($id) {
+            // SECURITY CHECK
+            $exists = $schedModel->where(['id' => $id, 'masjid_id' => $masjidId])->first();
+            if (!$exists) return redirect()->back()->with('error', 'Akses ditolak.');
+
+            $schedModel->update($id, $data);
+        } else {
+            $schedModel->insert($data);
+        }
+
+        return redirect()->to('dashboard/schedules')->with('success', 'Jadwal berhasil disimpan.');
+    }
+
+    public function deleteSchedule($id)
+    {
+        $masjidId = session()->get('masjid_id');
+        $schedModel = new \App\Models\MasjidScheduleModel();
+        
+        $item = $schedModel->where(['id' => $id, 'masjid_id' => $masjidId])->first();
+        if ($item) {
+            $schedModel->delete($id);
+            return redirect()->to('dashboard/schedules')->with('success', 'Jadwal berhasil dihapus.');
+        }
+
+        return redirect()->to('dashboard/schedules')->with('error', 'Jadwal tidak ditemukan.');
+    }
+
+    // --------------------------------------------------------------------
+    // MOSQUE COMMITTEE MANAGEMENT (Pengurus Masjid)
+    // --------------------------------------------------------------------
+
+    public function pengurus()
+    {
+        $masjidId = session()->get('masjid_id');
+        $pengurusModel = new \App\Models\MasjidPengurusModel();
+
+        // Fetch pengurus with user details
+        $pengurus = $pengurusModel->select('masjid_pengurus.*, users.name, users.email, users.phone, users.avatar')
+            ->join('users', 'users.id = masjid_pengurus.user_id')
+            ->where('masjid_id', $masjidId)
+            ->findAll();
+
+        return view('dashboard/pengurus/index', [
+            'title'    => 'Pengurus Masjid - Masj.id',
+            'pengurus' => $pengurus
+        ]);
+    }
+
+    // BROADCAST NEWSLETTER MODULE
+    // --------------------------------------------------------------------
+
+    public function subscribers()
+    {
+        $masjidId = session()->get('masjid_id');
+        $subscriberModel = new \App\Models\MasjidSubscriberModel();
+
+        $subscribers = $subscriberModel->where('masjid_id', $masjidId)
+            ->orderBy('created_at', 'DESC')
+            ->findAll();
+
+        return view('dashboard/broadcast/subscribers', [
+            'title'       => 'Subscriber Newsletter - Masj.id',
+            'subscribers' => $subscribers
+        ]);
+    }
+
+    public function deleteSubscriber($id) 
+    {
+        $masjidId = session()->get('masjid_id');
+        $subscriberModel = new \App\Models\MasjidSubscriberModel();
+        
+        $item = $subscriberModel->where(['id' => $id, 'masjid_id' => $masjidId])->first();
+        if ($item) {
+            $subscriberModel->delete($id);
+            return redirect()->back()->with('success', 'Subscriber dihapus.');
+        }
+        return redirect()->back()->with('error', 'Data tidak ditemukan.');
+    }
+
+    public function broadcasts()
+    {
+        $masjidId = session()->get('masjid_id');
+        $broadcastModel = new \App\Models\MasjidBroadcastModel();
+
+        $broadcasts = $broadcastModel->where('masjid_id', $masjidId)
+            ->orderBy('created_at', 'DESC')
+            ->findAll();
+
+        return view('dashboard/broadcast/index', [
+            'title'      => 'Riwayat Siaran/Broadcast - Masj.id',
+            'broadcasts' => $broadcasts
+        ]);
+    }
+
+    public function createBroadcast()
+    {
+        return view('dashboard/broadcast/form', [
+            'title' => 'Buat Siaran Baru - Masj.id'
+        ]);
+    }
+
+    public function sendBroadcast()
+    {
+        $masjidId = session()->get('masjid_id');
+        $subject = $this->request->getPost('subject');
+        $content = $this->request->getPost('content');
+        
+        // 1. Save to Database
+        $broadcastModel = new \App\Models\MasjidBroadcastModel();
+        $broadcastId = $broadcastModel->insert([
+            'masjid_id' => $masjidId,
+            'subject'   => $subject,
+            'content'   => $content,
+            'type'      => 'email',
+            'status'    => 'draft',
+            'recipient_count' => 0
+        ]);
+
+        // 2. Get Active Subscribers
+        $subscriberModel = new \App\Models\MasjidSubscriberModel();
+        $subscribers = $subscriberModel->where(['masjid_id' => $masjidId, 'is_active' => 1])->findAll();
+        
+        if (empty($subscribers)) {
+             return redirect()->to('dashboard/broadcast')->with('error', 'Belum ada subscriber aktif.');
+        }
+
+        // 3. Send Emails (Looping - MVP Approach)
+        $email = \Config\Services::email();
+        $masjidModel = new \App\Models\MasjidModel();
+        $masjid = $masjidModel->find($masjidId);
+        $count = 0;
+
+        foreach ($subscribers as $sub) {
+            $email->clear();
+            $email->setTo($sub['email']);
+            $email->setSubject($subject);
+            
+            // Simple Template
+            $body = "<h2>Berita dari " . esc($masjid['name']) . "</h2>";
+            $body .= "<hr>";
+            $body .= $content;
+            $body .= "<br><br><small>Anda menerima email ini karena berlangganan update dari " . esc($masjid['name']) . " via Masj.id.</small>";
+
+            $email->setMessage($body);
+
+            if ($email->send()) {
+                $count++;
+            }
+        }
+
+        // 4. Update Status
+        $broadcastModel->update($broadcastId, [
+            'status' => 'sent', 
+            'recipient_count' => $count,
+            'sent_at' => date('Y-m-d H:i:s')
+        ]);
+
+        return redirect()->to('dashboard/broadcast')->with('success', "Siaran berhasil dikirim ke $count subscriber.");
+    }
+
+    // AID DISTRIBUTION (PENYALURAN) MODULE
+    // --------------------------------------------------------------------
+
+    public function distributions()
+    {
+        $masjidId = session()->get('masjid_id');
+        $distModel = new \App\Models\MasjidDistributionModel();
+
+        // Join Warga & Program names
+        $distributions = $distModel->select('masjid_distributions.*, masjid_warga.name as warga_name, masjid_programs.title as program_name')
+            ->join('masjid_warga', 'masjid_warga.id = masjid_distributions.warga_id', 'left')
+            ->join('masjid_programs', 'masjid_programs.id = masjid_distributions.program_id', 'left')
+            ->where('masjid_distributions.masjid_id', $masjidId)
+            ->orderBy('date', 'DESC')
+            ->findAll();
+
+        return view('dashboard/distribution/index', [
+            'title'         => 'Penyaluran Bantuan - Masj.id',
+            'distributions' => $distributions
+        ]);
+    }
+
+    public function createDistribution()
+    {
+        $masjidId = session()->get('masjid_id');
+        $wargaModel = new \App\Models\MasjidWargaModel();
+        $programModel = new \App\Models\MasjidProgramModel();
+
+        $warga = $wargaModel->where('masjid_id', $masjidId)->findAll();
+        $programs = $programModel->where('masjid_id', $masjidId)->orderBy('date_start', 'DESC')->findAll();
+
+        return view('dashboard/distribution/form', [
+            'title'    => 'Input Penyaluran - Masj.id',
+            'warga'    => $warga,
+            'programs' => $programs
+        ]);
+    }
+
+    public function editDistribution($id)
+    {
+        $masjidId = session()->get('masjid_id');
+        $distModel = new \App\Models\MasjidDistributionModel();
+        $wargaModel = new \App\Models\MasjidWargaModel();
+        $programModel = new \App\Models\MasjidProgramModel();
+
+        $item = $distModel->where(['id' => $id, 'masjid_id' => $masjidId])->first();
+        if (!$item) return redirect()->to('dashboard/distribution')->with('error', 'Data tidak ditemukan.');
+
+        $warga = $wargaModel->where('masjid_id', $masjidId)->findAll();
+        $programs = $programModel->where('masjid_id', $masjidId)->orderBy('date_start', 'DESC')->findAll();
+
+        return view('dashboard/distribution/form', [
+            'title'    => 'Edit Penyaluran - Masj.id',
+            'item'     => $item,
+            'warga'    => $warga,
+            'programs' => $programs
+        ]);
+    }
+
+    public function saveDistribution()
+    {
+        $masjidId = session()->get('masjid_id');
+        $distModel = new \App\Models\MasjidDistributionModel();
+        
+        $id = $this->request->getPost('id');
+        $data = [
+            'masjid_id'   => $masjidId,
+            'warga_id'    => $this->request->getPost('warga_id') ?: null,
+            'program_id'  => $this->request->getPost('program_id') ?: null,
+            'date'        => $this->request->getPost('date'),
+            'type'        => $this->request->getPost('type'),
+            'amount'      => str_replace('.', '', $this->request->getPost('amount') ?? '0'),
+            'items'       => $this->request->getPost('items'),
+            'description' => $this->request->getPost('description'),
+        ];
+
+        // Handle Photo Upload
+        $file = $this->request->getFile('evidence_photo');
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            $storage = new \App\Libraries\Storage();
+            if ($id) {
+                // Delete old photo if exists
+                $oldItem = $distModel->find($id);
+                if ($oldItem && !empty($oldItem['evidence_photo'])) {
+                    $storage->delete($oldItem['evidence_photo']);
+                }
+            }
+            $filename = $file->getRandomName();
+            $path = $storage->upload($file, 'distributions', $filename);
+            $data['evidence_photo'] = $path;
+        }
+
+        if ($id) {
+            // SECURITY CHECK
+            $exists = $distModel->where(['id' => $id, 'masjid_id' => $masjidId])->first();
+            if (!$exists) return redirect()->back()->with('error', 'Akses ditolak.');
+
+            $distModel->update($id, $data);
+            $message = 'Data penyaluran diperbarui.';
+        } else {
+            $distModel->insert($data);
+            $message = 'Data penyaluran berhasil disimpan.';
+
+            // OPTIONAL: Auto-create Expense Transaction
+            if ($this->request->getPost('create_expense') == 1 && $data['type'] == 'money') {
+                $financeModel = new \App\Models\MasjidFinanceTransactionModel();
+                $financeModel->insert([
+                    'masjid_id' => $masjidId,
+                    'type'      => 'expense',
+                    'category_id' => null, // Or a default "Penyaluran" category if exists
+                    'amount'    => $data['amount'],
+                    'date'      => $data['date'],
+                    'description' => 'Penyaluran via Modul: ' . ($data['description'] ?? '-'),
+                ]);
+                $message .= ' (Transaksi pengeluaran otomatis dibuat).';
+            }
+        }
+
+        return redirect()->to('dashboard/distribution')->with('success', $message);
+    }
+
+    public function deleteDistribution($id)
+    {
+        $masjidId = session()->get('masjid_id');
+        $distModel = new \App\Models\MasjidDistributionModel();
+        
+        $item = $distModel->where(['id' => $id, 'masjid_id' => $masjidId])->first();
+        if ($item) {
+            // Delete photo
+            if (!empty($item['evidence_photo'])) {
+                $storage = new \App\Libraries\Storage();
+                $storage->delete($item['evidence_photo']);
+            }
+
+            $distModel->delete($id);
+            return redirect()->back()->with('success', 'Data penyaluran dihapus.');
+        }
+        return redirect()->back()->with('error', 'Data tidak ditemukan.');
+    }
+
+    // REPORTING (LAPORAN) MODULE
+    // --------------------------------------------------------------------
+
+    public function reports()
+    {
+        return view('dashboard/reports/index', [
+            'title' => 'Laporan & Rekap - Masj.id'
+        ]);
+    }
+
+    public function generateFinanceReport()
+    {
+        $masjidId = session()->get('masjid_id');
+        $startDate = $this->request->getGet('start_date') ?? date('Y-m-01');
+        $endDate = $this->request->getGet('end_date') ?? date('Y-m-d');
+
+        $financeModel = new \App\Models\MasjidFinanceTransactionModel();
+        
+        // 1. Get Opening Balance (Saldo Awal) before Start Date
+        $prevTransactions = $financeModel->where('masjid_id', $masjidId)
+            ->where('date <', $startDate)
+            ->findAll();
+        
+        $openingBalance = 0;
+        foreach ($prevTransactions as $t) {
+            if ($t['type'] == 'income') $openingBalance += $t['amount'];
+            else $openingBalance -= $t['amount'];
+        }
+
+        // 2. Get Transactions in Range
+        $transactions = $financeModel->select('masjid_finance_transactions.*, masjid_finance_categories.name as category_name')
+            ->join('masjid_finance_categories', 'masjid_finance_categories.id = masjid_finance_transactions.category_id', 'left')
+            ->where('masjid_finance_transactions.masjid_id', $masjidId)
+            ->where('date >=', $startDate)
+            ->where('date <=', $endDate)
+            ->orderBy('date', 'ASC')
+            ->findAll();
+
+        // 3. Calculate Summary
+        $totalIncome = 0;
+        $totalExpense = 0;
+        foreach ($transactions as $t) {
+            if ($t['type'] == 'income') $totalIncome += $t['amount'];
+            else $totalExpense += $t['amount'];
+        }
+
+        return view('dashboard/reports/finance_view', [
+            'masjid' => (new \App\Models\MasjidModel())->find($masjidId),
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+            'openingBalance' => $openingBalance,
+            'transactions' => $transactions,
+            'totalIncome' => $totalIncome,
+            'totalExpense' => $totalExpense,
+            'closingBalance' => $openingBalance + $totalIncome - $totalExpense
+        ]);
+    }
+
+    public function generateProgramReport()
+    {
+        $masjidId = session()->get('masjid_id');
+        $month = $this->request->getGet('month') ?? date('Y-m');
+        
+        $programModel = new \App\Models\MasjidProgramModel();
+        
+        // Get programs starting in that month
+        $programs = $programModel->select('masjid_programs.*, masjid_program_categories.name as category_name')
+            ->join('masjid_program_categories', 'masjid_program_categories.id = masjid_programs.category_id', 'left')
+            ->where('masjid_programs.masjid_id', $masjidId)
+            ->like('date_start', $month, 'after')
+            ->orderBy('date_start', 'ASC')
+            ->findAll();
+
+        return view('dashboard/reports/program_view', [
+             'masjid' => (new \App\Models\MasjidModel())->find($masjidId),
+             'month' => $month,
+             'programs' => $programs
+        ]);
+    }
+
+    public function generateInventoryReport()
+    {
+         $masjidId = session()->get('masjid_id');
+         $status = $this->request->getGet('condition') ?? 'all';
+
+         $inventoryModel = new \App\Models\MasjidInventoryModel();
+         $builder = $inventoryModel->where('masjid_id', $masjidId);
+         
+         if ($status != 'all') {
+             $builder->where('condition', $status);
+         }
+
+         $items = $builder->orderBy('name', 'ASC')->findAll();
+
+         return view('dashboard/reports/inventory_view', [
+             'masjid' => (new \App\Models\MasjidModel())->find($masjidId),
+             'items' => $items,
+             'filterCondition' => $status
+         ]);
     }
 }

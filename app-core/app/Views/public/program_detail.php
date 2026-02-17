@@ -103,15 +103,58 @@
                         </div>
 
                         <?php if (!empty($program['registration_link'])): ?>
-                            <a href="<?= esc($program['registration_link']) ?>" target="_blank" class="w-full h-16 bg-primary text-white rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-emerald-900 transition-all shadow-lg shadow-primary/20">
+                            <a href="<?= esc($program['registration_link']) ?>" target="_blank" class="w-full h-16 bg-primary text-white rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-emerald-900 transition-all shadow-lg shadow-primary/20 mb-4">
                                 <span class="material-symbols-outlined text-sm">how_to_reg</span>
                                 Daftar Sekarang
                             </a>
                         <?php else: ?>
-                            <div class="w-full p-4 bg-emerald-50 dark:bg-primary/10 border border-primary/20 rounded-2xl text-center">
+                            <div class="w-full p-4 bg-emerald-50 dark:bg-primary/10 border border-primary/20 rounded-2xl text-center mb-4">
                                 <p class="text-xs font-bold text-primary italic">Pendaftaran langsung di lokasi kegiatan.</p>
                             </div>
                         <?php endif; ?>
+
+                        <!-- Fundraising Progress -->
+                        <?php if (isset($program['target_donation']) && $program['target_donation'] > 0): ?>
+                            <?php 
+                                // Calculate Progress (This should ideally be from controller/model, but for now query here or pass from controller)
+                                // We need to fetch total donations for this program
+                                $db = \Config\Database::connect();
+                                $builder = $db->table('masjid_donations');
+                                $builder->selectSum('amount');
+                                $builder->where('program_id', $program['id']);
+                                $builder->where('status', 'success');
+                                $query = $builder->get();
+                                $collected = $query->getRow()->amount ?? 0;
+                                
+                                $percentage = min(100, round(($collected / $program['target_donation']) * 100));
+                            ?>
+                            <div class="mb-6">
+                                <div class="flex justify-between items-end mb-2">
+                                    <div>
+                                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">Terkumpul</p>
+                                        <p class="text-lg font-black text-primary">Rp <?= number_format($collected, 0, ',', '.') ?></p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">Target</p>
+                                        <p class="text-sm font-bold text-gray-900">Rp <?= number_format($program['target_donation'], 0, ',', '.') ?></p>
+                                    </div>
+                                </div>
+                                <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                                    <div class="bg-primary h-3 rounded-full transition-all duration-1000" style="width: <?= $percentage ?>%"></div>
+                                </div>
+                                <p class="text-right text-xs font-bold text-primary mt-1"><?= $percentage ?>% Terpenuhi</p>
+                            </div>
+                        <?php endif; ?>
+
+                        <!-- Donation CTA -->
+                        <div class="border-t border-dashed border-gray-200 pt-6 mt-2">
+                            <h4 class="font-bold mb-3 text-center">Ingin Berkontribusi?</h4>
+                            <p class="text-xs text-gray-500 text-center mb-4 px-4">Salurkan infaq terbaik Anda untuk mendukung program kegiatan ini.</p>
+                            <a href="<?= base_url('donation/' . $masjid['username'] . '/form/' . $program['slug']) ?>" class="w-full h-14 bg-white border-2 border-primary text-primary rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-primary hover:text-white transition-all">
+                                <span class="material-symbols-outlined text-sm">volunteer_activism</span>
+                                Donasi Sekarang
+                            </a>
+                        </div>
                     </div>
                 </div>
 

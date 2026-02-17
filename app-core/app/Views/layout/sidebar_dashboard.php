@@ -35,9 +35,13 @@
                 <span class="material-symbols-outlined text-xl">payments</span>
                 <span class="text-sm font-medium">Keuangan & Donasi</span>
             </a>
-            <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg <?= $inactiveClass ?>" href="#">
+            <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg <?= ($uri == 'dashboard/distribution') ? $activeClass : $inactiveClass ?>" href="<?= base_url('dashboard/distribution') ?>">
+                <span class="material-symbols-outlined text-xl">volunteer_activism</span>
+                <span class="text-sm font-medium">Penyaluran Bantuan</span>
+            </a>
+            <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg <?= ($uri == 'dashboard/warga') ? $activeClass : $inactiveClass ?>" href="<?= base_url('dashboard/warga') ?>">
                 <span class="material-symbols-outlined text-xl">groups_3</span>
-                <span class="text-sm font-medium">Data Warga & Bantuan</span>
+                <span class="text-sm font-medium">Data Warga</span>
             </a>
 <?php else: ?>
 <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
@@ -60,7 +64,7 @@
 <span class="material-symbols-outlined text-xl">calendar_month</span>
 <span class="text-sm font-medium">Kalender</span>
 </a>
-<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg <?= ($uri == 'dashboard/reports') ? $activeClass : $inactiveClass ?>" href="<?= base_url('dashboard/reports') ?>">
 <span class="material-symbols-outlined text-xl">description</span>
 <span class="text-sm font-medium">Laporan</span>
 </a>

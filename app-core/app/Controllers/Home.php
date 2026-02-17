@@ -105,6 +105,22 @@ class Home extends BaseController
         $financeModel = new \App\Models\MasjidFinanceTransactionModel();
         $financeSummary = $financeModel->getSummary($masjid['id']);
 
+        // Fetch Worship Schedules
+        $schedModel = new \App\Models\MasjidScheduleModel();
+        $todaySchedules = $schedModel->where('masjid_id', $masjidId)
+            ->where('date', date('Y-m-d'))
+            ->orderBy('prayer_type', 'ASC')
+            ->findAll();
+        
+        // Next Friday
+        $nextFriday = date('Y-m-d', strtotime('next Friday'));
+        if (date('l') === 'Friday') $nextFriday = date('Y-m-d'); // If today is Friday
+        
+        $fridaySchedule = $schedModel->where('masjid_id', $masjidId)
+            ->where('date', $nextFriday)
+            ->where('prayer_type', 'jumat')
+            ->first();
+
         $storage = new \App\Libraries\Storage();
 
         return view('public/masjid_profile', [
@@ -116,6 +132,8 @@ class Home extends BaseController
             'news'           => $news,
             'programs'       => $programs,
             'financeSummary' => $financeSummary,
+            'todaySchedules' => $todaySchedules,
+            'fridaySchedule' => $fridaySchedule,
             'storage'        => $storage
         ]);
     }
@@ -250,5 +268,40 @@ class Home extends BaseController
             'program' => $program,
             'storage' => new \App\Libraries\Storage()
         ]);
+    }
+
+    public function subscribe()
+    {
+        $masjidUsername = $this->request->getPost('masjid_username');
+        $email = $this->request->getPost('email');
+        $name = $this->request->getPost('name');
+
+        if (!$masjidUsername || !$email) {
+            return redirect()->back()->with('error', 'Email wajib diisi.');
+        }
+
+        $masjidModel = new \App\Models\MasjidModel();
+        $masjid = $masjidModel->where('username', $masjidUsername)->first();
+
+        if (!$masjid) {
+            return redirect()->back()->with('error', 'Masjid tidak ditemukan.');
+        }
+
+        $subscriberModel = new \App\Models\MasjidSubscriberModel();
+        
+        // Check if already subscribed
+        $exists = $subscriberModel->where(['masjid_id' => $masjid['id'], 'email' => $email])->first();
+        if ($exists) {
+            return redirect()->back()->with('error', 'Email ini sudah terdaftar.');
+        }
+
+        $subscriberModel->insert([
+            'masjid_id' => $masjid['id'],
+            'email'     => $email,
+            'name'      => $name,
+            'is_active' => 1
+        ]);
+
+        return redirect()->back()->with('success', 'Terima kasih telah berlangganan info masjid!');
     }
 }

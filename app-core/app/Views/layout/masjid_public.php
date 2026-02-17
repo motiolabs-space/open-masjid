@@ -60,6 +60,29 @@
     
     <?= $this->include('layout/navbar_masjid') ?>
 
+    <!-- Flash Messages -->
+    <?php if (session()->getFlashdata('success')): ?>
+        <div id="flash-success" class="fixed top-24 right-6 z-50 bg-emerald-500 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-right duration-500">
+            <span class="material-symbols-outlined">check_circle</span>
+            <div class="font-bold"><?= session()->getFlashdata('success') ?></div>
+            <button onclick="document.getElementById('flash-success').remove()" class="ml-2 hover:bg-white/20 rounded-full p-1 transition-colors">
+                <span class="material-symbols-outlined text-sm">close</span>
+            </button>
+        </div>
+        <script>setTimeout(() => document.getElementById('flash-success').remove(), 5000);</script>
+    <?php endif; ?>
+
+    <?php if (session()->getFlashdata('error')): ?>
+        <div id="flash-error" class="fixed top-24 right-6 z-50 bg-red-500 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-right duration-500">
+            <span class="material-symbols-outlined">error</span>
+            <div class="font-bold"><?= session()->getFlashdata('error') ?></div>
+            <button onclick="document.getElementById('flash-error').remove()" class="ml-2 hover:bg-white/20 rounded-full p-1 transition-colors">
+                <span class="material-symbols-outlined text-sm">close</span>
+            </button>
+        </div>
+        <script>setTimeout(() => document.getElementById('flash-error').remove(), 5000);</script>
+    <?php endif; ?>
+
     <main>
         <?= $this->renderSection('content') ?>
     </main>

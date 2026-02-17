@@ -4,18 +4,17 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class MasjidProgramModel extends Model
+class MasjidScheduleModel extends Model
 {
-    protected $table            = 'masjid_programs';
+    protected $table            = 'masjid_schedules';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
-        'masjid_id', 'category_id', 'title', 'slug', 'description', 'thumbnail', 
-        'date_start', 'date_end', 'location', 'registration_link', 
-        'quota', 'target_donation', 'status'
+        'masjid_id', 'date', 'prayer_type', 
+        'imam_name', 'khatib_name', 'muadzin_name', 'bilal_name'
     ];
 
     // Dates
@@ -26,11 +25,10 @@ class MasjidProgramModel extends Model
 
     // Validation
     protected $validationRules      = [
-        'masjid_id' => 'required|numeric',
-        'title'     => 'required|min_length[3]|max_length[255]',
-        'slug'      => 'required|max_length[255]',
-        'description' => 'required',
-        'date_start' => 'required|valid_date'
+        'masjid_id'   => 'required|numeric',
+        'date'        => 'required|valid_date',
+        'prayer_type' => 'required|in_list[subuh,dzuhur,ashar,maghrib,isya,jumat,tarawih,eid_fitr,eid_adha]',
+        'imam_name'   => 'permit_empty|min_length[3]|max_length[100]',
     ];
     protected $validationMessages   = [];
     protected $skipValidation       = false;

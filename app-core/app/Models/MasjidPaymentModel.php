@@ -4,18 +4,17 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class MasjidProgramModel extends Model
+class MasjidPaymentModel extends Model
 {
-    protected $table            = 'masjid_programs';
+    protected $table            = 'masjid_payments';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
-        'masjid_id', 'category_id', 'title', 'slug', 'description', 'thumbnail', 
-        'date_start', 'date_end', 'location', 'registration_link', 
-        'quota', 'target_donation', 'status'
+        'masjid_id', 'payment_mode', 'bank_name', 'bank_account_name', 
+        'bank_account_number', 'qris_image', 'multipay_api_key', 'multipay_secret_key'
     ];
 
     // Dates
@@ -26,11 +25,8 @@ class MasjidProgramModel extends Model
 
     // Validation
     protected $validationRules      = [
-        'masjid_id' => 'required|numeric',
-        'title'     => 'required|min_length[3]|max_length[255]',
-        'slug'      => 'required|max_length[255]',
-        'description' => 'required',
-        'date_start' => 'required|valid_date'
+        'masjid_id'    => 'required|numeric',
+        'payment_mode' => 'required|in_list[manual,multipay]',
     ];
     protected $validationMessages   = [];
     protected $skipValidation       = false;
