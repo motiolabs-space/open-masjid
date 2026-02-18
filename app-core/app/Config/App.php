@@ -19,6 +19,15 @@ class App extends BaseConfig
     public string $baseURL = 'http://localhost/masjid2/';
 
     /**
+     * --------------------------------------------------------------------------
+     * Asset URL
+     * --------------------------------------------------------------------------
+     *
+     * URL to your assets folder (public).
+     */
+    public string $assetURL = '';
+
+    /**
      * Allowed Hostnames in the Site URL other than the hostname in the baseURL.
      * If you want to accept multiple Hostnames, set this.
      *
