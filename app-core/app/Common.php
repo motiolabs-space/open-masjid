@@ -27,7 +27,10 @@ if (! function_exists('asset_url')) {
 
         // Check if assetURL is set and not empty
         if (! empty($config->assetURL)) {
-            return rtrim($config->assetURL, '/') . '/' . ltrim($path, '/');
+            // If assetURL is set (Production/Staging), it usually points directly to public assets.
+            // We strip 'public' from the path to avoid duplication (e.g., 'public/img.png' -> 'img.png').
+            $cleanPath = preg_replace('#^public/#', '', ltrim($path, '/'));
+            return rtrim($config->assetURL, '/') . '/' . $cleanPath;
         }
 
         // Fallback to base_url
