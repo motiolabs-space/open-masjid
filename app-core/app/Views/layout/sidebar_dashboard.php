@@ -1,7 +1,7 @@
 <aside class="w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col h-screen sticky top-0">
 <div class="p-6 border-b border-slate-100 dark:border-slate-800">
     <div class="flex items-center justify-center">
-        <img src="<?= asset_url('public/logo.png') ?>" alt="Logo Masj.id" class="h-12">
+        <img src="<?= asset_url('logo.png') ?>" alt="Logo Masj.id" class="h-12">
     </div>
 </div>
 <div class="flex-1 overflow-y-auto p-4 sidebar-scroll">

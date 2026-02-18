@@ -1,7 +1,7 @@
 <header class="sticky top-0 z-50 w-full border-b border-[#dbe6e1] dark:border-[#1e3a2f] bg-white/80 dark:bg-background-dark/80 backdrop-blur-md">
     <div class="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
         <a href="<?= base_url() ?>" class="flex items-center gap-2">
-            <img src="<?= base_url('public/logo.png') ?>" alt="Logo Masj.id" class="h-8">
+            <img src="<?= asset_url('logo.png') ?>" alt="Logo Masj.id" class="h-8">
         </a>
         <nav class="hidden md:flex items-center gap-8">
             <a class="text-sm font-medium hover:text-primary transition-colors" href="<?= base_url() ?>">Beranda</a>

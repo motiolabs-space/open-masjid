@@ -3,7 +3,7 @@
     <div class="max-w-[1200px] mx-auto grid md:grid-cols-4 gap-12">
         <div class="col-span-1 md:col-span-2 flex flex-col gap-6">
             <a href="<?= base_url() ?>" class="flex items-center gap-2">
-                <img src="<?= base_url('public/logo.png') ?>" alt="Logo Masj.id" class="h-6">
+                <img src="<?= asset_url('logo.png') ?>" alt="Logo Masj.id" class="h-6">
             </a>
             <p class="text-[#3d5a4d] dark:text-gray-400 max-w-[320px]">
                 Platform manajemen masjid berbasis cloud untuk transparansi keuangan dan pemberdayaan umat di era digital.

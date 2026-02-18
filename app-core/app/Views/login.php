@@ -2,7 +2,7 @@
 <html class="light" lang="id"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<link rel="icon" type="image/png" href="<?= asset_url('public/ico_masjid.png') ?>">
+<link rel="icon" type="image/png" href="<?= asset_url('ico_masjid.png') ?>">
 <title>Dashboard Masjid - Login</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"/>
@@ -49,7 +49,7 @@
 <main class="relative z-20 w-full max-w-[440px] px-6 py-12">
 <div class="bg-white dark:bg-slate-900 shadow-xl shadow-emerald-950/5 rounded-2xl border border-zinc-100 dark:border-slate-800 p-8 md:p-10">
 <header class="flex flex-col items-center mb-10 text-center">
-<img src="<?= asset_url('public/logo_masjid_200.png') ?>" alt="Logo Masjid" class="size-16 mx-auto mb-6">
+<img src="<?= asset_url('logo_masjid_200.png') ?>" alt="Logo Masjid" class="size-16 mx-auto mb-6">
 <h2 class="text-slate-900 dark:text-white tracking-tight text-2xl font-bold leading-tight">
                     Dashboard Masjid
                 </h2>

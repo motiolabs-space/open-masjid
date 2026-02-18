@@ -2,7 +2,7 @@
 <html class="light" lang="id"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<link rel="icon" type="image/png" href="<?= asset_url('public/ico_masjid.png') ?>">
+<link rel="icon" type="image/png" href="<?= asset_url('ico_masjid.png') ?>">
 <title>Registrasi - Masj.id</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"/>
@@ -49,7 +49,7 @@
 </div>
 <main class="relative z-10 w-full max-w-2xl">
 <div class="text-center mb-10">
-<img src="<?= asset_url('public/logo_masjid_200.png') ?>" alt="Logo Masj.id" class="size-16 mx-auto mb-6 px-1">
+<img src="<?= asset_url('logo_masjid_200.png') ?>" alt="Logo Masj.id" class="size-16 mx-auto mb-6 px-1">
 <h1 class="text-3xl md:text-4xl font-display font-bold text-slate-900 tracking-tight" id="page-title">Pendaftaran Akun Baru</h1>
 <p class="text-slate-500 mt-3 text-lg" id="page-subtitle">Pilih kategori pendaftaran untuk memulai</p>
 </div>
