@@ -2,6 +2,7 @@
 
 <?= $this->section('content') ?>
 
+<!-- Hero Section -->
 <section class="relative overflow-hidden pt-16 pb-24 px-6">
     <div class="max-w-[1200px] mx-auto grid lg:grid-cols-2 gap-12 items-center">
         <div class="flex flex-col gap-8">
@@ -10,21 +11,20 @@
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                     <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
                 </span>
-                SaaS Khusus Pengurus Masjid
+                Pusat Kebaikan Masyarakat
             </div>
             <h1 class="text-5xl md:text-6xl font-black leading-[1.1] tracking-tight text-[#111815] dark:text-white">
-                Manajemen Masjid <span class="text-primary">Modern</span>, Tanpa Biaya
+                Jadikan Masjid Jantung <span class="text-primary">Kebaikan</span> di Tengah Masyarakat
             </h1>
             <p class="text-lg text-[#3d5a4d] dark:text-gray-400 max-w-[540px] leading-relaxed">
-                Optimalkan pengelolaan program, transparansi keuangan, dan pendataan umat dalam satu platform yang amanah dan gratis selamanya.
+                Masj.id hadir untuk membantu pengurus masjid mengelola amanah dengan transparan, membangun kepercayaan jamaah, dan menggerakkan perubahan nyata bagi warga di sekitarnya.
             </p>
             <div class="flex flex-wrap gap-4">
                 <a href="<?= base_url('register') ?>" class="btn-primary-lg">
-                    Mulai Sekarang
+                    Mulai Alirkan Kebaikan
                 </a>
-                <a href="#" class="flex items-center gap-2 px-8 py-4 rounded-xl text-base font-bold border border-[#dbe6e1] dark:border-[#1e3a2f] hover:bg-white dark:hover:bg-gray-800 transition-colors">
-                    <span class="material-symbols-outlined text-primary">play_circle</span>
-                    Lihat Demo
+                <a href="#masalah" class="flex items-center gap-2 px-8 py-4 rounded-xl text-base font-bold border border-[#dbe6e1] dark:border-[#1e3a2f] hover:bg-white dark:hover:bg-gray-800 transition-colors">
+                    Lihat Dampak Sosial
                 </a>
             </div>
         </div>
@@ -33,6 +33,31 @@
             <div class="relative bg-white dark:bg-[#1a2e25] border border-[#dbe6e1] dark:border-[#1e3a2f] rounded-2xl shadow-2xl overflow-hidden aspect-[4/3] flex items-center justify-center p-8">
                 <div class="w-full h-full rounded-xl bg-center bg-cover border border-[#dbe6e1] dark:border-[#1e3a2f]" style="background-image: url('<?= base_url('images/masjid.png') ?>');">
                 </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Problem Section -->
+<section class="py-24 px-6 bg-white dark:bg-background-dark/30" id="masalah">
+    <div class="max-w-[800px] mx-auto text-center">
+        <h2 class="text-primary font-bold uppercase tracking-widest text-sm mb-4">Penderitaan Nyata di Sekitar Kita</h2>
+        <h3 class="text-3xl md:text-4xl font-black mb-8 text-[#111815] dark:text-white leading-tight">
+            Pernahkah kita menyadari, di gang sempit dekat masjid kita, mungkin ada seorang ibu yang kesulitan menyiapkan makan malam?
+        </h3>
+        <p class="text-lg text-[#3d5a4d] dark:text-gray-400 leading-relaxed mb-10">
+            Niat baik seringkali terhambat karena bantuan yang tidak terkoordinasi, dana umat yang kurang transparan, dan program sosial yang hanya berjalan sekali lalu hilang. Ini bukan hanya soal sistem yang kurang rapi, ini soal amanah yang belum tertunaikan sepenuhnya.
+        </p>
+        <div class="grid sm:grid-cols-2 gap-6 text-left">
+            <div class="p-6 bg-background-light dark:bg-[#1a2e25] rounded-2xl border border-[#dbe6e1] dark:border-[#1e3a2f]">
+                <span class="material-symbols-outlined text-red-500 mb-3">volunteer_activism</span>
+                <p class="font-bold text-[#111815] dark:text-white mb-2">Bantuan Tidak Terkoordinasi</p>
+                <p class="text-sm text-gray-500">Sulit memastikan bantuan sampai ke tangan yang paling membutuhkan tanpa data yang akurat.</p>
+            </div>
+            <div class="p-6 bg-background-light dark:bg-[#1a2e25] rounded-2xl border border-[#dbe6e1] dark:border-[#1e3a2f]">
+                <span class="material-symbols-outlined text-amber-500 mb-3">visibility_off</span>
+                <p class="font-bold text-[#111815] dark:text-white mb-2">Kurang Transparan</p>
+                <p class="text-sm text-gray-500">Jamaah ragu untuk berbagi lebih banyak jika aliran dana tidak terlihat jelas manfaatnya.</p>
             </div>
         </div>
     </div>
@@ -81,133 +106,181 @@ $stats = $stats ?? ['masjid' => 0, 'dana' => 0, 'jamaah' => 0];
     </div>
 </section>
 
-<section class="py-24 px-6 bg-background-light dark:bg-background-dark" id="fitur">
+<!-- Solution Section -->
+<section class="py-24 px-6 bg-background-light dark:bg-background-dark">
+    <div class="max-w-[1200px] mx-auto">
+        <div class="grid lg:grid-cols-2 gap-16 items-center">
+            <div class="relative">
+                <div class="aspect-video bg-primary/20 rounded-3xl overflow-hidden border border-primary/10 shadow-2xl relative group">
+                    <img alt="Community gathering" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCH6rPE_09TLBALsaxYwC-HYCb0gcQ5pL30SIbC5NI5brKt_v0dNXmcxxDfBGu_Wp3QJEBcjauKQTDR9sTrzpEMsgzpnPFf3mcjXLe_5k6tUZ_6pdDqpWZtq5NGsBblfmvn7MtooixCULuSg_Zq862nDNhPGgVt2eZ2L_2XAvFmWtSEVkc-Uec7aXoI3L0AJmS33p199NPfzKQj2bikTxEOysH9iUj78mJQCpjUaMVVI_xQxkBuMO5gZ9EZsFlTHuYlVjY2ZiVQ3t_c"/>
+                    <div class="absolute inset-0 bg-primary/20 mix-blend-overlay"></div>
+                </div>
+            </div>
+            <div class="flex flex-col gap-6">
+                <h2 class="text-primary font-bold uppercase tracking-widest text-sm">Masj.id: Penggerak Rantai Kebaikan</h2>
+                <h3 class="text-3xl font-black text-[#111815] dark:text-white leading-tight">
+                    Masj.id bukan sekadar aplikasi, melainkan jembatan yang menghubungkan niat mulia dengan kebutuhan nyata.
+                </h3>
+                <p class="text-lg text-[#3d5a4d] dark:text-gray-400 leading-relaxed">
+                    Kami percaya pada kekuatan kejujuran. Ketika masjid transparan, jamaah akan lebih percaya. Ketika kepercayaan tumbuh, bantuan sosial akan mengalir lebih deras untuk mereka yang benar-benar membutuhkan.
+                </p>
+                <div class="space-y-4 py-4">
+                    <div class="flex items-center gap-4">
+                        <div class="size-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center font-bold">1</div>
+                        <p class="font-bold text-[#111815] dark:text-white">Bangun Kepercayaan Jamaah</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="size-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center font-bold">2</div>
+                        <p class="font-bold text-[#111815] dark:text-white">Alirkan Bantuan Tepat Sasaran</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="size-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center font-bold">3</div>
+                        <p class="font-bold text-[#111815] dark:text-white">Ciptakan Dampak Berkelanjutan</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-24 px-6 bg-white dark:bg-[#1a1d21]" id="fitur">
     <div class="max-w-[1200px] mx-auto">
         <div class="flex flex-col gap-4 mb-16 max-w-[720px]">
-            <h2 class="text-primary font-bold uppercase tracking-widest text-sm">Fitur Unggulan</h2>
+            <h2 class="text-primary font-bold uppercase tracking-widest text-sm">Alat Pemantik Kebaikan</h2>
             <h3 class="text-4xl font-black tracking-tight text-[#111815] dark:text-white">
-                Transparansi & Pemberdayaan dalam Satu Genggaman
+                Teknologi Hanya Sarana, Dampak Bagi Umat Adalah Tujuan
             </h3>
             <p class="text-lg text-[#3d5a4d] dark:text-gray-400">
-                Kami menyediakan ekosistem digital yang dirancang khusus untuk memenuhi kebutuhan administrasi masjid kontemporer.
+                Kami merancang setiap fitur untuk memudahkan masjid menjalankan peran sosialnya dengan lebih amanah.
             </p>
         </div>
         <div class="grid md:grid-cols-3 gap-8">
-            <div class="group bg-white dark:bg-[#1a2e25] p-8 rounded-2xl border border-[#dbe6e1] dark:border-[#1e3a2f] hover:border-primary transition-all shadow-sm hover:shadow-xl">
-                <div class="size-14 bg-primary rounded-xl flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform shadow-md shadow-primary/10">
-                    <span class="material-symbols-outlined text-3xl">insights</span>
+            <div class="group bg-background-light dark:bg-[#1a2e25] p-8 rounded-2xl border border-[#dbe6e1] dark:border-[#1e3a2f] hover:border-primary transition-all shadow-sm hover:shadow-xl">
+                <div class="size-14 bg-primary/10 rounded-xl flex items-center justify-center text-primary mb-6 group-hover:bg-primary group-hover:text-white transition-all shadow-md">
+                    <span class="material-symbols-outlined text-3xl">verified_user</span>
                 </div>
-                <h4 class="text-xl font-bold mb-3 text-[#111815] dark:text-white">Transparansi Keuangan</h4>
-                <p class="text-[#3d5a4d] dark:text-gray-400 leading-relaxed mb-6">
-                    Laporan otomatis dan visualisasi dana infaq, sedekah, dan wakaf secara real-time yang dapat diakses oleh jamaah.
+                <h4 class="text-xl font-bold mb-3 text-[#111815] dark:text-white">Menjaga Amanah dengan Transparansi Dana</h4>
+                <p class="text-[#3d5a4d] dark:text-gray-400 leading-relaxed text-sm">
+                    Laporan keuangan terbuka yang bisa diakses siapa saja. Menghapus keraguan jamaah dan menumbuhkan semangat untuk berbagi lebih banyak.
                 </p>
-                <div class="w-full h-24 bg-background-light dark:bg-background-dark rounded-lg flex items-end gap-1 p-3">
-                    <div class="w-full bg-primary/20 h-1/2 rounded-sm"></div>
-                    <div class="w-full bg-primary/40 h-3/4 rounded-sm"></div>
-                    <div class="w-full bg-primary h-full rounded-sm"></div>
-                    <div class="w-full bg-primary/60 h-2/3 rounded-sm"></div>
-                    <div class="w-full bg-primary/30 h-1/2 rounded-sm"></div>
-                </div>
             </div>
-            <div class="group bg-white dark:bg-[#1a2e25] p-8 rounded-2xl border border-[#dbe6e1] dark:border-[#1e3a2f] hover:border-primary transition-all shadow-sm hover:shadow-xl">
-                <div class="size-14 bg-primary rounded-xl flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform shadow-md shadow-primary/10">
-                    <span class="material-symbols-outlined text-3xl">groups</span>
+            <div class="group bg-background-light dark:bg-[#1a2e25] p-8 rounded-2xl border border-[#dbe6e1] dark:border-[#1e3a2f] hover:border-primary transition-all shadow-sm hover:shadow-xl">
+                <div class="size-14 bg-primary/10 rounded-xl flex items-center justify-center text-primary mb-6 group-hover:bg-primary group-hover:text-white transition-all shadow-md">
+                    <span class="material-symbols-outlined text-3xl">volunteer_activism</span>
                 </div>
-                <h4 class="text-xl font-bold mb-3 text-[#111815] dark:text-white">Pemberdayaan Umat</h4>
-                <p class="text-[#3d5a4d] dark:text-gray-400 leading-relaxed mb-6">
-                    Database jamaah terintegrasi untuk distribusi zakat dan pemetaan bantuan sosial yang tepat sasaran.
+                <h4 class="text-xl font-bold mb-3 text-[#111815] dark:text-white">Gerakan Kebaikan Terukur Melalui Program Sosial</h4>
+                <p class="text-[#3d5a4d] dark:text-gray-400 leading-relaxed text-sm">
+                    Penataan agenda dakwah dan sosial yang rapi. Memastikan kehadiran masjid dirasakan manfaatnya secara berkelanjutan oleh warga.
                 </p>
-                <div class="flex -space-x-3">
-                    <div class="size-10 rounded-full border-2 border-white dark:border-[#1a2e25] bg-gray-200" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCD09EHpsLPG1Ws8UzAQXYQBnWXiOKRMTosOz3R9tQfb3ZsgaQ1Svwhn9OmkjqzCy_eSAVhx2RwztvzJYxeH0iEJLrtY-J_u4pWt2eDi3B9v8PG7465txZv3yfp3Brtc0rN3D1MBPj0h1VM0fBjs9ypffDw_jOxW24n4XpARhs8kvtWhlGdwkIB_e1MuB98eTnQ161cTJP2YESwQj4BGYKl99DtaeTWKjcdRDNdNIuew4pzCphiUZ270ecR6FAnuAQKzGMmi3KDYztf')"></div>
-                    <div class="size-10 rounded-full border-2 border-white dark:border-[#1a2e25] bg-gray-300" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCH6rPE_09TLBALsaxYwC-HYCb0gcQ5pL30SIbC5NI5brKt_v0dNXmcxxDfBGu_Wp3QJEBcjauKQTDR9sTrzpEMsgzpnPFf3mcjXLe_5k6tUZ_6pdDqpWZtq5NGsBblfmvn7MtooixCULuSg_Zq862nDNhPGgVt2eZ2L_2XAvFmWtSEVkc-Uec7aXoI3L0AJmS33p199NPfzKQj2bikTxEOysH9iUj78mJQCpjUaMVVI_xQxkBuMO5gZ9EZsFlTHuYlVjY2ZiVQ3t_c')"></div>
-                    <div class="size-10 rounded-full border-2 border-white dark:border-[#1a2e25] bg-gray-400" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDdz69YOxMsodAPleTwSbVGshagEYWfMOz7RDNFAFKDb2IgtgjJ-Oq6TzYHwWbDGyl2z1DjSx8hKDNCDUSe_r-q16zciNQuKeX5T00nOBsTgpdBbG3-ThAG8f_zh-QiuJIhjh9KmheDwzlrryJQPSQ-VqIbioxeNeaeMesGgF9w8lgDmcOkhTbuIgYqhMpNLgCP-1B5MI1Bzh7Fys77FA8wHD1b8wZSIEIjeXho3oWR4seE4wMp3LxoW5ccCjaHReHCWWfPZqRyk3Cn')"></div>
-                    <div class="size-10 rounded-full border-2 border-white dark:border-[#1a2e25] bg-primary flex items-center justify-center text-[10px] font-bold text-white">+1.2k</div>
-                </div>
             </div>
-            <div class="group bg-white dark:bg-[#1a2e25] p-8 rounded-2xl border border-[#dbe6e1] dark:border-[#1e3a2f] hover:border-primary transition-all shadow-sm hover:shadow-xl">
-                <div class="size-14 bg-primary rounded-xl flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform shadow-md shadow-primary/10">
-                    <span class="material-symbols-outlined text-3xl">event_available</span>
+            <div class="group bg-background-light dark:bg-[#1a2e25] p-8 rounded-2xl border border-[#dbe6e1] dark:border-[#1e3a2f] hover:border-primary transition-all shadow-sm hover:shadow-xl">
+                <div class="size-14 bg-primary/10 rounded-xl flex items-center justify-center text-primary mb-6 group-hover:bg-primary group-hover:text-white transition-all shadow-md">
+                    <span class="material-symbols-outlined text-3xl">groups_3</span>
                 </div>
-                <h4 class="text-xl font-bold mb-3 text-[#111815] dark:text-white">Kelola Program</h4>
-                <p class="text-[#3d5a4d] dark:text-gray-400 leading-relaxed mb-6">
-                    Penjadwalan Ta'lim, petugas Shalat Jumat, dan papan pengumuman digital dalam satu dashboard terpadu.
+                <h4 class="text-xl font-bold mb-3 text-[#111815] dark:text-white">Mengenal Lebih Dekat Kondisi Umat</h4>
+                <p class="text-[#3d5a4d] dark:text-gray-400 leading-relaxed text-sm">
+                    Pendataan kondisi ekonomi warga sekitar dengan akurat. Keadilan sosial bagi dhuafa agar bantuan jatuh ke tangan yang paling tepat.
                 </p>
-                <div class="flex flex-col gap-2">
-                    <div class="h-4 w-full bg-background-light dark:bg-background-dark rounded animate-pulse"></div>
-                    <div class="h-4 w-2/3 bg-background-light dark:bg-background-dark rounded animate-pulse"></div>
-                </div>
             </div>
         </div>
     </div>
 </section>
 
-<section class="py-24 px-6 bg-white dark:bg-background-dark/30">
-    <div class="max-w-[1200px] mx-auto flex flex-col lg:flex-row items-center gap-16">
-        <div class="flex-1 order-2 lg:order-1">
-            <div class="bg-background-light dark:bg-[#0d1b15] p-2 rounded-2xl border border-[#dbe6e1] dark:border-[#1e3a2f] shadow-2xl">
-                <div class="bg-white dark:bg-[#1a2e25] rounded-xl overflow-hidden">
-                    <div class="px-4 py-3 bg-gray-50 dark:bg-gray-800 flex items-center gap-4 border-b border-[#dbe6e1] dark:border-[#1e3a2f]">
-                        <div class="flex gap-1.5">
-                            <div class="size-3 rounded-full bg-red-400"></div>
-                            <div class="size-3 rounded-full bg-yellow-400"></div>
-                            <div class="size-3 rounded-full bg-emerald-600"></div>
-                        </div>
-                        <div class="flex-1 bg-white dark:bg-gray-900 rounded-md px-3 py-1 flex items-center gap-2 border border-[#dbe6e1] dark:border-gray-700">
-                            <span class="material-symbols-outlined text-sm text-gray-400">lock</span>
-                            <span class="text-xs font-medium text-gray-500">masj.id/</span>
-                            <span class="text-xs font-bold text-primary">baitul-hikmah</span>
-                        </div>
-                    </div>
-                    <div class="p-8 h-64 bg-center bg-cover flex flex-col justify-end" style='background-image: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8)), url("https://lh3.googleusercontent.com/aida-public/AB6AXuD8UH2p3M-vnDzDyWjSGIEp7ZEwCDrH7PpHpVrq59mY6xiQqx8-8Enf1PGPtx1_d0miE9IlzAv_4rn_7KuTQBP8Leu_iI525sBG97w1Kg-4ysb9-fr9uSnADZwjYjxSSvDmWs_4BoxCP-JvVcTSWKvgLYXrlE8blhFV3qPV26X1ndabvnjw4cl1Z1EQFo5F-TrPZQFiGpVzNzVdXqBW8UGB-h0rrWc-GiFcjmI3FaGexzcAelX0mJdYjTnMUEySyyWPzIGbL6aSTB51");'>
-                        <h5 class="text-2xl font-bold text-white">Masjid Baitul Hikmah</h5>
-                        <p class="text-sm text-gray-300">Jl. Menteng Raya No. 1, Jakarta</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="flex-1 order-1 lg:order-2">
-            <h2 class="text-3xl font-black mb-6 text-[#111815] dark:text-white leading-tight">Bangun Profil Digital Masjid Anda</h2>
-            <p class="text-lg text-[#3d5a4d] dark:text-gray-400 mb-8 leading-relaxed">
-                Dapatkan alamat URL khusus untuk masjid Anda. Berikan kemudahan bagi jamaah untuk melihat jadwal kajian, laporan keuangan, dan berdonasi secara online melalui satu tautan resmi.
+<!-- Social Impact Section -->
+<section class="py-24 px-6 bg-background-light dark:bg-background-dark">
+    <div class="max-w-[1200px] mx-auto">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-black mb-4 text-[#111815] dark:text-white">Dampak Nyata untuk Masyarakat Sekitar</h2>
+            <p class="text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
+                Perubahan yang kita ciptakan bukan sekadar angka di layar, melainkan kehidupan yang lebih baik bagi warga.
             </p>
-            <ul class="flex flex-col gap-4">
-                <li class="flex items-center gap-3 font-semibold text-[#111815] dark:text-gray-200">
-                    <span class="material-symbols-outlined text-primary font-bold">check_circle</span>
-                    QR Code otomatis untuk Infaq
-                </li>
-                <li class="flex items-center gap-3 font-semibold text-[#111815] dark:text-gray-200">
-                    <span class="material-symbols-outlined text-primary font-bold">check_circle</span>
-                    Papan pengumuman kegiatan real-time
-                </li>
-                <li class="flex items-center gap-3 font-semibold text-[#111815] dark:text-gray-200">
-                    <span class="material-symbols-outlined text-primary font-bold">check_circle</span>
-                    Laporan keuangan bulanan publik
-                </li>
-            </ul>
+        </div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="p-8 bg-white dark:bg-[#1a2e25] rounded-3xl border border-[#dbe6e1] dark:border-[#1e3a2f] shadow-sm">
+                <span class="material-symbols-outlined text-4xl text-primary mb-6">local_shippping</span>
+                <h4 class="text-xl font-bold mb-3 text-[#111815] dark:text-white">Sembako Tepat Sasaran</h4>
+                <p class="text-sm text-gray-500 leading-relaxed">Memastikan tidak ada lagi janda dan yatim di sekitar masjid yang kelaparan karena bantuan tersampaikan dengan data akurat.</p>
+            </div>
+            <div class="p-8 bg-white dark:bg-[#1a2e25] rounded-3xl border border-[#dbe6e1] dark:border-[#1e3a2f] shadow-sm">
+                <span class="material-symbols-outlined text-4xl text-primary mb-6">storefront</span>
+                <h4 class="text-xl font-bold mb-3 text-[#111815] dark:text-white">Sangga Usaha Kecil</h4>
+                <p class="text-sm text-gray-500 leading-relaxed">Memberikan modal dan dukungan bagi pedagang kecil di lingkungan masjid agar mandiri secara ekonomi.</p>
+            </div>
+            <div class="p-8 bg-white dark:bg-[#1a2e25] rounded-3xl border border-[#dbe6e1] dark:border-[#1e3a2f] shadow-sm">
+                <span class="material-symbols-outlined text-4xl text-primary mb-6">school</span>
+                <h4 class="text-xl font-bold mb-3 text-[#111815] dark:text-white">Beasiswa Pendidikan</h4>
+                <p class="text-sm text-gray-500 leading-relaxed">Menjamin anak-anak kurang mampu di sekitar masjid tetap bisa bersekolah dan meraih cita-cita mereka.</p>
+            </div>
         </div>
     </div>
 </section>
 
+<!-- Story Section -->
+<section class="py-24 px-6 bg-white dark:bg-background-dark/30">
+    <div class="max-w-[1000px] mx-auto bg-primary/5 dark:bg-primary/5 rounded-[3rem] p-12 md:p-20 border border-primary/10">
+        <div class="flex flex-col items-center text-center gap-8">
+            <div class="size-20 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined text-4xl">auto_stories</span>
+            </div>
+            <h3 class="text-2xl md:text-3xl font-black text-[#111815] dark:text-white italic leading-tight">
+                "Sekarang tidak ada lagi warga yang tidur dalam keadaan lapar dalam radius 1 kilometer dari masjid kami..."
+            </h3>
+            <div class="flex flex-col gap-2">
+                <p class="text-lg text-[#3d5a4d] dark:text-gray-400 leading-relaxed">
+                    Di sebuah masjid pemukiman padat, dulu pengurus kesulitan menyalurkan bantuan karena data yang tumpang tindih. Setelah mulai terbuka dan tertata, jamaah semakin percaya. Kini, tiga pemuda yang tadinya menganggur telah memulai usaha kecil berkat dukungan modal dari masjid.
+                </p>
+                <p class="text-sm font-bold text-primary uppercase tracking-widest mt-4">Cerita Perubahan Nyata</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Community & Trust -->
+<section class="py-24 px-6 bg-white dark:bg-[#1a1d21]">
+    <div class="max-w-[1200px] mx-auto grid lg:grid-cols-2 gap-16 items-center">
+        <div>
+            <h2 class="text-3xl font-black mb-6 text-[#111815] dark:text-white leading-tight">Membangun Ekosistem Kepercayaan</h2>
+            <p class="text-lg text-[#3d5a4d] dark:text-gray-400 mb-8 leading-relaxed">
+                Bagi kami, kepercayaan adalah amanah tertinggi. Masj.id dirancang untuk merawat kepercayaan itu melalui keterbukaan, sehingga menggerakkan kembali semangat gotong royong jamaah dan generasi muda.
+            </p>
+            <div class="grid grid-cols-2 gap-6">
+                <div class="flex flex-col gap-2">
+                    <span class="text-2xl font-black text-primary">High Trust</span>
+                    <span class="text-xs font-bold text-gray-500 uppercase">Kepercayaan Jamaah</span>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <span class="text-2xl font-black text-primary">Real Action</span>
+                    <span class="text-xs font-bold text-gray-500 uppercase">Kolaborasi Relawan</span>
+                </div>
+            </div>
+        </div>
+        <div class="bg-background-light dark:bg-[#1a2e25] p-2 rounded-3xl border border-[#dbe6e1] dark:border-[#1e3a2f] shadow-2xl">
+            <img alt="Community interaction" class="rounded-2xl" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGipiyg48agSRjm2VZqV0Jz_RgaKsdz8xGwWaWGOvuTQcwyeuF7uYCIA1buc2YkHwDgoitWPFGTHw795Diik7_IE9afPqHFpppJDgjpjuZnP9b8vliWlYm8KYK4GL8MRHRKz7zArIniCG3uyoDSW1tQKAeBOC5aKM5L_QXrQzPspDBeWZePlF5tiXkG2cEbxEq8nizgLHLshGJ-WhK4o7O85iNNkPwC0k7B3lLRGrZu1I_J0YAZ9ZyctT7dOm6b_3xfY3cQxBRPYlD"/>
+        </div>
+    </div>
+</section>
+
+<!-- Final CTA Section -->
 <section class="py-24 px-6">
     <div class="max-w-[1000px] mx-auto bg-[#0a1f18] dark:bg-[#11241d] rounded-[2.5rem] p-12 md:p-20 text-center relative overflow-hidden shadow-2xl">
         <div class="absolute top-0 right-0 w-64 h-64 bg-primary/20 blur-[100px] -translate-y-1/2 translate-x-1/2"></div>
         <div class="absolute bottom-0 left-0 w-64 h-64 bg-primary/10 blur-[100px] translate-y-1/2 -translate-x-1/2"></div>
         <div class="relative z-10 flex flex-col items-center gap-8">
             <h2 class="text-4xl md:text-5xl font-black text-white leading-tight">
-                Siap Memodernisasi <br/> Manajemen Masjid Anda?
+                Siap Memulai Perubahan <br/> Melalui Masjid Anda?
             </h2>
             <p class="text-lg text-emerald-100/70 max-w-[600px]">
-                Gabung bersama ratusan masjid lainnya. Proses pendaftaran hanya butuh 5 menit dan gratis selamanya.
+                Mari buat perubahan nyata, mulai dari gang-gang di sekitar masjid kita. Gabung bersama ratusan komunitas masjid lainnya hari ini.
             </p>
-            <div class="flex flex-col sm:flex-row gap-4">
-                <a href="<?= base_url('register') ?>" class="bg-white text-primary px-10 py-4 rounded-xl text-lg font-bold hover:bg-emerald-50 transition-all shadow-xl">
-                    Daftar Sekarang
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="<?= base_url('register') ?>" class="bg-white text-primary px-8 py-4 rounded-xl text-base font-black hover:bg-emerald-50 transition-all shadow-xl">
+                    Daftarkan Masjid Kami
                 </a>
-                <a href="#" class="bg-white/10 text-white border border-white/20 hover:bg-white/20 px-10 py-4 rounded-xl text-lg font-bold transition-all">
-                    Hubungi Tim Support
+                <a href="#" class="bg-white/10 text-white border border-white/20 hover:bg-white/20 px-8 py-4 rounded-xl text-base font-black transition-all">
+                    Jadi Relawan Kebaikan
                 </a>
             </div>
-            <p class="text-sm text-emerald-200/50 italic">"Sebaik-baik manusia adalah yang paling bermanfaat bagi manusia lainnya."</p>
+            <p class="text-sm text-emerald-200/50 italic font-medium">"Gratis, amanah, dan untuk kebaikan bersama."</p>
         </div>
     </div>
 </section>
