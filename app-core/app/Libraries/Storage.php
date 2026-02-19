@@ -8,12 +8,15 @@ use Aws\Exception\AwsException;
 class Storage
 {
     protected $driver;
-    protected $s3Client;
-    protected $bucket;
+    protected $uploadPath;
 
     public function __construct()
     {
         $this->driver = env('STORAGE_DRIVER', 'local');
+        
+        // Determine physical upload path
+        // Priority: Env STORAGE_PATH -> FCPATH
+        $this->uploadPath = rtrim(env('STORAGE_PATH', FCPATH), '/\\') . '/';
 
         if ($this->driver === 's3') {
             if (!class_exists('\Aws\S3\S3Client')) {
@@ -65,7 +68,8 @@ class Storage
             }
         } else {
             // Local
-            if ($file->move(FCPATH . 'public/' . $path, $newName)) {
+            // Use configured uploadPath instead of FCPATH directly
+            if ($file->move($this->uploadPath . $path, $newName)) {
                 return $path . '/' . $newName;
             }
         }
@@ -95,7 +99,7 @@ class Storage
                 return false;
             }
         } else {
-            $fullPath = FCPATH . 'public/' . $path;
+            $fullPath = $this->uploadPath . $path;
             if (file_exists($fullPath)) {
                 return unlink($fullPath);
             }
@@ -118,6 +122,6 @@ class Storage
             return $this->s3Client->getObjectUrl($this->bucket, $path);
         }
 
-        return asset_url('public/' . $path);
+        return asset_url($path);
     }
 }

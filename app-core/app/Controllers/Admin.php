@@ -125,7 +125,7 @@ class Admin extends BaseController
         $mandatoryFields = [
             'name', 'nama_resmi', 'jenis_masjid', 'tahun_berdiri', 
             'address', 'provinsi', 'kabupaten', 'kecamatan', 'kelurahan', 
-            'visi', 'misi', 'foto_utama'
+            'visi', 'misi', 'foto_utama', 'phone', 'about_us'
         ];
         $filledCount = 0;
         foreach ($mandatoryFields as $field) {
@@ -137,11 +137,15 @@ class Admin extends BaseController
 
         // Fetch Provinces
         $provinceModel = new ProvinceModel();
-        $provinces = $provinceModel->findAll();
+        $provinces = $provinceModel->orderBy('name', 'ASC')->findAll();
 
         // Fetch Service Areas (Wilayah Layanan)
         $wilayahModel = new MasjidWilayahModel();
         $wilayah = $wilayahModel->where('masjid_id', $masjidId)->findAll();
+
+        // Fetch Social Media
+        $socialModel = new \App\Models\MasjidSocialModel();
+        $socials = $socialModel->where('masjid_id', $masjidId)->findAll();
 
         // Fetch Gallery
         $galleryModel = new MasjidGalleryModel();
@@ -166,6 +170,7 @@ class Admin extends BaseController
             'percentage' => round($percentage),
             'provinces'  => $provinces,
             'wilayah'    => $wilayah,
+            'socials'    => $socials,
             'gallery'    => $gallery,
             'categories' => $categories
         ]);
@@ -219,6 +224,76 @@ class Admin extends BaseController
             $uploadPath = $storage->upload($file, 'images/masjid');
             if ($uploadPath) {
                 $data['foto_utama'] = $uploadPath;
+            } else {
+                log_message('error', 'Gagal upload foto masjid. Error: ' . $file->getErrorString());
+            }
+        } elseif ($file && !$file->isValid()) {
+            log_message('error', 'File tidak valid: ' . $file->getErrorString());
+        }
+
+        // Handle Logo Upload
+        $logoFile = $this->request->getFile('logo');
+        if ($logoFile && $logoFile->isValid() && !$logoFile->hasMoved()) {
+            $storage = new Storage();
+            
+            // Delete old logo if exists
+            $oldMasjid = $masjidModel->find($masjidId);
+            if (!empty($oldMasjid['logo'])) {
+                $storage->delete($oldMasjid['logo']);
+            }
+
+            // Upload new logo
+            $logoPath = $storage->upload($logoFile, 'images/masjid/logo');
+            if ($logoPath) {
+                $data['logo'] = $logoPath;
+            } else {
+                log_message('error', 'Gagal upload logo masjid. Error: ' . $logoFile->getErrorString());
+            }
+        }
+
+        // Handle Social Media
+        $socials = $this->request->getPost('socials');
+        $socialModel = new \App\Models\MasjidSocialModel();
+        
+        // Delete all existing socials for this masjid (simple overwrite strategy)
+        $socialModel->where('masjid_id', $masjidId)->delete();
+        
+        if (!empty($socials) && is_array($socials)) {
+            $socialData = [];
+            foreach ($socials as $s) {
+                if (!empty($s['platform']) && !empty($s['url'])) {
+                    $socialData[] = [
+                        'masjid_id' => $masjidId,
+                        'platform'  => $s['platform'],
+                        'url'       => $s['url']
+                    ];
+                }
+            }
+            if (!empty($socialData)) {
+                $socialModel->insertBatch($socialData);
+            }
+        }
+
+        // Handle Social Media
+        $socials = $this->request->getPost('socials');
+        $socialModel = new \App\Models\MasjidSocialModel();
+        
+        // Delete all existing socials for this masjid (simple overwrite strategy)
+        $socialModel->where('masjid_id', $masjidId)->delete();
+        
+        if (!empty($socials) && is_array($socials)) {
+            $socialData = [];
+            foreach ($socials as $s) {
+                if (!empty($s['platform']) && !empty($s['url'])) {
+                    $socialData[] = [
+                        'masjid_id' => $masjidId,
+                        'platform'  => $s['platform'],
+                        'url'       => $s['url']
+                    ];
+                }
+            }
+            if (!empty($socialData)) {
+                $socialModel->insertBatch($socialData);
             }
         }
 
@@ -234,6 +309,22 @@ class Admin extends BaseController
             }
         }
 
+        // Convert Kabupaten ID to Name if it's alphanumeric/numeric
+        if (isset($data['kabupaten'])) {
+            $regencyModel = new RegencyModel();
+            
+            // Save the ID to regency_id column (for prayer times API)
+            // We assume the input 'kabupaten' IS the ID from the dropdown
+            $data['regency_id'] = $data['kabupaten'];
+
+            // Check if it's an ID (try to find it)
+            $regency = $regencyModel->find($data['kabupaten']);
+            if ($regency) {
+                // Overwrite 'kabupaten' with the Name for display purposes
+                $data['kabupaten'] = $regency['name'];
+            }
+        }
+
         // Handle External Service Toggle
         $data['is_external_service'] = isset($data['is_external_service']) ? 1 : 0;
 
@@ -242,6 +333,9 @@ class Admin extends BaseController
     $data['menu_program'] = isset($data['menu_program']) ? 1 : 0;
     $data['menu_laporan'] = isset($data['menu_laporan']) ? 1 : 0;
     $data['menu_kontak']  = isset($data['menu_kontak']) ? 1 : 0;
+
+    // Handle Action Button
+    $data['action_button_active'] = isset($data['action_button_active']) ? 1 : 0;
 
     // Handle Wilayah Layanan (Service Areas)
         $wilayahData = $this->request->getPost('wilayah') ?? [];
@@ -485,7 +579,7 @@ class Admin extends BaseController
     public function getRegencies($provinceId)
     {
         $regencyModel = new RegencyModel();
-        $regencies = $regencyModel->where('province_id', $provinceId)->findAll();
+        $regencies = $regencyModel->where('province_id', $provinceId)->orderBy('name', 'ASC')->findAll();
         return $this->response->setJSON($regencies);
     }
 

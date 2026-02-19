@@ -8,7 +8,7 @@ class RegencyModel extends Model
 {
     protected $table            = 'regencies';
     protected $primaryKey       = 'id';
-    protected $useAutoIncrement = true;
+    protected $useAutoIncrement = false;
     protected $returnType       = 'array';
-    protected $allowedFields    = ['province_id', 'name'];
+    protected $allowedFields    = ['id', 'province_id', 'name'];
 }

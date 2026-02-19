@@ -13,9 +13,11 @@ class MasjidModel extends Model
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
-        'name', 'nama_resmi', 'username', 'tahun_berdiri', 'jenis_masjid', 
-        'no_sk', 'address', 'provinsi', 'kabupaten', 'kecamatan', 'kelurahan', 
-        'visi', 'misi', 'foto_utama', 'latitude', 'longitude', 'is_external_service',
+        'name', 'tagline', 'nama_resmi', 'username', 'tahun_berdiri', 'jenis_masjid', 
+        'no_sk', 'address', 'provinsi', 'kabupaten', 'kecamatan', 'kelurahan', 'regency_id', 
+        'visi', 'misi', 'foto_utama', 'logo', 'about_us', 'phone', 'whatsapp', 'email',
+        'action_button_active', 'action_button_text', 'action_button_url',
+        'latitude', 'longitude', 'is_external_service',
         'username_updated_at', 'menu_berita', 'menu_program', 'menu_laporan', 'menu_kontak'
     ];
 

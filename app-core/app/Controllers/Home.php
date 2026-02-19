@@ -6,7 +6,29 @@ class Home extends BaseController
 {
     public function index(): string
     {
-        return view('landing', ['title' => 'Masj.id - Manajemen Masjid Modern & Transparan']);
+        $masjidModel = new \App\Models\MasjidModel();
+        $wargaModel = new \App\Models\MasjidWargaModel();
+        $financeModel = new \App\Models\MasjidFinanceTransactionModel();
+
+        // 1. Total Masjid (Count all active mosques)
+        // Assuming all in 'masjid' table are valid/active for now.
+        $totalMasjid = $masjidModel->countAll();
+
+        // 2. Total Dana Terkelola (Sum of all 'pemasukan')
+        $totalDanaResult = $financeModel->selectSum('amount')->where('type', 'pemasukan')->first();
+        $totalDana = $totalDanaResult['amount'] ?? 0;
+
+        // 3. Total Jamaah (Count all warga)
+        $totalJamaah = $wargaModel->countAll();
+
+        return view('landing', [
+            'title'       => 'Masj.id - Manajemen Masjid Modern & Transparan',
+            'stats'       => [
+                'masjid' => $totalMasjid,
+                'dana'   => $totalDana,
+                'jamaah' => $totalJamaah
+            ]
+        ]);
     }
 
     public function fitur(): string
@@ -121,6 +143,38 @@ class Home extends BaseController
             ->where('prayer_type', 'jumat')
             ->first();
 
+        // Fetch Prayer Times from AlAdhan API (Coordinate Based)
+        $prayerData = null;
+        // Verify coordinates exist and are not default 0
+        if (!empty($masjid['latitude']) && !empty($masjid['longitude']) && ($masjid['latitude'] != 0 || $masjid['longitude'] != 0)) {
+            $lat = $masjid['latitude'];
+            $long = $masjid['longitude'];
+            $date = date('d-m-Y');
+            
+            $cacheKey = "prayer_aladhan_{$masjid['id']}_{$date}";
+            $prayerData = cache($cacheKey);
+
+            if (!$prayerData) {
+                try {
+                    $client = \Config\Services::curlrequest();
+                    // Method 20 is Ministry of Religious Affairs (Kemenag)
+                    $apiUrl = "http://api.aladhan.com/v1/timings/$date?latitude=$lat&longitude=$long&method=20";
+                    
+                    $response = $client->request('GET', $apiUrl, [
+                        'timeout' => 5
+                    ]);
+                    
+                    $body = json_decode($response->getBody(), true);
+                    if (isset($body['code']) && $body['code'] == 200) {
+                        $prayerData = $body['data'];
+                        cache()->save($cacheKey, $prayerData, 86400); // 24 hours
+                    }
+                } catch (\Exception $e) {
+                    log_message('error', 'AlAdhan API Error: ' . $e->getMessage());
+                }
+            }
+        }
+
         $storage = new \App\Libraries\Storage();
 
         return view('public/masjid_profile', [
@@ -134,6 +188,7 @@ class Home extends BaseController
             'financeSummary' => $financeSummary,
             'todaySchedules' => $todaySchedules,
             'fridaySchedule' => $fridaySchedule,
+            'prayerData'     => $prayerData,
             'storage'        => $storage
         ]);
     }
@@ -304,4 +359,6 @@ class Home extends BaseController
 
         return redirect()->back()->with('success', 'Terima kasih telah berlangganan info masjid!');
     }
+
 }
+

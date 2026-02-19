@@ -31,25 +31,47 @@
         <div class="relative group">
             <div class="absolute -inset-4 bg-primary/10 rounded-[2rem] blur-2xl group-hover:bg-primary/20 transition-colors"></div>
             <div class="relative bg-white dark:bg-[#1a2e25] border border-[#dbe6e1] dark:border-[#1e3a2f] rounded-2xl shadow-2xl overflow-hidden aspect-[4/3] flex items-center justify-center p-8">
-                <div class="w-full h-full rounded-xl bg-center bg-cover border border-[#dbe6e1] dark:border-[#1e3a2f]" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDTJrU3j5N5jZGFfRUSjk-syP7hVXMdUvqFzSpixEkFInUr3Ygbp33qNW06BBmIHXCnO820jH7420zRni8ET6zZQXYQG1iV3hJHNhYovwmgongJPcaGyIvUeznyT_QpsXhRs4QvowJan7uFNRarQBzAPJvujdr5aw45jnYLio0DbhJSf0guB-u-dkU3XHkZRm5cZbaKzoy28OCkazMh6tYIhywzrhAAshDEUUwqX8qdNsCvRh9l4EDVAqcC5sk1O9uFtqa5lWANOrt_");'>
+                <div class="w-full h-full rounded-xl bg-center bg-cover border border-[#dbe6e1] dark:border-[#1e3a2f]" style="background-image: url('<?= base_url('images/masjid.png') ?>');">
                 </div>
             </div>
         </div>
     </div>
 </section>
 
+<?php
+// Helper to format numbers compactly (e.g., 1.5k, 1M)
+function formatCompact($n) {
+    if ($n < 1000) return $n;
+    $suffix = '';
+    if ($n < 1000000) {
+        $n = $n / 1000;
+        $suffix = 'rb+'; // Ribu
+    } else if ($n < 1000000000) {
+        $n = $n / 1000000;
+        $suffix = 'Jt+'; // Juta
+    } else {
+        $n = $n / 1000000000;
+        $suffix = 'M+'; // Miliar
+    }
+    return round($n, 1) . $suffix;
+}
+
+// Ensure stats exist
+$stats = $stats ?? ['masjid' => 0, 'dana' => 0, 'jamaah' => 0];
+?>
+
 <section class="py-12 px-6 border-y border-[#dbe6e1] dark:border-[#1e3a2f] bg-white dark:bg-background-dark/50" id="statistik">
     <div class="max-w-[1200px] mx-auto flex flex-wrap justify-center gap-12 md:gap-24">
         <div class="flex flex-col items-center gap-1">
-            <span class="text-4xl font-black text-[#111815] dark:text-white">100+</span>
+            <span class="text-4xl font-black text-[#111815] dark:text-white"><?= formatCompact($stats['masjid']) ?></span>
             <span class="text-sm font-medium text-primary uppercase tracking-widest">Masjid Terdaftar</span>
         </div>
         <div class="flex flex-col items-center gap-1">
-            <span class="text-4xl font-black text-[#111815] dark:text-white">Rp 1M+</span>
+            <span class="text-4xl font-black text-[#111815] dark:text-white">Rp <?= formatCompact($stats['dana']) ?></span>
             <span class="text-sm font-medium text-primary uppercase tracking-widest">Dana Terkelola</span>
         </div>
         <div class="flex flex-col items-center gap-1">
-            <span class="text-4xl font-black text-[#111815] dark:text-white">50k+</span>
+            <span class="text-4xl font-black text-[#111815] dark:text-white"><?= formatCompact($stats['jamaah']) ?></span>
             <span class="text-sm font-medium text-primary uppercase tracking-widest">Jamaah Terdata</span>
         </div>
         <div class="flex flex-col items-center gap-1">

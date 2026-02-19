@@ -108,6 +108,11 @@ $routes->get('payment/simulation/(:segment)', 'Payment::simulation/$1');
 $routes->post('payment/callback', 'Payment::callback');
 $routes->get('payment/success/(:segment)', 'Payment::success/$1');
 
+// Prevent asset paths from being captured by wildcard
+$routes->get('(images|assets|uploads|css|js|fonts)/(:any)', function() {
+    throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+});
+
 // Public Profile (Catch-all)
 $routes->get('(:any)/berita', 'Home::newsList/$1');
 $routes->get('(:any)/berita/(:any)', 'Home::newsDetail/$1/$2');

@@ -17,10 +17,22 @@
                     <span class="size-2 bg-emerald-400 rounded-full animate-pulse"></span>
                     Profil Terverifikasi
                 </div>
-                <h1 class="text-4xl md:text-6xl font-black text-white leading-tight mb-2 drop-shadow-xl"><?= esc($masjid['name']) ?></h1>
-                <?php if (!empty($masjid['nama_resmi'])): ?>
-                    <p class="text-white/70 text-lg md:text-xl font-medium mb-4 italic"><?= esc($masjid['nama_resmi']) ?></p>
-                <?php endif; ?>
+                
+                <div class="flex items-center gap-4 mb-4">
+                    <?php 
+                        $logoUrl = !empty($masjid['logo']) ? $storage->url($masjid['logo']) : asset_url('public/logo_masjid_200.png');
+                    ?>
+                    <img src="<?= $logoUrl ?>" alt="Logo <?= esc($masjid['name']) ?>" class="size-16 md:size-20 rounded-full bg-white p-1 shadow-lg object-contain">
+                    <div>
+                        <h1 class="text-3xl md:text-5xl font-black text-white leading-tight drop-shadow-xl"><?= esc($masjid['name']) ?></h1>
+                        <?php if (!empty($masjid['nama_resmi']) && $masjid['nama_resmi'] !== $masjid['name']): ?>
+                            <p class="text-white/70 text-base md:text-lg font-medium italic"><?= esc($masjid['nama_resmi']) ?></p>
+                        <?php else: ?>
+                            <p class="text-white/70 text-base md:text-lg font-medium italic"><?= esc($masjid['address']) ?></p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
                 <div class="flex flex-wrap gap-4 text-white/80 text-sm">
                     <div class="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-white/5">
                         <span class="material-symbols-outlined text-sm">location_on</span>
@@ -39,10 +51,12 @@
                 </div>
             </div>
             <div class="flex flex-col gap-3">
-                <a href="#kontak" class="btn-primary-lg flex items-center justify-center gap-2">
+                <?php if ($masjid['action_button_active'] ?? 1): ?>
+                <a href="<?= esc($masjid['action_button_url'] ?? '#donasi') ?>" class="btn-primary-lg flex items-center justify-center gap-2">
                     <span class="material-symbols-outlined">volunteer_activism</span>
-                    Donasi Sekarang
+                    <?= esc($masjid['action_button_text'] ?? 'Donasi Sekarang') ?>
                 </a>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -62,8 +76,8 @@
                         <span class="material-symbols-outlined">calendar_today</span>
                     </div>
                     <div>
-                        <h3 class="font-bold text-lg">Petugas Sholat Hari Ini</h3>
-                        <p class="text-white/60 text-xs"><?= date('l, d F Y') ?></p>
+                        <h3 class="font-bold text-lg">Petugas Hari Ini</h3>
+                        <p class="text-white/60 text-xs"><?= date('l, d M Y') ?></p>
                     </div>
                 </div>
 
@@ -108,19 +122,23 @@
                         </div>
                         <div>
                             <h3 class="font-bold text-lg text-emerald-100">Jumat Berkah</h3>
-                            <p class="text-emerald-200/60 text-xs"><?= date('d F Y', strtotime($fridaySchedule['date'])) ?></p>
+                            <p class="text-emerald-200/60 text-xs"><?= date('d M Y', strtotime($fridaySchedule['date'])) ?></p>
                         </div>
                     </div>
 
                     <div class="space-y-6">
+                        <?php if ($fridaySchedule['khatib_name']): ?>
                         <div>
                             <p class="text-emerald-400 text-xs font-bold uppercase tracking-widest mb-1">Khatib</p>
                             <h4 class="text-2xl font-black text-white"><?= esc($fridaySchedule['khatib_name']) ?></h4>
                         </div>
+                        <?php endif; ?>
+                        <?php if ($fridaySchedule['imam_name']): ?>
                         <div>
                             <p class="text-emerald-400 text-xs font-bold uppercase tracking-widest mb-1">Imam</p>
                             <h4 class="text-xl font-bold text-white/90"><?= esc($fridaySchedule['imam_name']) ?></h4>
                         </div>
+                        <?php endif; ?>
                         <?php if ($fridaySchedule['muadzin_name']): ?>
                         <div>
                             <p class="text-emerald-400 text-xs font-bold uppercase tracking-widest mb-1">Muadzin/Bilal</p>
@@ -144,10 +162,19 @@
             <div class="space-y-8">
                 <div>
                     <h2 class="text-sm font-bold text-primary uppercase tracking-[0.2em] mb-3">Tentang Kami</h2>
-                    <h3 class="text-3xl md:text-4xl font-black leading-tight mb-6">Membangun Ummat, <br/>Memakmurkan Rumah Allah</h3>
-                    <p class="text-[#3d5a4d] dark:text-gray-400 text-lg leading-relaxed">
-                        Selamat datang di portal informasi resmi <?= esc($masjid['name']) ?>. Melalui platform Masj.id, kami berupaya menghadirkan transparansi pengelolaan dan kemudahan bagi jamaah dalam berinteraksi dengan program-program edukasi, sosial, dan ibadah kami.
-                    </p>
+                    <h3 class="text-3xl md:text-4xl font-black leading-tight mb-6">
+                        <?= !empty($masjid['tagline']) ? nl2br(esc($masjid['tagline'])) : 'Membangun Ummat, <br/>Memakmurkan Rumah Allah' ?>
+                    </h3>
+                    
+                    <?php if (!empty($masjid['about_us'])): ?>
+                        <p class="text-[#3d5a4d] dark:text-gray-400 text-lg leading-relaxed mb-4">
+                            <?= nl2br(esc($masjid['about_us'])) ?>
+                        </p>
+                    <?php else: ?>
+                        <p class="text-[#3d5a4d] dark:text-gray-400 text-lg leading-relaxed">
+                            Selamat datang di portal informasi resmi <?= esc($masjid['name']) ?>. Melalui platform Masj.id, kami berupaya menghadirkan transparansi pengelolaan dan kemudahan bagi jamaah dalam berinteraksi dengan program-program edukasi, sosial, dan ibadah kami.
+                        </p>
+                    <?php endif; ?>
                 </div>
                 
                 <?php if (!empty($service_areas)): ?>
@@ -166,41 +193,100 @@
             </div>
 
             <div class="grid gap-6">
-                <!-- Visi -->
-                <div class="bg-background-light dark:bg-[#1a2e25] border border-[#dbe6e1] dark:border-[#1e3a2f] p-8 rounded-[2rem] shadow-sm relative overflow-hidden group">
-                    <span class="material-symbols-outlined absolute -top-4 -right-4 text-8xl text-primary/5 transition-transform group-hover:scale-125">visibility</span>
-                    <h4 class="text-xl font-bold mb-4 flex items-center gap-2">
-                        <span class="size-8 bg-primary rounded-lg flex items-center justify-center text-white">
-                            <span class="material-symbols-outlined text-sm">visibility</span>
-                        </span>
-                        Visi
-                    </h4>
-                    <p class="text-[#3d5a4d] dark:text-gray-400 font-medium italic">
-                        "<?= esc($masjid['visi'] ?? 'Menjadi pusat kegiatan ibadah dan pemberdayaan masyarakat yang mandiri dan profesional.') ?>"
-                    </p>
-                </div>
+                <!-- Prayer Times Widget (AlAdhan) -->
+                <?php if (!empty($prayerData)): ?>
+                <div class="bg-primary text-white p-8 rounded-[2rem] shadow-xl relative overflow-hidden group">
+                     <div class="absolute top-0 right-0 p-24 bg-white/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/3"></div>
+                     <div class="relative z-10">
+                        <div class="flex justify-between items-start mb-6">
+                            <div>
+                                <h4 class="text-xl font-bold flex items-center gap-2">
+                                    <span class="material-symbols-outlined">schedule</span> Jadwal Sholat
+                                </h4>
+                                <div class="flex flex-col text-xs text-emerald-100/90 mt-1">
+                                    <span><?= $prayerData['date']['readable'] ?></span>
+                                    <span class="font-bold text-white">
+                                        <?= $prayerData['date']['hijri']['day'] ?> <?= $prayerData['date']['hijri']['month']['en'] ?> <?= $prayerData['date']['hijri']['year'] ?> H
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="px-3 py-1 bg-white/20 rounded-lg text-xs font-bold text-white">
+                                <?= $prayerData['meta']['timezone'] ?? 'WIB' ?>
+                            </div>
+                        </div>
 
-                <!-- Misi -->
-                <div class="bg-white dark:bg-[#1a2e25] border border-primary/20 p-8 rounded-[2rem] shadow-xl relative overflow-hidden group">
-                    <span class="material-symbols-outlined absolute -top-4 -right-4 text-8xl text-primary/5 transition-transform group-hover:scale-125">flag</span>
-                    <h4 class="text-xl font-bold mb-4 flex items-center gap-2 text-primary">
-                        <span class="size-8 bg-primary rounded-lg flex items-center justify-center text-white shadow-lg">
-                            <span class="material-symbols-outlined text-sm">flag</span>
-                        </span>
-                        Misi
-                    </h4>
-                    <ul class="space-y-4">
-                        <?php 
-                            $misiArray = !empty($masjid['misi']) ? explode("\n", $masjid['misi']) : ['Mewujudkan pelayanan ibadah yang nyaman.', 'Mengaktifkan pendidikan berbasis masjid.', 'Memberdayakan ekonomi jamaah sekitarnya.'];
-                            foreach ($misiArray as $m): if (empty(trim($m))) continue;
-                        ?>
-                            <li class="flex gap-3 text-sm font-medium text-[#3d5a4d] dark:text-gray-400">
-                                <span class="material-symbols-outlined text-primary">check_circle</span>
-                                <?= esc(trim($m)) ?>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
+                        <div class="space-y-3">
+                            <?php 
+                            $times = [
+                                'Imsak'   => $prayerData['timings']['Imsak'],
+                                'Subuh'   => $prayerData['timings']['Fajr'],
+                                'Terbit'  => $prayerData['timings']['Sunrise'],
+                                'Dzuhur'  => $prayerData['timings']['Dhuhr'],
+                                'Ashar'   => $prayerData['timings']['Asr'],
+                                'Maghrib' => $prayerData['timings']['Maghrib'],
+                                'Isya'    => $prayerData['timings']['Isha'],
+                            ];
+                            ?>
+                            <div class="grid grid-cols-2 gap-3">
+                                <?php foreach($times as $name => $time): 
+                                    $isHighlight = ($name == 'Maghrib' || $name == 'Subuh' || $name == 'Dzuhur'); 
+                                ?>
+                                <div class="bg-white/10 p-2.5 rounded-xl flex items-center justify-between border border-white/5 <?= $isHighlight ? 'bg-white/20' : '' ?>">
+                                    <span class="text-xs font-medium opacity-80"><?= $name ?></span>
+                                    <span class="text-sm font-bold tracking-wide"><?= $time ?></span>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-[10px] text-center text-emerald-200/60">
+                            *Waktu sholat berdasarkan Koordinat Masjid (Kemenag RI)
+                        </div>
+                     </div>
                 </div>
+                <?php endif; ?>
+
+                <!-- Visi & Misi logic -->
+                <?php if (!empty($masjid['visi']) || !empty($masjid['misi'])): ?>
+                    <!-- Visi -->
+                    <?php if (!empty($masjid['visi'])): ?>
+                    <div class="bg-background-light dark:bg-[#1a2e25] border border-[#dbe6e1] dark:border-[#1e3a2f] p-8 rounded-[2rem] shadow-sm relative overflow-hidden group">
+                        <span class="material-symbols-outlined absolute -top-4 -right-4 text-8xl text-primary/5 transition-transform group-hover:scale-125">visibility</span>
+                        <h4 class="text-xl font-bold mb-4 flex items-center gap-2">
+                            <span class="size-8 bg-primary rounded-lg flex items-center justify-center text-white">
+                                <span class="material-symbols-outlined text-sm">visibility</span>
+                            </span>
+                            Visi
+                        </h4>
+                        <p class="text-[#3d5a4d] dark:text-gray-400 font-medium italic">
+                            "<?= esc($masjid['visi']) ?>"
+                        </p>
+                    </div>
+                    <?php endif; ?>
+
+                    <!-- Misi -->
+                    <?php if (!empty($masjid['misi'])): ?>
+                    <div class="bg-white dark:bg-[#1a2e25] border border-primary/20 p-8 rounded-[2rem] shadow-xl relative overflow-hidden group">
+                        <span class="material-symbols-outlined absolute -top-4 -right-4 text-8xl text-primary/5 transition-transform group-hover:scale-125">flag</span>
+                        <h4 class="text-xl font-bold mb-4 flex items-center gap-2 text-primary">
+                            <span class="size-8 bg-primary rounded-lg flex items-center justify-center text-white shadow-lg">
+                                <span class="material-symbols-outlined text-sm">flag</span>
+                            </span>
+                            Misi
+                        </h4>
+                        <ul class="space-y-4">
+                            <?php 
+                                $misiArray = explode("\n", $masjid['misi']);
+                                foreach ($misiArray as $m): if (empty(trim($m))) continue;
+                            ?>
+                                <li class="flex gap-3 text-sm font-medium text-[#3d5a4d] dark:text-gray-400">
+                                    <span class="material-symbols-outlined text-primary">check_circle</span>
+                                    <?= esc(trim($m)) ?>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                    <?php endif; ?>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -516,8 +602,47 @@
                         <div class="size-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary mb-4">
                             <span class="material-symbols-outlined">mail</span>
                         </div>
-                        <h4 class="font-bold mb-2">Korespondensi</h4>
-                        <p class="text-sm text-gray-500"><?= esc($masjid['username']) ?>@masj.id</p>
+                        <h4 class="font-bold mb-2">Kontak Resmi</h4>
+                        <div class="space-y-2 mt-2">
+                            <?php if (!empty($masjid['phone'])): ?>
+                                <p class="text-sm text-gray-500 flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-xs">call</span> <?= esc($masjid['phone']) ?>
+                                </p>
+                            <?php endif; ?>
+                            <?php if (!empty($masjid['whatsapp'])): ?>
+                                <p class="text-sm text-gray-500 flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-xs">chat</span> <?= esc($masjid['whatsapp']) ?> (WA)
+                                </p>
+                            <?php endif; ?>
+                            <p class="text-sm text-gray-500 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-xs">mail</span> 
+                                <?= !empty($masjid['email']) ? esc($masjid['email']) : esc($masjid['username']) . '@masj.id' ?>
+                            </p>
+                        </div>
+                        
+                        <?php if (!empty($socials)): ?>
+                        <h4 class="font-bold mb-2 mt-6">Ikuti Kami</h4>
+                        <div class="flex flex-wrap gap-3">
+                            <?php foreach($socials as $soc): 
+                                $icon = 'link';
+                                $color = 'bg-gray-100 text-gray-600';
+                                switch($soc['platform']) {
+                                    case 'instagram': $icon = 'photo_camera'; $color = 'bg-pink-100 text-pink-600'; break; // Material doesn't have brands, using proxies
+                                    case 'facebook': $icon = 'thumb_up'; $color = 'bg-blue-100 text-blue-600'; break;
+                                    case 'tiktok': $icon = 'music_note'; $color = 'bg-black text-white'; break;
+                                    case 'youtube': $icon = 'play_circle'; $color = 'bg-red-100 text-red-600'; break;
+                                    case 'twitter': $icon = 'flutter_dash'; $color = 'bg-sky-100 text-sky-600'; break;
+                                    case 'whatsapp_group': $icon = 'groups'; $color = 'bg-green-100 text-green-600'; break;
+                                    case 'telegram_group': $icon = 'send'; $color = 'bg-blue-50 text-blue-500'; break;
+                                    case 'website': $icon = 'language'; $color = 'bg-emerald-100 text-emerald-600'; break;
+                                }
+                            ?>
+                            <a href="<?= esc($soc['url']) ?>" target="_blank" class="size-10 <?= $color ?> rounded-xl flex items-center justify-center hover:scale-110 transition-transform shadow-sm" title="<?= ucfirst(str_replace('_', ' ', $soc['platform'])) ?>">
+                                <span class="material-symbols-outlined"><?= $icon ?></span>
+                            </a>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
 

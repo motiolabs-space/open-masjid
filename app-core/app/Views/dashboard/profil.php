@@ -49,6 +49,10 @@
                     <input name="name" class="w-full rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary" type="text" value="<?= esc($masjid['name'] ?? '') ?>" required/>
                 </div>
                 <div>
+                    <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-1.5">Slogan / Tagline</label>
+                    <input name="tagline" class="w-full rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary" type="text" value="<?= esc($masjid['tagline'] ?? '') ?>" placeholder="Contoh: Membangun Ummat, Memakmurkan Masjid"/>
+                </div>
+                <div>
                     <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-1.5">Nama Resmi (Sesuai SK)</label>
                     <input name="nama_resmi" class="w-full rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary" placeholder="Masukkan nama resmi..." type="text" value="<?= esc($masjid['nama_resmi'] ?? '') ?>"/>
                 </div>
@@ -91,6 +95,31 @@
                         Username hanya dapat diubah minimal 1 bulan sekali untuk konsistensi link.
                     </p>
                 </div>
+                <div>
+                    <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-1.5">Tentang Kami</label>
+                    <textarea name="about_us" class="w-full rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary" rows="4" placeholder="Deskripsi singkat tentang sejarah atau profil masjid..."><?= esc($masjid['about_us'] ?? '') ?></textarea>
+                </div>
+                
+                <div class="pt-4 border-t border-[#e5e7eb] dark:border-white/10">
+                    <h3 class="font-bold text-[#111816] dark:text-white mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-lg">contact_phone</span>
+                        Kontak Resmi
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-1.5">Telepon / HP</label>
+                            <input name="phone" class="w-full rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary" type="text" value="<?= esc($masjid['phone'] ?? '') ?>" placeholder="0812..."/>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-1.5">WhatsApp</label>
+                            <input name="whatsapp" class="w-full rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary" type="text" value="<?= esc($masjid['whatsapp'] ?? '') ?>" placeholder="0812..."/>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-1.5">Email Masjid</label>
+                            <input name="email" class="w-full rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary" type="email" value="<?= esc($masjid['email'] ?? '') ?>" placeholder="info@masjid..."/>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="space-y-4">
                 <label class="block text-sm font-semibold text-[#111816] dark:text-white">Foto Utama Masjid</label>
@@ -111,6 +140,101 @@
                 </div>
                 <p class="text-xs text-[#608a7e]">Maksimal 5MB (JPG, PNG). Gunakan foto terbaik masjid Anda tampak depan.</p>
             </div>
+
+            <!-- Logo Masjid -->
+            <div class="space-y-4 pt-4 border-t border-[#e5e7eb] dark:border-white/10">
+                <label class="block text-sm font-semibold text-[#111816] dark:text-white">Logo Masjid (Opsional)</label>
+                <div class="flex items-center gap-6">
+                    <div class="relative group cursor-pointer border-2 border-dashed border-[#dbe6e3] dark:border-white/10 rounded-full overflow-hidden size-32 flex-shrink-0 flex items-center justify-center bg-[#f0f5f3] dark:bg-white/5">
+                        <?php 
+                            $logoUrl = !empty($masjid['logo']) ? $storage->url($masjid['logo']) : asset_url('public/logo_masjid_200.png');
+                        ?>
+                        <div id="logoPreview" class="absolute inset-0 bg-center bg-no-repeat bg-cover" style='background-image: url("<?= $logoUrl ?>");'></div>
+                        <div class="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-all flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100">
+                            <span class="material-symbols-outlined text-2xl">upload</span>
+                        </div>
+                        <input type="file" name="logo" class="absolute inset-0 opacity-0 cursor-pointer" onchange="previewLogo(this)">
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-xs text-[#608a7e] mb-2">Format: PNG/JPG (Transparan lebih baik). Jika kosong, akan menggunakan logo default Masj.id.</p>
+                        <button type="button" onclick="document.querySelector('input[name=logo]').click()" class="text-xs font-bold text-primary hover:underline">Pilih Logo</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Media Section -->
+            <div class="pt-4 border-t border-[#e5e7eb] dark:border-white/10 mt-4">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-[#111816] dark:text-white flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-lg">share</span>
+                        Media Sosial & Komunitas
+                    </h3>
+                    <button type="button" onclick="addSocialRow()" class="text-xs font-bold text-primary hover:underline flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">add_circle</span> Tambah
+                    </button>
+                </div>
+                
+                <div id="socialMediaContainer" class="space-y-3">
+                    <?php if (!empty($socials)): ?>
+                        <?php foreach($socials as $index => $soc): ?>
+                            <div class="flex gap-2 items-center social-row">
+                                <select name="socials[<?= $index ?>][platform]" class="w-1/3 rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 text-sm focus:border-primary focus:ring-primary">
+                                    <option value="instagram" <?= $soc['platform'] == 'instagram' ? 'selected' : '' ?>>Instagram</option>
+                                    <option value="facebook" <?= $soc['platform'] == 'facebook' ? 'selected' : '' ?>>Facebook</option>
+                                    <option value="tiktok" <?= $soc['platform'] == 'tiktok' ? 'selected' : '' ?>>TikTok</option>
+                                    <option value="youtube" <?= $soc['platform'] == 'youtube' ? 'selected' : '' ?>>YouTube</option>
+                                    <option value="twitter" <?= $soc['platform'] == 'twitter' ? 'selected' : '' ?>>Twitter/X</option>
+                                    <option value="whatsapp_group" <?= $soc['platform'] == 'whatsapp_group' ? 'selected' : '' ?>>WhatsApp Group</option>
+                                    <option value="telegram_group" <?= $soc['platform'] == 'telegram_group' ? 'selected' : '' ?>>Telegram Group</option>
+                                    <option value="website" <?= $soc['platform'] == 'website' ? 'selected' : '' ?>>Website Lain</option>
+                                </select>
+                                <input type="text" name="socials[<?= $index ?>][url]" value="<?= esc($soc['url']) ?>" class="flex-1 rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 text-sm focus:border-primary focus:ring-primary" placeholder="https://...">
+                                <button type="button" onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-500">
+                                    <span class="material-symbols-outlined text-lg">delete</span>
+                                </button>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+                <p class="text-[10px] text-[#608a7e] mt-2 italic">Tambahkan link grup WA warga, Instagram, atau channel Youtube masjid.</p>
+            </div>
+
+            <script>
+                function addSocialRow() {
+                    const container = document.getElementById('socialMediaContainer');
+                    const index = container.children.length;
+                    const div = document.createElement('div');
+                    div.className = 'flex gap-2 items-center social-row animate-in fade-in slide-in-from-top-2';
+                    div.innerHTML = `
+                        <select name="socials[${index}][platform]" class="w-1/3 rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 text-sm focus:border-primary focus:ring-primary">
+                            <option value="instagram">Instagram</option>
+                            <option value="facebook">Facebook</option>
+                            <option value="tiktok">TikTok</option>
+                            <option value="youtube">YouTube</option>
+                            <option value="twitter">Twitter/X</option>
+                            <option value="whatsapp_group">WhatsApp Group</option>
+                            <option value="telegram_group">Telegram Group</option>
+                            <option value="website">Website Lain</option>
+                        </select>
+                        <input type="text" name="socials[${index}][url]" class="flex-1 rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 text-sm focus:border-primary focus:ring-primary" placeholder="https://...">
+                        <button type="button" onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-500">
+                            <span class="material-symbols-outlined text-lg">delete</span>
+                        </button>
+                    `;
+                    container.appendChild(div);
+                }
+            </script>
+            <script>
+                function previewLogo(input) {
+                    if (input.files && input.files[0]) {
+                        var reader = new FileReader();
+                        reader.onload = function(e) {
+                            document.getElementById('logoPreview').style.backgroundImage = 'url(' + e.target.result + ')';
+                        }
+                        reader.readAsDataURL(input.files[0]);
+                    }
+                }
+            </script>
             <script>
                 function previewImage(input) {
                     if (input.files && input.files[0]) {
@@ -245,7 +369,7 @@
                         regencySelect.innerHTML = '<option value="">Pilih Kota/Kabupaten</option>';
                         regencies.forEach(r => {
                             const option = document.createElement('option');
-                            option.value = r.name;
+                            option.value = r.id; // Use ID for value
                             option.textContent = r.name;
                             if (selectedName && r.name === selectedName) {
                                 option.selected = true;
@@ -484,7 +608,7 @@
             <div class="p-6 border-b border-[#e5e7eb] dark:border-white/10 flex items-center justify-between cursor-pointer">
                 <h2 class="text-xl font-bold text-[#111816] dark:text-white flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary">visibility</span>
-                    Visi & Misi
+                    Visi & Misi <span class="text-xs font-normal text-[#608a7e] ml-2">(Opsional)</span>
                 </h2>
                 <span class="material-symbols-outlined text-[#608a7e]">expand_more</span>
             </div>
@@ -492,6 +616,7 @@
                 <div>
                     <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-2">Visi Masjid</label>
                     <textarea name="visi" class="w-full rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary" placeholder="Tuliskan visi utama masjid..." rows="3"><?= esc($masjid['visi'] ?? '') ?></textarea>
+                    <p class="text-[10px] text-[#608a7e] mt-1 italic">Jika dikosongkan, bagian ini akan otomatis menampilkan "Agenda Terdekat" di halaman publik.</p>
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-2">Misi Masjid</label>
@@ -1023,4 +1148,57 @@
         }
     }
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Location Dropdown Logic
+        const provSelect = document.getElementById('provinsiSelect');
+        const kabSelect = document.getElementById('kabupatenSelect');
+        const currentKab = document.getElementById('currentKabupaten').value;
+
+        // Function to load regencies
+        async function loadRegencies(provId, selectedValue = null) {
+            kabSelect.innerHTML = '<option value="">Memuat...</option>';
+            kabSelect.disabled = true;
+
+            try {
+                const response = await fetch(`<?= base_url('dashboard/regencies/') ?>${provId}`);
+                const data = await response.json();
+
+                kabSelect.innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
+                data.forEach(reg => {
+                    // Check if we should select this option
+                    // We compare NAME because currentKab stores the NAME
+                    const isSelected = selectedValue && (reg.name === selectedValue || reg.id === selectedValue);
+                    
+                    const option = document.createElement('option');
+                    option.value = reg.id; // Send ID to backend
+                    option.textContent = reg.name;
+                    if (isSelected) option.selected = true;
+                    kabSelect.appendChild(option);
+                });
+                kabSelect.disabled = false;
+            } catch (error) {
+                console.error('Error fetching regencies:', error);
+                kabSelect.innerHTML = '<option value="">Gagal memuat data</option>';
+            }
+        }
+
+        // Initial Load if Province is Selected
+        if (provSelect.value) {
+            loadRegencies(provSelect.value, currentKab);
+        }
+
+        // Change Event
+        provSelect.addEventListener('change', function() {
+            const provId = this.value;
+            if (provId) {
+                loadRegencies(provId);
+            } else {
+                kabSelect.innerHTML = '<option value="">Pilih Provinsi Terlebih Dahulu</option>';
+                kabSelect.disabled = true;
+            }
+        });
+    });
+</script>
+
 <?= $this->endSection() ?>
