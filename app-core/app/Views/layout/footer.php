@@ -6,7 +6,7 @@
                 <img src="<?= asset_url('logo.png') ?>" alt="Logo Masj.id" class="h-6">
             </a>
             <p class="text-[#3d5a4d] dark:text-gray-400 max-w-[320px]">
-                Platform manajemen masjid berbasis cloud untuk transparansi keuangan dan pemberdayaan umat di era digital.
+                Menguatkan peran masjid sebagai pusat amanah, kepedulian, dan pemberdayaan masyarakat.
             </p>
         </div>
         <div class="flex flex-col gap-4">

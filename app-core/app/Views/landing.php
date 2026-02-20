@@ -24,7 +24,7 @@
         <div class="relative group">
             <div class="absolute -inset-10 bg-primary/5 rounded-full blur-[100px] group-hover:bg-primary/10 transition-colors"></div>
             <div class="relative rounded-[3rem] overflow-hidden shadow-2xl border-4 border-white dark:border-gray-800">
-                <img alt="Community Movement" class="w-full aspect-square object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCH6rPE_09TLBALsaxYwC-HYCb0gcQ5pL30SIbC5NI5brKt_v0dNXmcxxDfBGu_Wp3QJEBcjauKQTDR9sTrzpEMsgzpnPFf3mcjXLe_5k6tUZ_6pdDqpWZtq5NGsBblfmvn7MtooixCULuSg_Zq862nDNhPGgVt2eZ2L_2XAvFmWtSEVkc-Uec7aXoI3L0AJmS33p199NPfzKQj2bikTxEOysH9iUj78mJQCpjUaMVVI_xQxkBuMO5gZ9EZsFlTHuYlVjY2ZiVQ3t_c"/>
+                <img alt="Community Movement" class="w-full aspect-square object-cover" src="<?= asset_url('images/masjid.png') ?>"/>
                 <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
             </div>
         </div>
@@ -58,7 +58,7 @@
         </div>
         <div class="bg-white dark:bg-[#1a2e25] p-10 rounded-[2.5rem] border border-primary/5 shadow-sm hover:shadow-xl transition-all text-center">
             <div class="size-20 bg-primary/10 rounded-3xl flex items-center justify-center text-primary mx-auto mb-8">
-                <span class="material-symbols-outlined text-4xl">lightbh</span>
+                <span class="material-symbols-outlined text-4xl">lightbulb</span>
             </div>
             <h4 class="text-2xl font-black mb-4 text-[#111815] dark:text-white leading-tight">Cahaya Perubahan</h4>
             <p class="text-[#3d5a4d] dark:text-gray-400 leading-relaxed">

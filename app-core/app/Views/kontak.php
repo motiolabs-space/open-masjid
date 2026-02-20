@@ -44,6 +44,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
         <div class="lg:col-span-5 space-y-8">
             <div class="bg-gray-50 dark:bg-gray-800/50 p-8 rounded-2xl space-y-8 border border-gray-100 dark:border-gray-800">
+                <!-- 
                 <div>
                     <div class="flex items-center gap-3 mb-4 text-primary">
                         <span class="material-symbols-outlined">location_on</span>
@@ -66,6 +67,7 @@
                         <span class="material-symbols-outlined text-sm">open_in_new</span>
                     </a>
                 </div>
+                -->
                 <div class="border-t border-gray-200 dark:border-gray-700 pt-8">
                     <div class="flex items-center gap-3 mb-4 text-primary">
                         <span class="material-symbols-outlined">mail</span>
@@ -142,6 +144,7 @@
     </section>
 
     <!-- Map Section Placeholder -->
+    <!-- 
     <section class="mt-24">
         <div class="rounded-3xl overflow-hidden border border-gray-100 dark:border-gray-800 h-[400px] relative">
             <img alt="Peta Lokasi Kantor Masj.id di Bandung" class="w-full h-full object-cover grayscale opacity-30 dark:opacity-20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAx-IqwkH-wKMBqd2R99WzHtxg4pViZyUScuWMoUdb_wtB91-H7zNpX0MdMn5N5_OTp02V3ky20kt_y7e7MptoB5U_xNTLNhXl9S6una_8mp6TR-XyE9a6kIQmgAmzRV9HFdK1hkE9ElTv9Fe23iMl9Lly-tHZa5XFQBK6ybaa6s0kqVKCH_FOVYSjgSrF5yOjTqTR_uL-lEGCaJL8sGA2aTrrPgm9W2xUi6bkU_IT_ADfdXExau7H37_s_3EFySxb8VWTiuGYzjEja"/>
@@ -159,5 +162,6 @@
             </div>
         </div>
     </section>
+    -->
 </main>
 <?= $this->endSection() ?>
