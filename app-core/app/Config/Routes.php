@@ -18,6 +18,7 @@ $routes->get('/login', 'Home::login');
 $routes->post('/login', 'Auth::login');
 $routes->get('/register', 'Home::register');
 $routes->get('/logout', 'Auth::logout');
+$routes->get('/auth/check-username', 'Auth::checkUsername');
 $routes->post('/register/masjid', 'Auth::registerMasjid');
 $routes->post('/register/jamaah', 'Auth::registerJamaah');
 $routes->get('dashboard', 'Admin::index');
@@ -96,6 +97,15 @@ $routes->get('dashboard/schedules/new', 'Admin::createSchedule');
 $routes->get('dashboard/schedules/edit/(:num)', 'Admin::editSchedule/$1');
 $routes->post('dashboard/schedules/save', 'Admin::saveSchedule');
 $routes->get('dashboard/schedules/delete/(:num)', 'Admin::deleteSchedule/$1');
+
+// Super Admin Dashboard
+$routes->group('superadmin', ['filter' => 'dashboardGuard'], function($routes) {
+    $routes->get('/', 'SuperAdmin::index');
+    $routes->get('masjid', 'SuperAdmin::masjid');
+    $routes->get('users', 'SuperAdmin::users');
+    $routes->post('masjid/suspend', 'SuperAdmin::suspendMasjid');
+    $routes->get('promote-me', 'SuperAdmin::promoteMe'); // Temp tool
+});
 
 // Donation & Payment
 $routes->get('donation/(:segment)/form', 'Donation::create/$1');

@@ -109,10 +109,9 @@
                         <div class="input-prefix h-[54px] flex items-center px-4 bg-slate-50 border border-r-0 border-slate-200 rounded-l-xl text-slate-400 font-medium transition-colors">
                             masj.id/
                         </div>
-                        <input name="username_masjid" class="flex-1 h-[54px] px-4 bg-white border border-slate-200 rounded-r-xl focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all placeholder:text-slate-300 text-slate-900 font-medium" placeholder="nama-masjid-anda" type="text" required/>
-                        <div class="absolute right-4 flex items-center gap-1.5 bg-white pl-2">
-                            <span class="material-symbols-outlined text-emerald-600 text-[18px] fill-1">check_circle</span>
-                            <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-[0.1em]">Tersedia</span>
+                        <input name="username_masjid" id="username_masjid" class="flex-1 h-[54px] px-4 bg-white border border-slate-200 rounded-r-xl focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all placeholder:text-slate-300 text-slate-900 font-medium" placeholder="nama-masjid-anda" type="text" required/>
+                        <div id="availability-badge" class="absolute right-4 flex items-center gap-1.5 bg-white pl-2 hidden">
+                            <!-- Content will be injected by JS -->
                         </div>
                     </div>
                     <p class="text-[12px] text-slate-400 px-1 leading-relaxed">Digunakan sebagai tautan publik profil masjid Anda.</p>
@@ -298,6 +297,47 @@
             input.type = 'password';
             icon.innerText = 'visibility';
         }
+    }
+
+    // Username Availability Check
+    const usernameInput = document.getElementById('username_masjid');
+    const badge = document.getElementById('availability-badge');
+    let timeout = null;
+
+    if (usernameInput) {
+        usernameInput.addEventListener('input', function() {
+            const username = this.value.trim().toLowerCase();
+            clearTimeout(timeout);
+            
+            if (username === '') {
+                badge.classList.add('hidden');
+                return;
+            }
+
+            badge.classList.remove('hidden');
+            badge.innerHTML = `<span class="text-[10px] text-slate-400">Memeriksa...</span>`;
+
+            timeout = setTimeout(() => {
+                fetch(`<?= base_url('auth/check-username') ?>?username=${username}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.available) {
+                            badge.innerHTML = `
+                                <span class="material-symbols-outlined text-emerald-600 text-[18px] fill-1">check_circle</span>
+                                <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-[0.1em]">Tersedia</span>
+                            `;
+                        } else {
+                            badge.innerHTML = `
+                                <span class="material-symbols-outlined text-rose-500 text-[18px] fill-1">cancel</span>
+                                <span class="text-[10px] font-bold text-rose-500 uppercase tracking-[0.1em]">Terpakai</span>
+                            `;
+                        }
+                    })
+                    .catch(err => {
+                        badge.classList.add('hidden');
+                    });
+            }, 500);
+        });
     }
 </script>
 

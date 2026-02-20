@@ -103,6 +103,12 @@ class Auth extends BaseController
                 'user_email' => $user['email'],
             ];
 
+            if ($user['role'] === 'superadmin') {
+                $sessionData['role'] = 'superadmin';
+                $session->set($sessionData);
+                return redirect()->to('/superadmin')->with('success', 'Selamat datang di Panel Kontrol Pusat, ' . $user['name'] . '!');
+            }
+
             if ($pengurus) {
                 // Determine Masjid details
                 $masjidModel = new MasjidModel();
@@ -155,5 +161,18 @@ class Auth extends BaseController
     {
         session()->destroy();
         return redirect()->to('/login')->with('success', 'Berhasil keluar.');
+    }
+
+    public function checkUsername()
+    {
+        $username = $this->request->getGet('username');
+        if (empty($username)) {
+            return $this->response->setJSON(['available' => false, 'message' => 'Username kosong']);
+        }
+
+        $masjidModel = new MasjidModel();
+        $exists = $masjidModel->where('username', $username)->first();
+
+        return $this->response->setJSON(['available' => !$exists]);
     }
 }
