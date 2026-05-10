@@ -851,7 +851,7 @@
     </div>
 </div>
 
-<script>
+
 <div id="addPengurusModal" class="fixed inset-0 bg-black/50 z-[100] hidden items-center justify-center p-4">
     <div class="bg-white dark:bg-[#1a2e28] rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
         <div class="p-6 border-b border-[#e5e7eb] dark:border-white/10 flex justify-between items-center bg-primary/5">
