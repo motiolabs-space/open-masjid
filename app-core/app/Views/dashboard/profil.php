@@ -320,29 +320,43 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-1.5">Provinsi</label>
-                            <select id="provinceSelect" name="provinsi" class="w-full rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary" onchange="loadRegencies(this.value)">
+                            <select id="provinceSelect" name="provinsi_id" class="w-full rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary" onchange="loadRegencies(this.value)">
                                 <option value="">Pilih Provinsi</option>
                                 <?php foreach ($provinces as $p): ?>
-                                    <option value="<?= $p['id'] ?>" data-name="<?= esc($p['name']) ?>" <?= ($masjid['provinsi'] ?? '') == $p['name'] ? 'selected' : '' ?>><?= esc($p['name']) ?></option>
+                                    <option value="<?= $p['id'] ?>" <?= ($masjid['provinsi'] ?? '') == $p['name'] ? 'selected' : '' ?>><?= esc($p['name']) ?></option>
                                 <?php endforeach; ?>
                             </select>
+                            <input type="hidden" name="provinsi" id="provinsi_name" value="<?= esc($masjid['provinsi'] ?? '') ?>">
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-1.5">Kota/Kabupaten</label>
-                            <select id="regencySelect" name="kabupaten" class="w-full rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary">
+                            <select id="regencySelect" name="regency_id" class="w-full rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary" onchange="loadDistricts(this.value)">
                                 <option value="">Pilih Kota/Kabupaten</option>
                                 <?php if (!empty($masjid['kabupaten'])): ?>
-                                    <option value="<?= esc($masjid['kabupaten']) ?>" selected><?= esc($masjid['kabupaten']) ?></option>
+                                    <option value="<?= esc($masjid['regency_id'] ?? '') ?>" selected><?= esc($masjid['kabupaten']) ?></option>
                                 <?php endif; ?>
                             </select>
+                            <input type="hidden" name="kabupaten" id="kabupaten_name" value="<?= esc($masjid['kabupaten'] ?? '') ?>">
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-1.5">Kecamatan</label>
-                            <input name="kecamatan" class="w-full rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary" type="text" value="<?= esc($masjid['kecamatan'] ?? '') ?>"/>
+                            <select id="districtSelect" name="district_id" class="w-full rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary" onchange="loadVillages(this.value)">
+                                <option value="">Pilih Kecamatan</option>
+                                <?php if (!empty($masjid['kecamatan'])): ?>
+                                    <option value="<?= esc($masjid['district_id'] ?? '') ?>" selected><?= esc($masjid['kecamatan']) ?></option>
+                                <?php endif; ?>
+                            </select>
+                            <input type="hidden" name="kecamatan" id="kecamatan_name" value="<?= esc($masjid['kecamatan'] ?? '') ?>">
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-1.5">Kelurahan</label>
-                            <input name="kelurahan" class="w-full rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary" type="text" value="<?= esc($masjid['kelurahan'] ?? '') ?>"/>
+                            <select id="villageSelect" name="village_id" class="w-full rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary" onchange="document.getElementById('kelurahan_name').value = this.options[this.selectedIndex].text">
+                                <option value="">Pilih Kelurahan</option>
+                                <?php if (!empty($masjid['kelurahan'])): ?>
+                                    <option value="<?= esc($masjid['village_id'] ?? '') ?>" selected><?= esc($masjid['kelurahan']) ?></option>
+                                <?php endif; ?>
+                            </select>
+                            <input type="hidden" name="kelurahan" id="kelurahan_name" value="<?= esc($masjid['kelurahan'] ?? '') ?>">
                         </div>
                     </div>
                 </div>
@@ -364,33 +378,90 @@
                 </div>
             </div>
             <script>
-                let map;
-                let marker;
-
-                async function loadRegencies(provinceId, selectedName = null) {
-                    const regencySelect = document.getElementById('regencySelect');
-                    if (!provinceId) {
-                        regencySelect.innerHTML = '<option value="">Pilih Kota/Kabupaten</option>';
-                        return;
+                const apiBase = 'https://www.emsifa.com/api-wilayah-indonesia/api';
+                
+                async function loadRegencies(provinceId, selectedId = null) {
+                    const select = document.getElementById('regencySelect');
+                    const provinceNameInput = document.getElementById('provinsi_name');
+                    
+                    // Update hidden name
+                    const provinceSelect = document.getElementById('provinceSelect');
+                    if (provinceSelect.selectedIndex > 0) {
+                        provinceNameInput.value = provinceSelect.options[provinceSelect.selectedIndex].text;
                     }
+
+                    if (!provinceId) return;
 
                     try {
-                        const response = await fetch('<?= base_url('dashboard/regencies') ?>/' + provinceId);
-                        const regencies = await response.json();
+                        const response = await fetch(`${apiBase}/regencies/${provinceId}.json`);
+                        const data = await response.json();
                         
-                        regencySelect.innerHTML = '<option value="">Pilih Kota/Kabupaten</option>';
-                        regencies.forEach(r => {
-                            const option = document.createElement('option');
-                            option.value = r.id; // Use ID for value
-                            option.textContent = r.name;
-                            if (selectedName && r.name === selectedName) {
-                                option.selected = true;
-                            }
-                            regencySelect.appendChild(option);
+                        select.innerHTML = '<option value="">Pilih Kota/Kabupaten</option>';
+                        data.forEach(r => {
+                            const opt = document.createElement('option');
+                            opt.value = r.id;
+                            opt.textContent = r.name;
+                            if (selectedId && r.id === selectedId) opt.selected = true;
+                            select.appendChild(opt);
                         });
-                    } catch (error) {
-                        console.error('Error loading regencies:', error);
+
+                        // Clear lower levels
+                        document.getElementById('districtSelect').innerHTML = '<option value="">Pilih Kecamatan</option>';
+                        document.getElementById('villageSelect').innerHTML = '<option value="">Pilih Kelurahan</option>';
+                    } catch (e) { console.error(e); }
+                }
+
+                async function loadDistricts(regencyId, selectedId = null) {
+                    const select = document.getElementById('districtSelect');
+                    const kabNameInput = document.getElementById('kabupaten_name');
+                    
+                    const regencySelect = document.getElementById('regencySelect');
+                    if (regencySelect.selectedIndex > 0) {
+                        kabNameInput.value = regencySelect.options[regencySelect.selectedIndex].text;
                     }
+
+                    if (!regencyId) return;
+
+                    try {
+                        const response = await fetch(`${apiBase}/districts/${regencyId}.json`);
+                        const data = await response.json();
+                        
+                        select.innerHTML = '<option value="">Pilih Kecamatan</option>';
+                        data.forEach(r => {
+                            const opt = document.createElement('option');
+                            opt.value = r.id;
+                            opt.textContent = r.name;
+                            if (selectedId && r.id === selectedId) opt.selected = true;
+                            select.appendChild(opt);
+                        });
+                        document.getElementById('villageSelect').innerHTML = '<option value="">Pilih Kelurahan</option>';
+                    } catch (e) { console.error(e); }
+                }
+
+                async function loadVillages(districtId, selectedId = null) {
+                    const select = document.getElementById('villageSelect');
+                    const kecNameInput = document.getElementById('kecamatan_name');
+                    
+                    const districtSelect = document.getElementById('districtSelect');
+                    if (districtSelect.selectedIndex > 0) {
+                        kecNameInput.value = districtSelect.options[districtSelect.selectedIndex].text;
+                    }
+
+                    if (!districtId) return;
+
+                    try {
+                        const response = await fetch(`${apiBase}/villages/${districtId}.json`);
+                        const data = await response.json();
+                        
+                        select.innerHTML = '<option value="">Pilih Kelurahan</option>';
+                        data.forEach(r => {
+                            const opt = document.createElement('option');
+                            opt.value = r.id;
+                            opt.textContent = r.name;
+                            if (selectedId && r.id === selectedId) opt.selected = true;
+                            select.appendChild(opt);
+                        });
+                    } catch (e) { console.error(e); }
                 }
 
                 function initMap() {
@@ -453,9 +524,21 @@
                 }
 
                 document.addEventListener('DOMContentLoaded', function() {
-                    const provinceSelect = document.getElementById('provinceSelect');
-                    if (provinceSelect && provinceSelect.value) {
-                        loadRegencies(provinceSelect.value, '<?= esc($masjid['kabupaten'] ?? '') ?>');
+                    const provId = document.getElementById('provinceSelect').value;
+                    const regId = '<?= $masjid['regency_id'] ?? '' ?>';
+                    const distId = '<?= $masjid['district_id'] ?? '' ?>';
+                    const villId = '<?= $masjid['village_id'] ?? '' ?>';
+
+                    if (provId) {
+                        loadRegencies(provId, regId).then(() => {
+                            if (regId) {
+                                loadDistricts(regId, distId).then(() => {
+                                    if (distId) {
+                                        loadVillages(distId, villId);
+                                    }
+                                });
+                            }
+                        });
                     }
                 });
             </script>
