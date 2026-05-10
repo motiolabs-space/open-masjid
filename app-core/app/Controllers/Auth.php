@@ -77,7 +77,7 @@ class Auth extends BaseController
                 'masjid_username' => $masjidData['username']
             ]);
 
-            return redirect()->to('/dashboard')->with('success', 'Pendaftaran masjid berhasil. Selamat datang!');
+            return redirect()->to(site_url('dashboard'))->with('success', 'Pendaftaran masjid berhasil. Selamat datang!');
 
         } catch (\Exception $e) {
             $db->transRollback();
@@ -112,7 +112,7 @@ class Auth extends BaseController
             if ($user['role'] === 'superadmin') {
                 $sessionData['role'] = 'superadmin';
                 $session->set($sessionData);
-                return redirect()->to('/superadmin')->with('success', 'Selamat datang di Panel Kontrol Pusat, ' . $user['name'] . '!');
+                return redirect()->to(site_url('superadmin'))->with('success', 'Selamat datang di Panel Kontrol Pusat, ' . $user['name'] . '!');
             }
 
             if ($pengurus) {
@@ -129,7 +129,7 @@ class Auth extends BaseController
             }
 
             $session->set($sessionData);
-            return redirect()->to('/dashboard')->with('success', 'Selamat datang kembali, ' . $user['name'] . '!');
+            return redirect()->to(site_url('dashboard'))->with('success', 'Selamat datang kembali, ' . $user['name'] . '!');
         }
 
         return redirect()->back()->withInput()->with('error', 'Email atau password salah.');
@@ -157,7 +157,7 @@ class Auth extends BaseController
                 'role'       => 'jamaah'
             ]);
 
-            return redirect()->to('/dashboard')->with('success', 'Pendaftaran berhasil. Selamat datang!');
+            return redirect()->to(site_url('dashboard'))->with('success', 'Pendaftaran berhasil. Selamat datang!');
         }
 
         return redirect()->back()->withInput()->with('error', 'Gagal mendaftarkan akun.');
