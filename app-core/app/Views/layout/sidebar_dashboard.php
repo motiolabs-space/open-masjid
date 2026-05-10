@@ -18,7 +18,7 @@
                 <span class="text-sm font-semibold">Dashboard</span>
             </a>
             
-            <?php if (session()->get('role') === 'pengurus'): ?>
+            <?php if (session()->get('role') === 'pengurus' || session()->get('role') === 'superadmin'): ?>
             <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg <?= ($uri == 'dashboard/profil') ? $activeClass : $inactiveClass ?>" href="<?= base_url('dashboard/profil') ?>">
                 <span class="material-symbols-outlined text-xl">account_balance</span>
                 <span class="text-sm font-medium">Profil Masjid</span>
@@ -56,7 +56,7 @@
 </nav>
 </div>
 
-<?php if (session()->get('role') === 'pengurus'): ?>
+<?php if (session()->get('role') === 'pengurus' || session()->get('role') === 'superadmin'): ?>
 <div>
 <p class="px-3 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Laporan & Sistem</p>
 <nav class="flex flex-col gap-1">
