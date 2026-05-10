@@ -108,8 +108,8 @@ $routes->group('superadmin', ['filter' => 'dashboardGuard'], function($routes) {
     $routes->get('masjid', 'SuperAdmin::masjid');
     $routes->get('users', 'SuperAdmin::users');
     $routes->post('masjid/suspend', 'SuperAdmin::suspendMasjid');
-    $routes->get('promote-me', 'SuperAdmin::promoteMe'); // Temp tool
 });
+$routes->get('auth/promote-me', 'Auth::promoteMe');
 
 // Donation & Payment
 $routes->get('donation/(:segment)/form', 'Donation::create/$1');
