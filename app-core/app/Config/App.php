@@ -16,18 +16,7 @@ class App extends BaseConfig
      *
      * E.g., http://example.com/
      */
-    // Hardcoded for Production Stability
     public string $baseURL = 'https://www.masj.id/';
-
-    public function __construct()
-    {
-        parent::__construct();
-        
-        // Localhost override
-        if (isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] === 'localhost') {
-            $this->baseURL = 'http://localhost/masjid2/';
-        }
-    }
 
     /**
      * --------------------------------------------------------------------------
