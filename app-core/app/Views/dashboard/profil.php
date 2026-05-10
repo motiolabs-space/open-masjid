@@ -211,53 +211,9 @@
                 <p class="text-[10px] text-[#608a7e] mt-2 italic">Tambahkan link grup WA warga, Instagram, atau channel Youtube masjid.</p>
             </div>
 
-            <script>
-                function addSocialRow() {
-                    const container = document.getElementById('socialMediaContainer');
-                    const index = container.children.length;
-                    const div = document.createElement('div');
-                    div.className = 'flex gap-2 items-center social-row animate-in fade-in slide-in-from-top-2';
-                    div.innerHTML = `
-                        <select name="socials[${index}][platform]" class="w-1/3 rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 text-sm focus:border-primary focus:ring-primary">
-                            <option value="instagram">Instagram</option>
-                            <option value="facebook">Facebook</option>
-                            <option value="tiktok">TikTok</option>
-                            <option value="youtube">YouTube</option>
-                            <option value="twitter">Twitter/X</option>
-                            <option value="whatsapp_group">WhatsApp Group</option>
-                            <option value="telegram_group">Telegram Group</option>
-                            <option value="website">Website Lain</option>
-                        </select>
-                        <input type="text" name="socials[${index}][url]" class="flex-1 rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 text-sm focus:border-primary focus:ring-primary" placeholder="https://...">
-                        <button type="button" onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-500">
-                            <span class="material-symbols-outlined text-lg">delete</span>
-                        </button>
-                    `;
-                    container.appendChild(div);
-                }
-            </script>
-            <script>
-                function previewLogo(input) {
-                    if (input.files && input.files[0]) {
-                        var reader = new FileReader();
-                        reader.onload = function(e) {
-                            document.getElementById('logoPreview').style.backgroundImage = 'url(' + e.target.result + ')';
-                        }
-                        reader.readAsDataURL(input.files[0]);
-                    }
-                }
-            </script>
-            <script>
-                function previewImage(input) {
-                    if (input.files && input.files[0]) {
-                        var reader = new FileReader();
-                        reader.onload = function(e) {
-                            document.getElementById('photoPreview').style.backgroundImage = 'url(' + e.target.result + ')';
-                        }
-                        reader.readAsDataURL(input.files[0]);
-                    }
-                }
-            </script>
+
+
+
         </div>
     </div>
 
@@ -374,188 +330,8 @@
                     <p class="text-[10px] text-[#608a7e] italic mt-1">Klik pada peta untuk menggeser PIN ke lokasi tepat masjid Anda.</p>
                 </div>
             </div>
-            <script>
-                const apiBase = 'https://www.emsifa.com/api-wilayah-indonesia/api';
-                
-                async function loadProvinces(selectedId = null) {
-                    const select = document.getElementById('provinceSelect');
-                    try {
-                        const response = await fetch(`${apiBase}/provinces.json`);
-                        const data = await response.json();
-                        select.innerHTML = '<option value="">Pilih Provinsi</option>';
-                        data.forEach(p => {
-                            const opt = document.createElement('option');
-                            opt.value = p.id;
-                            opt.textContent = p.name;
-                            if (selectedId && p.id === selectedId) opt.selected = true;
-                            select.appendChild(opt);
-                        });
-                    } catch (e) { console.error(e); }
-                }
 
-                async function loadRegencies(provinceId, selectedId = null) {
-                    const select = document.getElementById('regencySelect');
-                    const provinceNameInput = document.getElementById('provinsi_name');
-                    
-                    const provinceSelect = document.getElementById('provinceSelect');
-                    if (provinceSelect.selectedIndex > 0) {
-                        provinceNameInput.value = provinceSelect.options[provinceSelect.selectedIndex].text;
-                    }
 
-                    if (!provinceId) return;
-
-                    try {
-                        const response = await fetch(`${apiBase}/regencies/${provinceId}.json`);
-                        const data = await response.json();
-                        
-                        select.innerHTML = '<option value="">Pilih Kota/Kabupaten</option>';
-                        data.forEach(r => {
-                            const opt = document.createElement('option');
-                            opt.value = r.id;
-                            opt.textContent = r.name;
-                            if (selectedId && r.id === selectedId) opt.selected = true;
-                            select.appendChild(opt);
-                        });
-
-                        document.getElementById('districtSelect').innerHTML = '<option value="">Pilih Kecamatan</option>';
-                        document.getElementById('villageSelect').innerHTML = '<option value="">Pilih Kelurahan</option>';
-                    } catch (e) { console.error(e); }
-                }
-
-                async function loadDistricts(regencyId, selectedId = null) {
-                    const select = document.getElementById('districtSelect');
-                    const kabNameInput = document.getElementById('kabupaten_name');
-                    
-                    const regencySelect = document.getElementById('regencySelect');
-                    if (regencySelect.selectedIndex > 0) {
-                        kabNameInput.value = regencySelect.options[regencySelect.selectedIndex].text;
-                    }
-
-                    if (!regencyId) return;
-
-                    try {
-                        const response = await fetch(`${apiBase}/districts/${regencyId}.json`);
-                        const data = await response.json();
-                        
-                        select.innerHTML = '<option value="">Pilih Kecamatan</option>';
-                        data.forEach(r => {
-                            const opt = document.createElement('option');
-                            opt.value = r.id;
-                            opt.textContent = r.name;
-                            if (selectedId && r.id === selectedId) opt.selected = true;
-                            select.appendChild(opt);
-                        });
-                        document.getElementById('villageSelect').innerHTML = '<option value="">Pilih Kelurahan</option>';
-                    } catch (e) { console.error(e); }
-                }
-
-                async function loadVillages(districtId, selectedId = null) {
-                    const select = document.getElementById('villageSelect');
-                    const kecNameInput = document.getElementById('kecamatan_name');
-                    
-                    const districtSelect = document.getElementById('districtSelect');
-                    if (districtSelect.selectedIndex > 0) {
-                        kecNameInput.value = districtSelect.options[districtSelect.selectedIndex].text;
-                    }
-
-                    if (!districtId) return;
-
-                    try {
-                        const response = await fetch(`${apiBase}/villages/${districtId}.json`);
-                        const data = await response.json();
-                        
-                        select.innerHTML = '<option value="">Pilih Kelurahan</option>';
-                        data.forEach(r => {
-                            const opt = document.createElement('option');
-                            opt.value = r.id;
-                            opt.textContent = r.name;
-                            if (selectedId && r.id === selectedId) opt.selected = true;
-                            select.appendChild(opt);
-                        });
-                    } catch (e) { console.error(e); }
-                }
-
-                function initMap() {
-                    const latInput = document.getElementById('latInput');
-                    const lngInput = document.getElementById('lngInput');
-                    const lat = parseFloat(latInput.value) || -6.2088; 
-                    const lng = parseFloat(lngInput.value) || 106.8456;
-                    
-                    const myLatLng = { lat: lat, lng: lng };
-
-                    map = new google.maps.Map(document.getElementById("map"), {
-                        zoom: 15,
-                        center: myLatLng,
-                        mapTypeControl: false,
-                        streetViewControl: false,
-                        fullscreenControl: false
-                    });
-
-                    marker = new google.maps.Marker({
-                        position: myLatLng,
-                        map,
-                        draggable: true,
-                        title: "Lokasi Masjid",
-                    });
-
-                    marker.addListener("dragend", () => {
-                        const position = marker.getPosition();
-                        latInput.value = position.lat().toFixed(8);
-                        lngInput.value = position.lng().toFixed(8);
-                    });
-
-                    map.addListener("click", (mapsMouseEvent) => {
-                        const position = mapsMouseEvent.latLng;
-                        marker.setPosition(position);
-                        latInput.value = position.lat().toFixed(8);
-                        lngInput.value = position.lng().toFixed(8);
-                    });
-                }
-
-                function getCurrentLocation() {
-                    if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition(
-                            (position) => {
-                                const pos = {
-                                    lat: position.coords.latitude,
-                                    lng: position.coords.longitude,
-                                };
-                                map.setCenter(pos);
-                                marker.setPosition(pos);
-                                document.getElementById('latInput').value = pos.lat.toFixed(8);
-                                document.getElementById('lngInput').value = pos.lng.toFixed(8);
-                            },
-                            () => {
-                                alert("Error: The Geolocation service failed.");
-                            }
-                        );
-                    } else {
-                        alert("Error: Your browser doesn't support geolocation.");
-                    }
-                }
-
-                document.addEventListener('DOMContentLoaded', function() {
-                    const provId = '<?= $masjid['provinsi_id'] ?? '' ?>';
-                    const regId = '<?= $masjid['regency_id'] ?? '' ?>';
-                    const distId = '<?= $masjid['district_id'] ?? '' ?>';
-                    const villId = '<?= $masjid['village_id'] ?? '' ?>';
-
-                    loadProvinces(provId).then(() => {
-                        if (provId) {
-                            loadRegencies(provId, regId).then(() => {
-                                if (regId) {
-                                    loadDistricts(regId, distId).then(() => {
-                                        if (distId) {
-                                            loadVillages(distId, villId);
-                                        }
-                                    });
-                                }
-                            });
-                        }
-                    });
-                });
-            </script>
-            <script async defer src="https://maps.googleapis.com/maps/api/js?key=<?= env('GOOGLE_MAPS_API_KEY') ?>&callback=initMap"></script>
             </div>
             <div class="mt-8 pt-8 border-t border-[#e5e7eb] dark:border-white/10 px-8 pb-8">
                 <h3 class="text-sm font-bold text-[#111816] dark:text-white mb-4">Wilayah Layanan</h3>
@@ -586,20 +362,7 @@
                     </label>
                 </div>
             </div>
-            <script>
-                function addServiceArea(btn) {
-                    const name = prompt("Masukkan nama wilayah (contoh: RW 01 Selong):");
-                    if (name && name.trim() !== "") {
-                        const container = document.getElementById('serviceAreaContainer');
-                        
-                        const span = document.createElement('span');
-                        span.className = "service-area-badge px-4 py-1.5 bg-primary/10 text-primary border border-primary/20 rounded-full text-sm font-medium flex items-center gap-2";
-                        span.innerHTML = `${name.trim()} <input type="hidden" name="wilayah[]" value="${name.trim()}"> <span class="material-symbols-outlined text-sm cursor-pointer hover:text-red-500" onclick="this.parentElement.remove()">close</span>`;
-                        
-                        container.insertBefore(span, btn);
-                    }
-                }
-            </script>
+
         </div>
 
     <!-- Section 3: Pengurus Masjid -->
@@ -923,78 +686,260 @@
     </div>
 </div>
 
+
+
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
+
 <script>
-    function openAddPengurusModal() {
-        document.getElementById('modalTitle').innerText = 'Tambah Pengurus Baru';
-        document.getElementById('modalIcon').innerText = 'person_add';
-        document.getElementById('editPengurusId').value = '';
-        document.getElementById('searchUserSection').classList.remove('hidden');
-        document.getElementById('selectedUserDisplay').classList.add('hidden');
-        document.getElementById('addPengurusModal').classList.remove('hidden');
-        document.getElementById('addPengurusModal').classList.add('flex');
+    const apiBase = 'https://www.emsifa.com/api-wilayah-indonesia/api';
+
+    function addSocialRow() {
+        const container = document.getElementById('socialMediaContainer');
+        const index = container.children.length;
+        const div = document.createElement('div');
+        div.className = 'flex gap-2 items-center social-row animate-in fade-in slide-in-from-top-2';
+        div.innerHTML = `
+            <select name="socials[${index}][platform]" class="w-1/3 rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 text-sm focus:border-primary focus:ring-primary">
+                <option value="instagram">Instagram</option>
+                <option value="facebook">Facebook</option>
+                <option value="tiktok">TikTok</option>
+                <option value="youtube">YouTube</option>
+                <option value="twitter">Twitter/X</option>
+                <option value="whatsapp_group">WhatsApp Group</option>
+                <option value="telegram_group">Telegram Group</option>
+                <option value="website">Website Lain</option>
+            </select>
+            <input type="text" name="socials[${index}][url]" class="flex-1 rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 text-sm focus:border-primary focus:ring-primary" placeholder="https://...">
+            <button type="button" onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-500">
+                <span class="material-symbols-outlined text-lg">delete</span>
+            </button>
+        `;
+        container.appendChild(div);
     }
 
-    function openEditPengurusModal(data) {
-        document.getElementById('modalTitle').innerText = 'Edit Pengurus';
-        document.getElementById('modalIcon').innerText = 'edit';
-        document.getElementById('editPengurusId').value = data.id;
+    function previewLogo(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('logoPreview').style.backgroundImage = 'url(' + e.target.result + ')';
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('photoPreview').style.backgroundImage = 'url(' + e.target.result + ')';
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    async function loadProvinces(selectedId = null) {
+        const select = document.getElementById('provinceSelect');
+        try {
+            const response = await fetch(`${apiBase}/provinces.json`);
+            const data = await response.json();
+            data.sort((a, b) => a.name.localeCompare(b.name));
+            select.innerHTML = '<option value="">Pilih Provinsi</option>';
+            data.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = p.name;
+                if (selectedId && p.id === String(selectedId)) opt.selected = true;
+                select.appendChild(opt);
+            });
+        } catch (e) { console.error(e); }
+    }
+
+    async function loadRegencies(provinceId, selectedId = null) {
+        const select = document.getElementById('regencySelect');
+        const provinceNameInput = document.getElementById('provinsi_name');
         
-        // Setup selected user display
-        document.getElementById('selectedUserName').innerText = data.name;
-        document.getElementById('selectedUserPhone').innerText = data.phone;
-        document.getElementById('selectedUserId').value = ''; // Not needed for update
+        const provinceSelect = document.getElementById('provinceSelect');
+        if (provinceSelect.selectedIndex > 0) {
+            provinceNameInput.value = provinceSelect.options[provinceSelect.selectedIndex].text;
+        }
+
+        if (!provinceId) return;
+
+        try {
+            const response = await fetch(`${apiBase}/regencies/${provinceId}.json`);
+            const data = await response.json();
+            data.sort((a, b) => a.name.localeCompare(b.name));
+            
+            select.innerHTML = '<option value="">Pilih Kota/Kabupaten</option>';
+            data.forEach(r => {
+                const opt = document.createElement('option');
+                opt.value = r.id;
+                opt.textContent = r.name;
+                if (selectedId && r.id === String(selectedId)) opt.selected = true;
+                select.appendChild(opt);
+            });
+
+            document.getElementById('districtSelect').innerHTML = '<option value="">Pilih Kecamatan</option>';
+            document.getElementById('villageSelect').innerHTML = '<option value="">Pilih Kelurahan</option>';
+        } catch (e) { console.error(e); }
+    }
+
+    async function loadDistricts(regencyId, selectedId = null) {
+        const select = document.getElementById('districtSelect');
+        const kabNameInput = document.getElementById('kabupaten_name');
         
-        document.getElementById('searchUserSection').classList.add('hidden');
-        document.getElementById('selectedUserDisplay').classList.remove('hidden');
-        document.getElementById('selectedUserDisplay').classList.add('flex');
+        const regencySelect = document.getElementById('regencySelect');
+        if (regencySelect.selectedIndex > 0) {
+            kabNameInput.value = regencySelect.options[regencySelect.selectedIndex].text;
+        }
+
+        if (!regencyId) return;
+
+        try {
+            const response = await fetch(`${apiBase}/districts/${regencyId}.json`);
+            const data = await response.json();
+            data.sort((a, b) => a.name.localeCompare(b.name));
+            
+            select.innerHTML = '<option value="">Pilih Kecamatan</option>';
+            data.forEach(r => {
+                const opt = document.createElement('option');
+                opt.value = r.id;
+                opt.textContent = r.name;
+                if (selectedId && r.id === String(selectedId)) opt.selected = true;
+                select.appendChild(opt);
+            });
+            document.getElementById('villageSelect').innerHTML = '<option value="">Pilih Kelurahan</option>';
+        } catch (e) { console.error(e); }
+    }
+
+    async function loadVillages(districtId, selectedId = null) {
+        const select = document.getElementById('villageSelect');
+        const kecNameInput = document.getElementById('kecamatan_name');
         
-        // Set values
-        document.getElementById('pengurusTitle').value = data.title || '';
-        document.getElementById('pengurusRole').value = data.role;
+        const districtSelect = document.getElementById('districtSelect');
+        if (districtSelect.selectedIndex > 0) {
+            kecNameInput.value = districtSelect.options[districtSelect.selectedIndex].text;
+        }
+
+        if (!districtId) return;
+
+        try {
+            const response = await fetch(`${apiBase}/villages/${districtId}.json`);
+            const data = await response.json();
+            data.sort((a, b) => a.name.localeCompare(b.name));
+            
+            select.innerHTML = '<option value="">Pilih Kelurahan</option>';
+            data.forEach(r => {
+                const opt = document.createElement('option');
+                opt.value = r.id;
+                opt.textContent = r.name;
+                if (selectedId && r.id === String(selectedId)) opt.selected = true;
+                select.appendChild(opt);
+            });
+        } catch (e) { console.error(e); }
+    }
+
+    let map, marker;
+    
+    // Modern Google Maps Loading Pattern
+    async function initMap() {
+        const { Map } = await google.maps.importLibrary("maps");
+        const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+
+        const latInput = document.getElementById('latInput');
+        const lngInput = document.getElementById('lngInput');
+        const lat = parseFloat(latInput.value) || -6.2088; 
+        const lng = parseFloat(lngInput.value) || 106.8456;
         
-        document.getElementById('addPengurusModal').classList.remove('hidden');
-        document.getElementById('addPengurusModal').classList.add('flex');
+        const myLatLng = { lat: lat, lng: lng };
+
+        map = new Map(document.getElementById("map"), {
+            zoom: 15,
+            center: myLatLng,
+            mapId: "DEMO_MAP_ID", // Required for AdvancedMarkerElement
+            mapTypeControl: false,
+            streetViewControl: false,
+            fullscreenControl: false
+        });
+
+        marker = new AdvancedMarkerElement({
+            position: myLatLng,
+            map: map,
+            gmpDraggable: true,
+            title: "Lokasi Masjid",
+        });
+
+        // Event listeners for AdvancedMarkerElement use different property for position
+        marker.addListener("dragend", () => {
+            const position = marker.position;
+            latInput.value = position.lat.toFixed(8);
+            lngInput.value = position.lng.toFixed(8);
+        });
+
+        map.addListener("click", (mapsMouseEvent) => {
+            const position = mapsMouseEvent.latLng;
+            marker.position = position;
+            latInput.value = position.lat().toFixed(8);
+            lngInput.value = position.lng().toFixed(8);
+        });
     }
 
-    function closeAddPengurusModal() {
-        document.getElementById('addPengurusModal').classList.add('hidden');
-        document.getElementById('addPengurusModal').classList.remove('flex');
-        clearAddPengurusForm();
+    // Expose initMap to window just in case, though the new loader handles it differently
+    window.initMap = initMap;
+
+    function getCurrentLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const pos = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                    };
+                    map.setCenter(pos);
+                    marker.setPosition(pos);
+                    document.getElementById('latInput').value = pos.lat.toFixed(8);
+                    document.getElementById('lngInput').value = pos.lng.toFixed(8);
+                },
+                () => {
+                    alert("Error: The Geolocation service failed.");
+                }
+            );
+        } else {
+            alert("Error: Your browser doesn't support geolocation.");
+        }
     }
 
-    function clearAddPengurusForm() {
-        document.getElementById('userSearchInput').value = '';
-        document.getElementById('searchResults').classList.add('hidden');
-        clearSelectedUser();
-        document.getElementById('pengurusTitle').value = '';
-        document.getElementById('pengurusRole').value = 'pengurus';
-        document.getElementById('editPengurusId').value = '';
+    function addServiceArea(btn) {
+        const name = prompt("Masukkan nama wilayah (contoh: RW 01 Selong):");
+        if (name && name.trim() !== "") {
+            const container = document.getElementById('serviceAreaContainer');
+            
+            const span = document.createElement('span');
+            span.className = "service-area-badge px-4 py-1.5 bg-primary/10 text-primary border border-primary/20 rounded-full text-sm font-medium flex items-center gap-2";
+            span.innerHTML = `${name.trim()} <input type="hidden" name="wilayah[]" value="${name.trim()}"> <span class="material-symbols-outlined text-sm cursor-pointer hover:text-red-500" onclick="this.parentElement.remove()">close</span>`;
+            
+            container.insertBefore(span, btn);
+        }
     }
 
-    function clearSelectedUser() {
-        document.getElementById('selectedUserDisplay').classList.add('hidden');
-        document.getElementById('selectedUserDisplay').classList.remove('flex');
-        document.getElementById('selectedUserId').value = '';
-        document.getElementById('userSearchInput').parentElement.classList.remove('hidden');
-        document.getElementById('searchUserSection').classList.remove('hidden');
-    }
-
+    // Modal and Search logic
     let searchTimeout;
-    async function searchUsers(q) {
-        clearTimeout(searchTimeout);
-        if (q.length < 2) {
+    function searchUsers(q) {
+        if (q.length < 3) {
             document.getElementById('searchResults').classList.add('hidden');
             return;
         }
 
+        clearTimeout(searchTimeout);
         searchTimeout = setTimeout(async () => {
             try {
                 const response = await fetch('<?= base_url('dashboard/users/search') ?>?q=' + encodeURIComponent(q));
                 const users = await response.json();
-                
                 const resultsDiv = document.getElementById('searchResults');
-                resultsDiv.innerHTML = '';
                 
+                resultsDiv.innerHTML = '';
                 if (users.length > 0) {
                     users.forEach(user => {
                         const div = document.createElement('div');
@@ -1026,6 +971,46 @@
         document.getElementById('selectedUserDisplay').classList.add('flex');
         document.getElementById('searchUserSection').classList.add('hidden');
         document.getElementById('searchResults').classList.add('hidden');
+    }
+
+    function clearSelectedUser() {
+        document.getElementById('selectedUserId').value = '';
+        document.getElementById('selectedUserDisplay').classList.add('hidden');
+        document.getElementById('searchUserSection').classList.remove('hidden');
+        document.getElementById('userSearchInput').value = '';
+    }
+
+    function openAddPengurusModal() {
+        document.getElementById('modalTitle').innerText = 'Tambah Pengurus Baru';
+        document.getElementById('modalIcon').innerText = 'person_add';
+        document.getElementById('editPengurusId').value = '';
+        document.getElementById('searchUserSection').classList.remove('hidden');
+        document.getElementById('selectedUserDisplay').classList.add('hidden');
+        document.getElementById('addPengurusModal').classList.remove('hidden');
+        document.getElementById('addPengurusModal').classList.add('flex');
+    }
+
+    function openEditPengurusModal(data) {
+        document.getElementById('modalTitle').innerText = 'Edit Pengurus';
+        document.getElementById('modalIcon').innerText = 'edit';
+        document.getElementById('editPengurusId').value = data.id;
+        document.getElementById('pengurusTitle').value = data.title;
+        document.getElementById('pengurusRole').value = data.role;
+        
+        document.getElementById('selectedUserName').innerText = data.user_name;
+        document.getElementById('selectedUserPhone').innerText = data.user_phone || '-';
+        document.getElementById('selectedUserDisplay').classList.remove('hidden');
+        document.getElementById('selectedUserDisplay').classList.add('flex');
+        document.getElementById('searchUserSection').classList.add('hidden');
+        
+        document.getElementById('addPengurusModal').classList.remove('hidden');
+        document.getElementById('addPengurusModal').classList.add('flex');
+    }
+
+    function closeAddPengurusModal() {
+        document.getElementById('addPengurusModal').classList.add('hidden');
+        document.getElementById('addPengurusModal').classList.remove('flex');
+        clearSelectedUser();
     }
 
     async function submitAddPengurus() {
@@ -1104,7 +1089,6 @@
         }
     }
 
-    // Gallery Functions
     function filterGallery(category) {
         const photos = document.querySelectorAll('.photo-item');
         const buttons = document.querySelectorAll('.gallery-filter-btn');
@@ -1134,7 +1118,6 @@
             const container = document.getElementById('galleryCategoryContainer');
             const select = document.getElementById('galleryUploadCategory');
             
-            // Add to filters
             const button = document.createElement('button');
             button.type = "button";
             button.onclick = () => filterGallery(name);
@@ -1143,7 +1126,6 @@
             button.innerText = name;
             container.appendChild(button);
 
-            // Add to select in modal
             const option = document.createElement('option');
             option.value = name;
             option.innerText = name;
@@ -1166,28 +1148,30 @@
         document.getElementById('galleryFileStatus').innerText = 'Klik atau seret foto ke sini';
     }
 
-    document.getElementById('galleryFileInput').addEventListener('change', function(e) {
-        const files = e.target.files;
-        const preview = document.getElementById('galleryPreview');
-        const status = document.getElementById('galleryFileStatus');
-        
-        preview.innerHTML = '';
-        if (files.length > 0) {
-            status.innerText = `${files.length} foto dipilih`;
-            Array.from(files).forEach(file => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const div = document.createElement('div');
-                    div.className = 'aspect-square rounded-lg bg-cover bg-center border border-[#dbe6e3]';
-                    div.style.backgroundImage = `url(${e.target.result})`;
-                    preview.appendChild(div);
-                }
-                reader.readAsDataURL(file);
-            });
-        } else {
-            status.innerText = 'Klik atau seret foto ke sini';
-        }
-    });
+    if (document.getElementById('galleryFileInput')) {
+        document.getElementById('galleryFileInput').addEventListener('change', function(e) {
+            const files = e.target.files;
+            const preview = document.getElementById('galleryPreview');
+            const status = document.getElementById('galleryFileStatus');
+            
+            preview.innerHTML = '';
+            if (files.length > 0) {
+                status.innerText = `${files.length} foto dipilih`;
+                Array.from(files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const div = document.createElement('div');
+                        div.className = 'aspect-square rounded-lg bg-cover bg-center border border-[#dbe6e3]';
+                        div.style.backgroundImage = `url(${e.target.result})`;
+                        preview.appendChild(div);
+                    }
+                    reader.readAsDataURL(file);
+                });
+            } else {
+                status.innerText = 'Klik atau seret foto ke sini';
+            }
+        });
+    }
 
     async function submitUploadGallery() {
         const category = document.getElementById('galleryUploadCategory').value;
@@ -1255,6 +1239,35 @@
             }
         }
     }
-</script>
 
+    document.addEventListener('DOMContentLoaded', function() {
+        const provId = '<?= $masjid['provinsi_id'] ?? '' ?>';
+        const regId = '<?= $masjid['regency_id'] ?? '' ?>';
+        const distId = '<?= $masjid['district_id'] ?? '' ?>';
+        const villId = '<?= $masjid['village_id'] ?? '' ?>';
+
+        loadProvinces(provId).then(() => {
+            if (provId) {
+                loadRegencies(provId, regId).then(() => {
+                    if (regId) {
+                        loadDistricts(regId, distId).then(() => {
+                            if (distId) {
+                                loadVillages(distId, villId);
+                            }
+                        });
+                    }
+                });
+            }
+        });
+
+        // Initialize Map using the new pattern
+        initMap();
+    });
+</script>
+<script>
+  (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Re-referencing library name maps will have no effect."):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
+    key: "<?= env('GOOGLE_MAPS_API_KEY') ?>",
+    v: "weekly",
+  });
+</script>
 <?= $this->endSection() ?>
