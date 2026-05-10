@@ -1,20 +1,94 @@
-# Open Masjid - Gerakan Keterbukaan & Digitalisasi Masjid
+# Open Masjid - Sistem Open Source untuk Digitalisasi Masjid yang Amanah, Transparan, dan Modern
 
-**Open Masjid** merupakan sebuah inisiatif dan gerakan pengembangan sistem sumber terbuka (*open-source*) yang didedikasikan untuk mewujudkan tata kelola masjid yang lebih modern dan transparan. Melalui platform ini, kami berikhtiar untuk menghadirkan kemudahan bagi para pengelola (DKM) dalam mengelola data jamaah, menyajikan transparansi laporan keuangan yang dapat diakses publik, serta mempublikasikan berbagai kegiatan syiar dan sosial secara terintegrasi.
+![Open Source](https://img.shields.io/badge/Open%20Source-Yes-green)
+![CodeIgniter4](https://img.shields.io/badge/CodeIgniter-4-red)
+![PHP](https://img.shields.io/badge/PHP-8-blue)
+![License](https://img.shields.io/badge/license-MIT-yellow)
+![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen)
 
-Sistem ini telah diimplementasikan pada layanan [**masj.id**](https://masj.id) sebagai platform SaaS (*Software as a Service*), namun kode sumber ini juga terbuka bagi siapa saja yang ingin memasangnya secara mandiri untuk kebutuhan **Single Masjid** (non-SaaS). Kami percaya bahwa setiap masjid memiliki hak untuk memiliki sistem manajemen yang handal dan transparan.
+Open Masjid adalah sistem manajemen masjid berbasis open source untuk membantu DKM mengelola keuangan, jamaah, program donasi, kegiatan, dan distribusi bantuan sosial secara lebih amanah, transparan, dan modern.
 
-## ✨ Fitur Utama
+Project ini menjadi fondasi teknologi dari ekosistem Masj.id, namun tetap dapat dipasang secara mandiri oleh masjid, komunitas, yayasan, atau developer yang ingin membantu digitalisasi masjid di Indonesia.
 
-- **Landing Page Modern**: Tampilan publik yang profesional, informatif, dan responsif.
-- **Sistem Multi-Role**: Fitur registrasi khusus untuk **Masjid** (Pengelola) dan **Jamaah** (Personal/Donatur).
-- **Dashboard Masjid**: Panel kontrol lengkap untuk pengelola yang mencakup:
-  - Ringkasan statistik jamaah dan dana.
-  - Progress pendanaan program (Crowdfunding/Donasi Teks).
-  - Kalender kegiatan dan agenda rutin.
-  - Alert sosial untuk bantuan warga terpilih.
-- **Transparansi Keuangan**: Laporan donasi dan pengeluaran yang dapat diakses secara publik untuk meningkatkan kepercayaan jamaah.
-- **Pusat Bantuan & Panduan**: Dokumentasi lengkap penggunaan sistem bagi admin maupun jamaah.
+## Why Open Masjid?
+
+Banyak masjid masih mengelola keuangan, data jamaah, program sosial, dan laporan kegiatan secara manual. Akibatnya, laporan sering terlambat, data tercecer, dan kepercayaan jamaah sulit dibangun secara konsisten.
+
+Open Masjid hadir untuk membantu masjid:
+- Menyajikan laporan keuangan yang transparan.
+- Mengelola program donasi berbasis tujuan.
+- Mendata jamaah dan mustahik secara lebih rapi.
+- Menampilkan informasi masjid melalui TV display.
+- Membuka ruang kontribusi developer untuk kemaslahatan umat.
+
+## Who Is This For?
+
+Open Masjid cocok untuk:
+- DKM / Takmir Masjid
+- Yayasan pengelola masjid
+- Masjid kampus
+- Masjid perumahan
+- Masjid perusahaan
+- Komunitas developer muslim
+- Lembaga sosial dan filantropi Islam
+
+## Key Features
+
+### Finance & Transparency
+- Import mutasi bank dari CSV BCA, BSI, dan Mandiri.
+- Laporan pemasukan dan pengeluaran yang dapat dipublikasikan.
+- Program-based funding untuk pembangunan, zakat, infak, sedekah, dan kegiatan sosial.
+- Halaman laporan publik untuk meningkatkan kepercayaan jamaah.
+
+### Masjid Digital Profile
+- Landing page publik untuk setiap masjid.
+- Informasi kegiatan, program, jadwal, dan laporan.
+- Profil masjid yang mudah dibagikan ke jamaah dan donatur.
+
+### Jamaah & Engagement
+- Manajemen data jamaah.
+- Integrasi WhatsApp untuk komunikasi.
+- TV Display Mode untuk layar informasi masjid.
+
+### Social Impact
+- Database mustahik.
+- Profil ekonomi penerima bantuan.
+- Tracking distribusi bantuan dengan dokumentasi/evidence.
+
+## Support This Project
+
+Jika Anda percaya bahwa masjid di Indonesia perlu menjadi lebih amanah, transparan, dan modern, bantu project ini dengan:
+- Star repository ini.
+- Fork dan coba install secara mandiri.
+- Share ke DKM, developer, dan komunitas muslim.
+- Kontribusi melalui issue, pull request, dokumentasi, atau testing.
+
+## Roadmap
+
+### Phase 1 — Core Masjid Management
+- Dashboard masjid
+- Manajemen jamaah
+- Laporan keuangan
+- Import mutasi bank
+- Program donasi
+
+### Phase 2 — Engagement & Display
+- TV display mode
+- WhatsApp integration
+- Jadwal kegiatan
+- Public profile masjid
+
+### Phase 3 — Social Impact
+- Database mustahik
+- Distribusi bantuan
+- Evidence tracking
+- Laporan dampak sosial
+
+### Phase 4 — Ecosystem
+- Payment gateway integration
+- Multi-masjid SaaS mode
+- API integration
+- Mobile-friendly jamaah portal
 
 ## 🚀 Teknologi yang Digunakan
 
@@ -71,9 +145,60 @@ Sistem ini telah diimplementasikan pada layanan [**masj.id**](https://masj.id) s
 - `public/`: Direktori publik untuk aset dan index utama.
 - `.htaccess`: Konfigurasi routing server.
 
-## 🤝 Kontribusi
+## A Movement for Better Mosque Management
 
-Proyek ini dikembangkan untuk kemaslahatan umat. Jika Anda ingin berkontribusi, silakan lakukan fork dan kirimkan Pull Request.
+Open Masjid bukan hanya aplikasi.
+
+Ini adalah gerakan open source untuk membantu masjid di Indonesia menjadi:
+- lebih amanah,
+- lebih transparan,
+- lebih modern,
+- dan lebih berdampak bagi jamaah dan masyarakat.
+
+Kami percaya teknologi dapat membantu meningkatkan kepercayaan jamaah, efisiensi pengelolaan masjid, dan distribusi bantuan sosial yang lebih tepat sasaran.
+
+## About Masj.id
+
+Open Masjid adalah fondasi open-source dari ekosistem Masj.id.
+
+Masj.id berfokus pada digitalisasi masjid Indonesia melalui:
+- transparansi laporan,
+- engagement jamaah,
+- pengelolaan program,
+- dan social impact management.
+
+## Contributing
+
+Kami membuka kontribusi dari developer, designer, tester, penulis dokumentasi, DKM, dan relawan digital.
+
+Anda dapat membantu melalui:
+- Membuat issue untuk bug atau ide fitur.
+- Memperbaiki dokumentasi.
+- Membuat UI/UX improvement.
+- Menambahkan integrasi bank/payment gateway.
+- Membantu testing pada masjid nyata.
+- Membuat panduan instalasi untuk shared hosting, VPS, atau localhost.
+
+Silakan fork repository ini dan kirim Pull Request.
+## Community & Social Media
+
+Follow perkembangan Open Masjid dan gerakan digitalisasi masjid Indonesia:
+
+- Instagram: [@webmasjid](https://instagram.com/webmasjid)
+- LinkedIn: [Portal Masjid](https://www.linkedin.com/company/portal-masjid/)
+
+Kami membuka kolaborasi dengan:
+- DKM / Takmir Masjid
+- Developer Open Source
+- Komunitas Muslim
+- Lembaga Sosial & Filantropi
+- Relawan Digitalisasi Masjid
+
+
+## Disclaimer
+
+Open Masjid adalah project open source yang terus dikembangkan. Beberapa fitur dapat berubah mengikuti kebutuhan lapangan, masukan DKM, dan kontribusi komunitas. Untuk penggunaan produksi, pastikan konfigurasi keamanan, backup database, dan hak akses sudah diuji dengan baik.
+
 
 ---
 
