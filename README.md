@@ -1,5 +1,11 @@
 # Open Masjid - Sistem Open Source untuk Digitalisasi Masjid yang Amanah, Transparan, dan Modern
 
+![Open Source](https://img.shields.io/badge/Open%20Source-Yes-green)
+![CodeIgniter4](https://img.shields.io/badge/CodeIgniter-4-red)
+![PHP](https://img.shields.io/badge/PHP-8-blue)
+![License](https://img.shields.io/badge/license-MIT-yellow)
+![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen)
+
 Open Masjid adalah sistem manajemen masjid berbasis open source untuk membantu DKM mengelola keuangan, jamaah, program donasi, kegiatan, dan distribusi bantuan sosial secara lebih amanah, transparan, dan modern.
 
 Project ini menjadi fondasi teknologi dari ekosistem Masj.id, namun tetap dapat dipasang secara mandiri oleh masjid, komunitas, yayasan, atau developer yang ingin membantu digitalisasi masjid di Indonesia.
@@ -139,6 +145,28 @@ Jika Anda percaya bahwa masjid di Indonesia perlu menjadi lebih amanah, transpar
 - `public/`: Direktori publik untuk aset dan index utama.
 - `.htaccess`: Konfigurasi routing server.
 
+## A Movement for Better Mosque Management
+
+Open Masjid bukan hanya aplikasi.
+
+Ini adalah gerakan open source untuk membantu masjid di Indonesia menjadi:
+- lebih amanah,
+- lebih transparan,
+- lebih modern,
+- dan lebih berdampak bagi jamaah dan masyarakat.
+
+Kami percaya teknologi dapat membantu meningkatkan kepercayaan jamaah, efisiensi pengelolaan masjid, dan distribusi bantuan sosial yang lebih tepat sasaran.
+
+## About Masj.id
+
+Open Masjid adalah fondasi open-source dari ekosistem Masj.id.
+
+Masj.id berfokus pada digitalisasi masjid Indonesia melalui:
+- transparansi laporan,
+- engagement jamaah,
+- pengelolaan program,
+- dan social impact management.
+
 ## Contributing
 
 Kami membuka kontribusi dari developer, designer, tester, penulis dokumentasi, DKM, dan relawan digital.
@@ -152,10 +180,25 @@ Anda dapat membantu melalui:
 - Membuat panduan instalasi untuk shared hosting, VPS, atau localhost.
 
 Silakan fork repository ini dan kirim Pull Request.
+## Community & Social Media
+
+Follow perkembangan Open Masjid dan gerakan digitalisasi masjid Indonesia:
+
+- Instagram: [@webmasjid](https://instagram.com/webmasjid)
+- LinkedIn: [Portal Masjid](https://www.linkedin.com/company/portal-masjid/)
+
+Kami membuka kolaborasi dengan:
+- DKM / Takmir Masjid
+- Developer Open Source
+- Komunitas Muslim
+- Lembaga Sosial & Filantropi
+- Relawan Digitalisasi Masjid
+
 
 ## Disclaimer
 
 Open Masjid adalah project open source yang terus dikembangkan. Beberapa fitur dapat berubah mengikuti kebutuhan lapangan, masukan DKM, dan kontribusi komunitas. Untuk penggunaan produksi, pastikan konfigurasi keamanan, backup database, dan hak akses sudah diuji dengan baik.
+
 
 ---
 
