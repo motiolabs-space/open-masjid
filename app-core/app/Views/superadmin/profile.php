@@ -36,7 +36,12 @@
 
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Password Saat Ini</label>
-                    <input type="password" name="current_password" required placeholder="••••••••" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-primary">
+                    <div class="relative">
+                        <input type="password" name="current_password" id="current_password" required placeholder="••••••••" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-primary pr-12">
+                        <button type="button" onclick="togglePassword('current_password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
+                            <span class="material-symbols-outlined text-sm">visibility</span>
+                        </button>
+                    </div>
                     <?php if(isset(session('errors')['current_password'])): ?>
                         <p class="text-xs text-rose-500 mt-1"><?= session('errors')['current_password'] ?></p>
                     <?php endif; ?>
@@ -44,7 +49,12 @@
 
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Password Baru</label>
-                    <input type="password" name="new_password" required placeholder="Minimal 6 karakter" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-primary">
+                    <div class="relative">
+                        <input type="password" name="new_password" id="new_password" required placeholder="Minimal 6 karakter" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-primary pr-12">
+                        <button type="button" onclick="togglePassword('new_password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
+                            <span class="material-symbols-outlined text-sm">visibility</span>
+                        </button>
+                    </div>
                     <?php if(isset(session('errors')['new_password'])): ?>
                         <p class="text-xs text-rose-500 mt-1"><?= session('errors')['new_password'] ?></p>
                     <?php endif; ?>
@@ -52,7 +62,12 @@
 
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Konfirmasi Password Baru</label>
-                    <input type="password" name="confirm_password" required placeholder="Ulangi password baru" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-primary">
+                    <div class="relative">
+                        <input type="password" name="confirm_password" id="confirm_password" required placeholder="Ulangi password baru" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-primary pr-12">
+                        <button type="button" onclick="togglePassword('confirm_password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
+                            <span class="material-symbols-outlined text-sm">visibility</span>
+                        </button>
+                    </div>
                     <?php if(isset(session('errors')['confirm_password'])): ?>
                         <p class="text-xs text-rose-500 mt-1"><?= session('errors')['confirm_password'] ?></p>
                     <?php endif; ?>
@@ -68,5 +83,20 @@
         </form>
     </div>
 </div>
+
+<script>
+function togglePassword(inputId, button) {
+    const input = document.getElementById(inputId);
+    const icon = button.querySelector('.material-symbols-outlined');
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.textContent = 'visibility_off';
+    } else {
+        input.type = 'password';
+        icon.textContent = 'visibility';
+    }
+}
+</script>
 
 <?= $this->endSection() ?>
