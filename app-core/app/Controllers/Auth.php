@@ -199,10 +199,17 @@ class Auth extends BaseController
     // e.g., site.com/auth/promote-me?email=your@email.com
     public function promoteMe()
     {
+        $userModel = new UserModel();
+        
+        // Security check: If a superadmin already exists, disable this backdoor
+        $anySuperAdmin = $userModel->where('role', 'superadmin')->first();
+        if ($anySuperAdmin) {
+            return "Fitur ini dinonaktifkan demi keamanan karena Super Admin sudah terdaftar. Silakan minta akses ke Super Admin yang ada.";
+        }
+
         $email = $this->request->getGet('email');
         if (!$email) return "Email required.";
         
-        $userModel = new UserModel();
         $user = $userModel->where('email', $email)->first();
         
         if ($user) {
