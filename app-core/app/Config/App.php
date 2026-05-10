@@ -18,6 +18,22 @@ class App extends BaseConfig
      */
     public string $baseURL = 'http://localhost/masjid2/';
 
+    public function __construct()
+    {
+        parent::__construct();
+        
+        // Dynamic BaseURL Detection to prevent SiteURI errors
+        if (isset($_SERVER['HTTP_HOST'])) {
+            $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
+            $this->baseURL = $protocol . '://' . $_SERVER['HTTP_HOST'] . '/';
+            
+            // Handle subfolder for localhost
+            if ($_SERVER['HTTP_HOST'] === 'localhost' && strpos($_SERVER['REQUEST_URI'], '/masjid2/') !== false) {
+                $this->baseURL .= 'masjid2/';
+            }
+        }
+    }
+
     /**
      * --------------------------------------------------------------------------
      * Asset URL
@@ -189,7 +205,9 @@ class App extends BaseConfig
      *
      * @var array<string, string>
      */
-    public array $proxyIPs = [];
+    public array $proxyIPs = [
+        '0.0.0.0/0' => 'X-Forwarded-For'
+    ];
 
     /**
      * --------------------------------------------------------------------------
