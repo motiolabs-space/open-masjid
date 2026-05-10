@@ -321,10 +321,7 @@
                         <div>
                             <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-1.5">Provinsi</label>
                             <select id="provinceSelect" name="provinsi_id" class="w-full rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary" onchange="loadRegencies(this.value)">
-                                <option value="">Pilih Provinsi</option>
-                                <?php foreach ($provinces as $p): ?>
-                                    <option value="<?= $p['id'] ?>" <?= ($masjid['provinsi'] ?? '') == $p['name'] ? 'selected' : '' ?>><?= esc($p['name']) ?></option>
-                                <?php endforeach; ?>
+                                <option value="">Memuat Provinsi...</option>
                             </select>
                             <input type="hidden" name="provinsi" id="provinsi_name" value="<?= esc($masjid['provinsi'] ?? '') ?>">
                         </div>
@@ -380,11 +377,26 @@
             <script>
                 const apiBase = 'https://www.emsifa.com/api-wilayah-indonesia/api';
                 
+                async function loadProvinces(selectedId = null) {
+                    const select = document.getElementById('provinceSelect');
+                    try {
+                        const response = await fetch(`${apiBase}/provinces.json`);
+                        const data = await response.json();
+                        select.innerHTML = '<option value="">Pilih Provinsi</option>';
+                        data.forEach(p => {
+                            const opt = document.createElement('option');
+                            opt.value = p.id;
+                            opt.textContent = p.name;
+                            if (selectedId && p.id === selectedId) opt.selected = true;
+                            select.appendChild(opt);
+                        });
+                    } catch (e) { console.error(e); }
+                }
+
                 async function loadRegencies(provinceId, selectedId = null) {
                     const select = document.getElementById('regencySelect');
                     const provinceNameInput = document.getElementById('provinsi_name');
                     
-                    // Update hidden name
                     const provinceSelect = document.getElementById('provinceSelect');
                     if (provinceSelect.selectedIndex > 0) {
                         provinceNameInput.value = provinceSelect.options[provinceSelect.selectedIndex].text;
@@ -405,7 +417,6 @@
                             select.appendChild(opt);
                         });
 
-                        // Clear lower levels
                         document.getElementById('districtSelect').innerHTML = '<option value="">Pilih Kecamatan</option>';
                         document.getElementById('villageSelect').innerHTML = '<option value="">Pilih Kelurahan</option>';
                     } catch (e) { console.error(e); }
@@ -524,22 +535,24 @@
                 }
 
                 document.addEventListener('DOMContentLoaded', function() {
-                    const provId = document.getElementById('provinceSelect').value;
+                    const provId = '<?= $masjid['provinsi_id'] ?? '' ?>';
                     const regId = '<?= $masjid['regency_id'] ?? '' ?>';
                     const distId = '<?= $masjid['district_id'] ?? '' ?>';
                     const villId = '<?= $masjid['village_id'] ?? '' ?>';
 
-                    if (provId) {
-                        loadRegencies(provId, regId).then(() => {
-                            if (regId) {
-                                loadDistricts(regId, distId).then(() => {
-                                    if (distId) {
-                                        loadVillages(distId, villId);
-                                    }
-                                });
-                            }
-                        });
-                    }
+                    loadProvinces(provId).then(() => {
+                        if (provId) {
+                            loadRegencies(provId, regId).then(() => {
+                                if (regId) {
+                                    loadDistricts(regId, distId).then(() => {
+                                        if (distId) {
+                                            loadVillages(distId, villId);
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
                 });
             </script>
             <script async defer src="https://maps.googleapis.com/maps/api/js?key=<?= env('GOOGLE_MAPS_API_KEY') ?>&callback=initMap"></script>
