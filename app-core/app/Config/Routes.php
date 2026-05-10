@@ -49,6 +49,9 @@ $routes->post('dashboard/program/category/save', 'Admin::saveProgramCategory');
 $routes->post('dashboard/program/category/delete', 'Admin::deleteProgramCategory');
 
 $routes->get('dashboard/keuangan', 'Admin::keuangan');
+$routes->get('dashboard/keuangan/mutasi', 'Admin::mutasi');
+$routes->post('dashboard/keuangan/mutasi/upload', 'Admin::uploadMutasi');
+$routes->post('dashboard/keuangan/mutasi/map', 'Admin::mapMutasi');
 $routes->post('dashboard/keuangan/save', 'Admin::saveFinanceTransaction');
 $routes->post('dashboard/keuangan/delete', 'Admin::deleteFinanceTransaction');
 $routes->post('dashboard/keuangan/category/save', 'Admin::saveFinanceCategory');
@@ -88,8 +91,8 @@ $routes->post('dashboard/inventory/save', 'Admin::saveInventory');
 $routes->get('dashboard/inventory/delete/(:num)', 'Admin::deleteInventory/$1');
 
 // Payment Settings
-$routes->get('dashboard/settings/payment', 'Admin::paymentSettings');
-$routes->post('dashboard/settings/payment/save', 'Admin::savePaymentSettings');
+$routes->get('dashboard/pembayaran', 'Admin::paymentSettings');
+$routes->post('dashboard/pembayaran/save', 'Admin::savePaymentSettings');
 
 // Schedule Management
 $routes->get('dashboard/schedules', 'Admin::schedules');
@@ -128,4 +131,5 @@ $routes->get('(:any)/berita', 'Home::newsList/$1');
 $routes->get('(:any)/berita/(:any)', 'Home::newsDetail/$1/$2');
 $routes->get('(:any)/program', 'Home::programList/$1');
 $routes->get('(:any)/program/(:any)', 'Home::programDetail/$1/$2');
+$routes->get('(:any)/laporan', 'Home::publicReport/$1');
 $routes->get('(:any)', 'Home::masjid/$1');

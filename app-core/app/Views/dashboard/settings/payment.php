@@ -107,23 +107,39 @@
 
                     <!-- Multipay Settings -->
                     <div id="multipay-section" class="bg-white dark:bg-white/5 rounded-3xl border border-[#e5e7eb] dark:border-white/10 p-8 space-y-6 <?= ($settings['payment_mode'] ?? '') != 'multipay' ? 'hidden' : '' ?>">
-                        <h3 class="font-bold text-lg border-b border-[#e5e7eb] pb-4">Konfigurasi Multipay</h3>
+                        <div class="flex items-center justify-between border-b border-[#e5e7eb] pb-4">
+                            <h3 class="font-bold text-lg">Konfigurasi Multipay</h3>
+                            <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-[10px] font-black uppercase">Automated</span>
+                        </div>
                         
-                        <div class="bg-blue-50 text-blue-800 p-4 rounded-xl text-sm flex gap-3 border border-blue-100">
-                            <span class="material-symbols-outlined">info</span>
-                            <div>
-                                <p class="font-bold">Informasi Integrasi</p>
-                                <p>Silakan daftar di <a href="https://dash-multipay.multidaya.id" target="_blank" class="underline">Dashboard Multipay</a> untuk mendapatkan API Key & Secret Key.</p>
+                        <div class="bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 p-6 rounded-2xl text-sm space-y-4 border border-blue-100 dark:border-blue-900/50">
+                            <div class="flex gap-3">
+                                <span class="material-symbols-outlined">info</span>
+                                <div>
+                                    <p class="font-bold">Informasi Integrasi</p>
+                                    <p class="opacity-80">Gunakan detail di bawah ini untuk menghubungkan masjid Anda dengan gateway Multipay.</p>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-white/50 dark:bg-black/20 rounded-xl space-y-2">
+                                <p class="text-[10px] font-bold uppercase opacity-60">Webhook / Callback URL</p>
+                                <div class="flex items-center justify-between gap-4">
+                                    <code class="text-primary font-bold break-all"><?= base_url('payment/callback') ?></code>
+                                    <button type="button" onclick="copyToClipboard('<?= base_url('payment/callback') ?>')" class="flex-shrink-0 text-primary hover:text-emerald-700">
+                                        <span class="material-symbols-outlined text-sm">content_copy</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-bold mb-2">API Key (Email Akun Multipay)</label>
-                            <input type="email" name="multipay_api_key" value="<?= esc($settings['multipay_api_key'] ?? '') ?>" placeholder="email@masjid.com" class="w-full bg-[#f0f5f3] dark:bg-white/5 border-none rounded-xl focus:ring-2 focus:ring-primary p-4 font-bold">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold mb-2">Secret Key (Password / Secret)</label>
-                            <input type="password" name="multipay_secret_key" value="<?= esc($settings['multipay_secret_key'] ?? '') ?>" placeholder="••••••••" class="w-full bg-[#f0f5f3] dark:bg-white/5 border-none rounded-xl focus:ring-2 focus:ring-primary p-4 font-bold">
+                        <div class="grid gap-6">
+                            <div>
+                                <label class="block text-sm font-bold mb-2">API Key / Merchant ID</label>
+                                <input type="text" name="multipay_api_key" value="<?= esc($settings['multipay_api_key'] ?? '') ?>" placeholder="Masukkan API Key dari dashboard Multipay" class="w-full bg-[#f0f5f3] dark:bg-white/5 border-none rounded-xl focus:ring-2 focus:ring-primary p-4 font-bold">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold mb-2">Secret Key</label>
+                                <input type="password" name="multipay_secret_key" value="<?= esc($settings['multipay_secret_key'] ?? '') ?>" placeholder="••••••••" class="w-full bg-[#f0f5f3] dark:bg-white/5 border-none rounded-xl focus:ring-2 focus:ring-primary p-4 font-bold">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -158,6 +174,12 @@
             manualSec.classList.add('hidden');
             multipaySec.classList.remove('hidden');
         }
+    }
+
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Callback URL berhasil disalin!');
+        });
     }
 </script>
 <?= $this->endSection() ?>

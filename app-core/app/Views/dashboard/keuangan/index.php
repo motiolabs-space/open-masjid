@@ -9,6 +9,10 @@
             <p class="text-[#608a7e]">Pantau saldo, catat pemasukan, dan kelola pengeluaran masjid.</p>
         </div>
         <div class="flex items-center gap-3">
+            <a href="<?= base_url('dashboard/keuangan/mutasi') ?>" class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-primary/20 bg-primary/5 text-primary text-sm font-bold hover:bg-primary/10 transition-all">
+                <span class="material-symbols-outlined text-sm">sync_alt</span>
+                Impor Mutasi Bank
+            </a>
             <button onclick="openCategoryModal()" class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[#dbe6e3] dark:border-white/10 text-sm font-bold hover:bg-white dark:hover:bg-white/5 transition-all">
                 <span class="material-symbols-outlined text-sm">category</span>
                 Kelola Kategori

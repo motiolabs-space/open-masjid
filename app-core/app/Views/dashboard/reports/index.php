@@ -21,16 +21,22 @@
                 <form action="<?= base_url('dashboard/reports/finance') ?>" method="GET" target="_blank" class="space-y-4">
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Mulai Tanggal</label>
-                        <input type="date" name="start_date" required value="<?= date('Y-m-01') ?>" class="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 text-sm font-bold">
+                        <input type="date" name="start_date" id="fin_start" required value="<?= date('Y-m-01') ?>" class="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 text-sm font-bold">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Sampai Tanggal</label>
-                        <input type="date" name="end_date" required value="<?= date('Y-m-d') ?>" class="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 text-sm font-bold">
+                        <input type="date" name="end_date" id="fin_end" required value="<?= date('Y-m-d') ?>" class="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 text-sm font-bold">
                     </div>
-                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors">
-                        <span class="material-symbols-outlined">print</span>
-                        Cetak Laporan
-                    </button>
+                    <div class="flex gap-2">
+                        <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors">
+                            <span class="material-symbols-outlined">print</span>
+                            Cetak
+                        </button>
+                        <button type="button" onclick="shareFinanceReport()" class="flex-1 bg-emerald-50 text-emerald-600 border border-emerald-200 font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-emerald-100 transition-colors">
+                            <span class="material-symbols-outlined text-xl">share</span>
+                            Bagikan
+                        </button>
+                    </div>
                 </form>
             </div>
 
@@ -81,7 +87,54 @@
                 </form>
             </div>
 
+            <!-- QR Code Public Report -->
+            <div class="bg-gradient-to-br from-[#11241d] to-[#08110e] rounded-3xl p-8 text-white relative overflow-hidden shadow-2xl">
+                <div class="absolute top-0 right-0 p-32 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+                <div class="relative z-10">
+                    <div class="size-14 bg-white/10 rounded-2xl flex items-center justify-center mb-6">
+                        <span class="material-symbols-outlined text-3xl text-emerald-400">qr_code_2</span>
+                    </div>
+                    <h3 class="text-xl font-black mb-2">QR Code Laporan Publik</h3>
+                    <p class="text-sm text-emerald-100/60 mb-8">Cetak dan tempel QR Code ini di area masjid agar jamaah bisa scan langsung via HP.</p>
+                    
+                    <?php 
+                        $publicUrl = base_url(session()->get('masjid_username') . '/laporan');
+                        $qrUrl = "https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=" . urlencode($publicUrl) . "&choe=UTF-8";
+                    ?>
+                    
+                    <div class="bg-white p-4 rounded-2xl w-full aspect-square mb-6">
+                        <img src="<?= $qrUrl ?>" alt="QR Code Laporan" class="w-full h-full object-contain">
+                    </div>
+
+                    <div class="space-y-3">
+                        <a href="<?= $qrUrl ?>" download="qr_laporan.png" target="_blank" class="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-all">
+                            <span class="material-symbols-outlined text-sm">download</span>
+                            Download QR
+                        </a>
+                        <button type="button" onclick="copyToClipboard('<?= $publicUrl ?>')" class="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-all">
+                            <span class="material-symbols-outlined text-sm">content_copy</span>
+                            Salin Link
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+<script>
+    function shareFinanceReport() {
+        const start = document.getElementById('fin_start').value;
+        const end = document.getElementById('fin_end').value;
+        const url = `<?= base_url('dashboard/reports/finance') ?>?start_date=${start}&end_date=${end}`;
+        const message = encodeURIComponent(`Assalamu'alaikum Warahmatullahi Wabarakatuh,\n\nBerikut adalah Laporan Keuangan Masjid periode ${start} s/d ${end}:\n\n${url}\n\nJazaakumullahu Khairan.`);
+        
+        window.open(`https://wa.me/?text=${message}`, '_blank');
+    }
+
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Link berhasil disalin!');
+        });
+    }
+</script>
 <?= $this->endSection() ?>

@@ -14,7 +14,9 @@ class MasjidPaymentModel extends Model
     protected $protectFields    = true;
     protected $allowedFields    = [
         'masjid_id', 'payment_mode', 'bank_name', 'bank_account_name', 
-        'bank_account_number', 'qris_image', 'multipay_api_key', 'multipay_secret_key'
+        'bank_account_number', 'qris_image', 
+        'multipay_api_key', 'multipay_secret_key',
+        'api_key', 'api_secret', 'merchant_id', 'callback_token'
     ];
 
     // Dates

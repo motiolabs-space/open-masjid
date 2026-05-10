@@ -381,6 +381,43 @@ class Home extends BaseController
         ]);
     }
 
+    public function publicReport($username): string
+    {
+        $masjidModel = new \App\Models\MasjidModel();
+        $masjid = $masjidModel->where('username', $username)->first();
+
+        if (!$masjid || ($masjid['menu_laporan'] ?? 1) == 0) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Laporan tidak tersedia atau dinonaktifkan.");
+        }
+
+        $financeModel = new \App\Models\MasjidFinanceTransactionModel();
+        $programModel = new \App\Models\MasjidProgramModel();
+        
+        // Get filters from GET
+        $start = $this->request->getGet('start_date') ?: date('Y-m-01');
+        $end = $this->request->getGet('end_date') ?: date('Y-m-d');
+
+        $query = $financeModel->select('masjid_finance_transactions.*, masjid_finance_categories.name as category_name, masjid_programs.title as program_title')
+            ->join('masjid_finance_categories', 'masjid_finance_categories.id = masjid_finance_transactions.category_id', 'left')
+            ->join('masjid_programs', 'masjid_programs.id = masjid_finance_transactions.program_id', 'left')
+            ->where('masjid_finance_transactions.masjid_id', $masjid['id'])
+            ->where('date >=', $start)
+            ->where('date <=', $end)
+            ->orderBy('date', 'DESC');
+
+        $transactions = $query->findAll();
+        $summary = $financeModel->getSummary($masjid['id']);
+
+        return view('public/finance_report', [
+            'title'        => 'Laporan Keuangan - ' . esc($masjid['name']),
+            'masjid'       => $masjid,
+            'transactions' => $transactions,
+            'summary'      => $summary,
+            'filters'      => ['start' => $start, 'end' => $end],
+            'storage'      => new \App\Libraries\Storage()
+        ]);
+    }
+
     public function subscribe()
     {
         $masjidUsername = $this->request->getPost('masjid_username');

@@ -77,7 +77,17 @@
                                 <td class="px-6 py-4 text-sm text-gray-500">
                                     <?= esc($item['program_name'] ?? '-') ?>
                                 </td>
-                                <td class="px-6 py-4 text-right flex justify-end gap-2">
+                                <td class="px-6 py-4 text-right flex justify-end gap-2 items-center">
+                                    <?php if (!empty($item['warga_phone'])): 
+                                        $waPhone = preg_replace('/[^0-9]/', '', $item['warga_phone']);
+                                        if (strpos($waPhone, '0') === 0) $waPhone = '62' . substr($waPhone, 1);
+                                        elseif (strpos($waPhone, '62') !== 0) $waPhone = '62' . $waPhone;
+                                    ?>
+                                        <a href="https://wa.me/<?= $waPhone ?>" target="_blank" class="text-emerald-500 hover:text-emerald-600 tooltip" title="Hubungi via WhatsApp">
+                                            <span class="material-symbols-outlined text-xl">chat</span>
+                                        </a>
+                                    <?php endif; ?>
+
                                     <?php if (!empty($item['evidence_photo'])): ?>
                                         <?php $storage = new \App\Libraries\Storage(); ?>
                                         <a href="<?= $storage->url($item['evidence_photo']) ?>" target="_blank" class="text-blue-400 hover:text-blue-500 tooltip" title="Lihat Bukti Foto">
@@ -88,7 +98,7 @@
                                         <span class="material-symbols-outlined">edit</span>
                                     </a>
                                     <a href="<?= base_url('dashboard/distribution/delete/' . $item['id']) ?>" onclick="return confirm('Hapus data penyaluran ini?')" class="text-gray-400 hover:text-red-500 transition-colors tooltip" title="Hapus">
-                                        <span class="material-symbols-outlined">delete</span>
+                                        <span class="material-symbols-outlined text-lg">delete</span>
                                     </a>
                                 </td>
                             </tr>

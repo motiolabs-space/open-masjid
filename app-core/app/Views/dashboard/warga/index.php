@@ -136,6 +136,15 @@
                                 </td>
                                 <td class="p-6 text-right">
                                     <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <?php if ($w['phone']): 
+                                            $waPhone = preg_replace('/[^0-9]/', '', $w['phone']);
+                                            if (strpos($waPhone, '0') === 0) $waPhone = '62' . substr($waPhone, 1);
+                                            elseif (strpos($waPhone, '62') !== 0) $waPhone = '62' . $waPhone;
+                                        ?>
+                                            <a href="https://wa.me/<?= $waPhone ?>" target="_blank" class="size-10 flex items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-colors" title="Hubungi via WhatsApp">
+                                                <span class="material-symbols-outlined">chat</span>
+                                            </a>
+                                        <?php endif; ?>
                                         <a href="<?= base_url('dashboard/warga/edit/' . $w['id']) ?>" class="size-10 flex items-center justify-center rounded-xl bg-[#ebf2ef] text-[#111816] hover:bg-primary hover:text-white transition-colors">
                                             <span class="material-symbols-outlined">edit</span>
                                         </a>

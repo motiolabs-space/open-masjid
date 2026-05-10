@@ -1338,6 +1338,9 @@ class Admin extends BaseController
             'bank_account_number' => $this->request->getPost('bank_account_number'),
             'multipay_api_key'    => $this->request->getPost('multipay_api_key'),
             'multipay_secret_key' => $this->request->getPost('multipay_secret_key'),
+            'api_key'             => $this->request->getPost('multipay_api_key'), // Generic alias
+            'api_secret'          => $this->request->getPost('multipay_secret_key'), // Generic alias
+            'merchant_id'         => $this->request->getPost('merchant_id'),
         ];
 
         // Handle QRIS Image
@@ -1609,7 +1612,7 @@ class Admin extends BaseController
         $distModel = new \App\Models\MasjidDistributionModel();
 
         // Join Warga & Program names
-        $distributions = $distModel->select('masjid_distributions.*, masjid_warga.name as warga_name, masjid_programs.title as program_name')
+        $distributions = $distModel->select('masjid_distributions.*, masjid_warga.name as warga_name, masjid_warga.phone as warga_phone, masjid_programs.title as program_name')
             ->join('masjid_warga', 'masjid_warga.id = masjid_distributions.warga_id', 'left')
             ->join('masjid_programs', 'masjid_programs.id = masjid_distributions.program_id', 'left')
             ->where('masjid_distributions.masjid_id', $masjidId)
@@ -1843,5 +1846,90 @@ class Admin extends BaseController
              'items' => $items,
              'filterCondition' => $status
          ]);
+    }
+
+    public function mutasi()
+    {
+        $masjidId = session()->get('masjid_id');
+        $programModel = new \App\Models\MasjidProgramModel();
+        $programs = $programModel->where('masjid_id', $masjidId)->findAll();
+        
+        return view('dashboard/keuangan/mutasi', [
+            'title'    => 'Impor Mutasi Bank - Masj.id',
+            'programs' => $programs,
+            'mutations' => session()->getFlashdata('mutations') ?? []
+        ]);
+    }
+
+    public function uploadMutasi()
+    {
+        $file = $this->request->getFile('csv_file');
+        $bankType = $this->request->getPost('bank_type');
+
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            $parser = new \App\Libraries\BankMutationParser();
+            $tempPath = $file->getTempName();
+            
+            try {
+                $rows = $parser->parse($tempPath, $bankType);
+                if (empty($rows)) {
+                    return redirect()->back()->with('error', 'Format file tidak sesuai atau data kosong.');
+                }
+                
+                return redirect()->back()->with('mutations', $rows)->with('success', count($rows) . ' transaksi ditemukan. Silakan petakan ke program.');
+            } catch (\Exception $e) {
+                return redirect()->back()->with('error', 'Gagal membaca file: ' . $e->getMessage());
+            }
+        }
+
+        return redirect()->back()->with('error', 'Pilih file CSV terlebih dahulu.');
+    }
+
+    public function mapMutasi()
+    {
+        $masjidId = session()->get('masjid_id');
+        $financeModel = new \App\Models\MasjidFinanceTransactionModel();
+        $catModel = new \App\Models\MasjidFinanceCategoryModel();
+        
+        $dates = $this->request->getPost('date');
+        $descs = $this->request->getPost('description');
+        $amounts = $this->request->getPost('amount');
+        $programIds = $this->request->getPost('program_id');
+        $selected = $this->request->getPost('selected');
+
+        if (empty($selected)) {
+            return redirect()->back()->with('error', 'Pilih setidaknya satu transaksi untuk dipetakan.');
+        }
+
+        // Ensure 'Donasi Terikat' category exists
+        $category = $catModel->where(['masjid_id' => $masjidId, 'slug' => 'donasi-terikat'])->first();
+        if (!$category) {
+            $catId = $catModel->insert([
+                'masjid_id' => $masjidId,
+                'name' => 'Donasi Terikat Program',
+                'type' => 'pemasukan',
+                'slug' => 'donasi-terikat'
+            ]);
+        } else {
+            $catId = $category['id'];
+        }
+
+        $successCount = 0;
+        foreach ($selected as $index) {
+            if (empty($programIds[$index])) continue;
+
+            $financeModel->insert([
+                'masjid_id'   => $masjidId,
+                'category_id' => $catId,
+                'program_id'  => $programIds[$index],
+                'date'        => date('Y-m-d', strtotime($dates[$index])),
+                'amount'      => $amounts[$index],
+                'type'        => 'pemasukan',
+                'description' => 'Mutasi Bank: ' . $descs[$index]
+            ]);
+            $successCount++;
+        }
+
+        return redirect()->to(base_url('dashboard/keuangan'))->with('success', $successCount . ' transaksi berhasil dipetakan ke laporan keuangan.');
     }
 }

@@ -455,7 +455,11 @@
             <div class="max-w-xl">
                 <h2 class="text-sm font-bold text-primary uppercase tracking-[0.2em] mb-3">Transparansi</h2>
                 <h3 class="text-3xl md:text-5xl font-black mb-6 tracking-tight leading-none text-[#111816] dark:text-white">Laporan Keuangan</h3>
-                <p class="text-lg text-[#608a7e]">Laporan keuangan masjid yang dikelola secara terbuka untuk jamaah.</p>
+                <p class="text-lg text-[#608a7e] mb-6">Laporan keuangan masjid yang dikelola secara terbuka untuk jamaah.</p>
+                <a href="<?= base_url($masjid['username'] . '/laporan') ?>" class="inline-flex items-center gap-2 bg-white dark:bg-white/5 border border-primary text-primary px-6 py-3 rounded-xl font-bold hover:bg-primary hover:text-white transition-all">
+                    <span class="material-symbols-outlined">analytics</span>
+                    Lihat Laporan Detail
+                </a>
             </div>
             <div class="bg-primary px-8 py-6 rounded-[2rem] text-white shadow-2xl shadow-primary/20">
                 <p class="text-emerald-200 text-[10px] font-black uppercase tracking-widest mb-1">Saldo Saat Ini</p>

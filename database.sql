@@ -63,6 +63,7 @@ CREATE TABLE IF NOT EXISTS `masjid` (
   `menu_program` tinyint(1) DEFAULT 1,
   `menu_laporan` tinyint(1) DEFAULT 1,
   `menu_kontak` tinyint(1) DEFAULT 1,
+  `is_public_report` tinyint(1) DEFAULT 1,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),

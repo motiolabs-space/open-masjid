@@ -31,9 +31,9 @@
                 <span class="material-symbols-outlined text-xl">newspaper</span>
                 <span class="text-sm font-medium">Berita & Dokumentasi</span>
             </a>
-            <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg <?= ($uri == 'dashboard/keuangan') ? $activeClass : $inactiveClass ?>" href="<?= base_url('dashboard/keuangan') ?>">
+            <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg <?= ($uri == 'dashboard/keuangan' || str_contains($uri, 'dashboard/keuangan')) ? $activeClass : $inactiveClass ?>" href="<?= base_url('dashboard/keuangan') ?>">
                 <span class="material-symbols-outlined text-xl">payments</span>
-                <span class="text-sm font-medium">Keuangan & Donasi</span>
+                <span class="text-sm font-medium">Keuangan & Mutasi</span>
             </a>
             <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg <?= ($uri == 'dashboard/distribution') ? $activeClass : $inactiveClass ?>" href="<?= base_url('dashboard/distribution') ?>">
                 <span class="material-symbols-outlined text-xl">volunteer_activism</span>
@@ -68,9 +68,13 @@
 <span class="material-symbols-outlined text-xl">description</span>
 <span class="text-sm font-medium">Laporan</span>
 </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg <?= ($uri == 'dashboard/pembayaran') ? $activeClass : $inactiveClass ?>" href="<?= base_url('dashboard/pembayaran') ?>">
+<span class="material-symbols-outlined text-xl">payments</span>
+<span class="text-sm font-medium">Pengaturan Pembayaran</span>
+</a>
 <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
 <span class="material-symbols-outlined text-xl">settings</span>
-<span class="text-sm font-medium">Pengaturan</span>
+<span class="text-sm font-medium">Pengaturan Umum</span>
 </a>
 </nav>
 </div>
