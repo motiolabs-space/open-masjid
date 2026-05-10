@@ -83,4 +83,39 @@ class SuperAdmin extends BaseController
 
         return redirect()->to('dashboard')->with('success', 'Sekarang mengelola: ' . $masjid['name']);
     }
+
+    public function profile()
+    {
+        $data = [
+            'title' => 'Profil Saya - Super Admin',
+            'user'  => (new UserModel())->find(session()->get('user_id'))
+        ];
+        return view('superadmin/profile', $data);
+    }
+
+    public function updatePassword()
+    {
+        $rules = [
+            'current_password' => 'required',
+            'new_password'     => 'required|min_length[6]',
+            'confirm_password' => 'required|matches[new_password]'
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        $userModel = new UserModel();
+        $user = $userModel->find(session()->get('user_id'));
+
+        if (!password_verify($this->request->getPost('current_password'), $user['password_hash'])) {
+            return redirect()->back()->with('error', 'Password saat ini salah.');
+        }
+
+        $userModel->update($user['id'], [
+            'password_hash' => password_hash($this->request->getPost('new_password'), PASSWORD_DEFAULT)
+        ]);
+
+        return redirect()->to('superadmin/profile')->with('success', 'Password berhasil diperbarui.');
+    }
 }

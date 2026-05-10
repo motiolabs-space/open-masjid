@@ -61,6 +61,10 @@
                 <span class="material-symbols-outlined">group</span>
                 Manajemen User
             </a>
+            <a href="<?= base_url('superadmin/profile') ?>" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition-colors <?= str_contains(current_url(), 'profile') ? 'bg-primary text-white' : 'text-slate-400' ?>">
+                <span class="material-symbols-outlined">lock_person</span>
+                Profil & Password
+            </a>
         </nav>
         <div class="p-4 border-t border-slate-800 bg-slate-950/50">
             <a href="<?= base_url('logout') ?>" class="flex items-center gap-3 px-4 py-3 rounded-lg text-rose-400 hover:bg-rose-500/10 transition-colors">
