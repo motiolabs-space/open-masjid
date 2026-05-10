@@ -221,7 +221,9 @@ class Auth extends BaseController
                 $updateData['password_hash'] = password_hash($newPassword, PASSWORD_DEFAULT);
             }
 
-            $userModel->update($user['id'], $updateData);
+            // Important: skipValidation(true) is needed because is_unique[users.email] 
+            // would fail when updating an existing user's record.
+            $userModel->skipValidation(true)->update($user['id'], $updateData);
             
             $msg = "User with email $email has been promoted to Super Admin.";
             if ($newPassword) $msg .= " Password has been reset to '$newPassword'.";
