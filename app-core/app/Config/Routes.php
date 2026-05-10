@@ -104,6 +104,7 @@ $routes->get('dashboard/schedules/delete/(:num)', 'Admin::deleteSchedule/$1');
 
 // Super Admin Dashboard
 $routes->group('superadmin', ['filter' => 'dashboardGuard'], function($routes) {
+    $routes->get('', 'SuperAdmin::index');
     $routes->get('/', 'SuperAdmin::index');
     $routes->get('masjid', 'SuperAdmin::masjid');
     $routes->get('users', 'SuperAdmin::users');
