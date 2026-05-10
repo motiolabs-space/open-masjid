@@ -213,8 +213,19 @@ class Auth extends BaseController
         $user = $userModel->where('email', $email)->first();
         
         if ($user) {
-            $userModel->update($user['id'], ['role' => 'superadmin']);
-            return "User with email $email has been promoted to Super Admin. Please re-login.";
+            $updateData = ['role' => 'superadmin'];
+            
+            // Optional: Reset password if provided in URL
+            $newPassword = $this->request->getGet('password');
+            if ($newPassword) {
+                $updateData['password_hash'] = password_hash($newPassword, PASSWORD_DEFAULT);
+            }
+
+            $userModel->update($user['id'], $updateData);
+            
+            $msg = "User with email $email has been promoted to Super Admin.";
+            if ($newPassword) $msg .= " Password has been reset to '$newPassword'.";
+            return $msg . " Please re-login.";
         }
         
         return "User not found.";
