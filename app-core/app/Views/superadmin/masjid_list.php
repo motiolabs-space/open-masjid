@@ -42,7 +42,10 @@
                     <td class="px-6 py-4 truncate max-w-[200px]"><?= !empty($m['address']) ? esc($m['address']) : '<span class="italic text-slate-400">Belum diisi</span>' ?></td>
                     <td class="px-6 py-4 text-slate-500 font-medium"><?= date('d M Y', strtotime($m['created_at'])) ?></td>
                     <td class="px-6 py-4 text-right space-x-2">
-                        <button class="text-primary hover:text-primary-dark font-bold text-xs">Edit</button>
+                        <a href="<?= base_url('superadmin/masjid/manage/' . $m['id']) ?>" class="bg-primary/10 text-primary hover:bg-primary hover:text-white px-3 py-1.5 rounded-lg font-bold text-xs transition-all inline-flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">settings_suggest</span>
+                            Kelola
+                        </a>
                         <button class="text-rose-500 hover:text-rose-600 font-bold text-xs">Suspend</button>
                     </td>
                 </tr>
