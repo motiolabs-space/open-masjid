@@ -418,6 +418,71 @@ class Home extends BaseController
         ]);
     }
 
+    public function display($username): string
+    {
+        $masjidModel = new \App\Models\MasjidModel();
+        $masjid = $masjidModel->where('username', $username)->first();
+
+        if (!$masjid) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Masjid tidak ditemukan.");
+        }
+
+        $masjidId = $masjid['id'];
+        $financeModel = new \App\Models\MasjidFinanceTransactionModel();
+        $programModel = new \App\Models\MasjidProgramModel();
+        $newsModel = new \App\Models\MasjidNewsModel();
+        $schedModel = new \App\Models\MasjidScheduleModel();
+
+        // 1. Finance Summary
+        $financeSummary = $financeModel->getSummary($masjidId);
+
+        // 2. Active Programs
+        $programs = $programModel->where(['masjid_id' => $masjidId, 'status' => 'published'])
+            ->orderBy('date_start', 'ASC')
+            ->limit(5)
+            ->findAll();
+
+        // 3. Recent News
+        $news = $newsModel->where(['masjid_id' => $masjidId, 'status' => 'published'])
+            ->orderBy('created_at', 'DESC')
+            ->limit(5)
+            ->findAll();
+
+        // 4. Prayer Times (Today)
+        $prayerData = null;
+        if (!empty($masjid['latitude']) && !empty($masjid['longitude'])) {
+            $lat = $masjid['latitude'];
+            $long = $masjid['longitude'];
+            $date = date('d-m-Y');
+            
+            $cacheKey = "prayer_aladhan_{$masjid['id']}_{$date}";
+            $prayerData = cache($cacheKey);
+
+            if (!$prayerData) {
+                try {
+                    $client = \Config\Services::curlrequest();
+                    $apiUrl = "http://api.aladhan.com/v1/timings/$date?latitude=$lat&longitude=$long&method=20";
+                    $response = $client->request('GET', $apiUrl, ['timeout' => 5]);
+                    $body = json_decode($response->getBody(), true);
+                    if (isset($body['code']) && $body['code'] == 200) {
+                        $prayerData = $body['data'];
+                        cache()->save($cacheKey, $prayerData, 86400);
+                    }
+                } catch (\Exception $e) {}
+            }
+        }
+
+        return view('public/display_tv', [
+            'title'          => 'Display TV - ' . esc($masjid['name']),
+            'masjid'         => $masjid,
+            'financeSummary' => $financeSummary,
+            'programs'       => $programs,
+            'news'           => $news,
+            'prayerData'     => $prayerData,
+            'storage'        => new \App\Libraries\Storage()
+        ]);
+    }
+
     public function subscribe()
     {
         $masjidUsername = $this->request->getPost('masjid_username');

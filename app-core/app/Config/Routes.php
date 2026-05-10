@@ -132,4 +132,5 @@ $routes->get('(:any)/berita/(:any)', 'Home::newsDetail/$1/$2');
 $routes->get('(:any)/program', 'Home::programList/$1');
 $routes->get('(:any)/program/(:any)', 'Home::programDetail/$1/$2');
 $routes->get('(:any)/laporan', 'Home::publicReport/$1');
+$routes->get('(:any)/display', 'Home::display/$1');
 $routes->get('(:any)', 'Home::masjid/$1');

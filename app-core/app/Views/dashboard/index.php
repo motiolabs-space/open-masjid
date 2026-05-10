@@ -7,6 +7,10 @@
         <p class="text-slate-500 text-sm">Selamat datang kembali di pusat kendali <?= esc(session()->get('masjid_name')) ?>.</p>
     </div>
     <div class="flex items-center gap-3">
+        <a href="<?= base_url(session()->get('masjid_username') . '/display') ?>" target="_blank" class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold hover:bg-slate-50 transition-all shadow-sm">
+            <span class="material-symbols-outlined text-sm">tv</span>
+            Mode TV
+        </a>
         <a href="<?= base_url(session()->get('masjid_username')) ?>" target="_blank" class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-primary text-primary text-xs font-bold hover:bg-primary hover:text-white transition-all shadow-sm">
             <span class="material-symbols-outlined text-sm">visibility</span>
             Lihat Profil Publik
