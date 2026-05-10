@@ -34,7 +34,7 @@ class Filters extends BaseFilters
         'forcehttps'    => ForceHTTPS::class,
         'pagecache'     => PageCache::class,
         'performance'   => PerformanceMetrics::class,
-        'dashboard'     => \App\Filters\DashboardGuard::class,
+        'dashboardGuard' => \App\Filters\DashboardGuard::class,
     ];
 
     /**
@@ -108,6 +108,6 @@ class Filters extends BaseFilters
      * @var array<string, array<string, list<string>>>
      */
     public array $filters = [
-        'dashboard' => ['before' => ['dashboard/*']]
+        'dashboardGuard' => ['before' => ['dashboard/*', 'superadmin/*']]
     ];
 }
