@@ -221,9 +221,9 @@ class Auth extends BaseController
                 $updateData['password_hash'] = password_hash($newPassword, PASSWORD_DEFAULT);
             }
 
-            // Important: skipValidation(true) is needed because is_unique[users.email] 
-            // would fail when updating an existing user's record.
-            $userModel->skipValidation(true)->update($user['id'], $updateData);
+            // Using direct query builder to bypass any model limitations or ENUM issues
+            $db = \Config\Database::connect();
+            $db->table('users')->where('id', $user['id'])->update($updateData);
             
             $msg = "User with email $email has been promoted to Super Admin.";
             if ($newPassword) $msg .= " Password has been reset to '$newPassword'.";
