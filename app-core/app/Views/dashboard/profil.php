@@ -60,8 +60,20 @@
                     <div>
                         <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-1.5">Tahun Berdiri</label>
                         <div class="relative">
-                            <input name="tahun_berdiri" id="tahun_berdiri" class="w-full rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary" type="date" value="<?= esc($masjid['tahun_berdiri'] ?? '') ?>"/>
-                            <span class="material-symbols-outlined absolute right-3 top-2 text-[#608a7e] text-xl cursor-pointer" onclick="document.getElementById('tahun_berdiri').showPicker()">calendar_month</span>
+                            <select name="tahun_berdiri" class="w-full rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary">
+                                <option value="">Pilih Tahun</option>
+                                <?php 
+                                    $currentYear = date('Y');
+                                    $selectedYear = $masjid['tahun_berdiri'] ?? '';
+                                    // If selectedYear is a full date (YYYY-MM-DD), extract the year
+                                    if (strlen($selectedYear) > 4) {
+                                        $selectedYear = date('Y', strtotime($selectedYear));
+                                    }
+                                    for ($year = $currentYear; $year >= 1800; $year--): 
+                                ?>
+                                    <option value="<?= $year ?>" <?= $selectedYear == $year ? 'selected' : '' ?>><?= $year ?></option>
+                                <?php endfor; ?>
+                            </select>
                         </div>
                     </div>
                     <div>
