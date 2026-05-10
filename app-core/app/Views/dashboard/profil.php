@@ -1256,57 +1256,5 @@
         }
     }
 </script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Location Dropdown Logic
-        const provSelect = document.getElementById('provinsiSelect');
-        const kabSelect = document.getElementById('kabupatenSelect');
-        const currentKab = document.getElementById('currentKabupaten').value;
-
-        // Function to load regencies
-        async function loadRegencies(provId, selectedValue = null) {
-            kabSelect.innerHTML = '<option value="">Memuat...</option>';
-            kabSelect.disabled = true;
-
-            try {
-                const response = await fetch(`<?= base_url('dashboard/regencies/') ?>${provId}`);
-                const data = await response.json();
-
-                kabSelect.innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
-                data.forEach(reg => {
-                    // Check if we should select this option
-                    // We compare NAME because currentKab stores the NAME
-                    const isSelected = selectedValue && (reg.name === selectedValue || reg.id === selectedValue);
-                    
-                    const option = document.createElement('option');
-                    option.value = reg.id; // Send ID to backend
-                    option.textContent = reg.name;
-                    if (isSelected) option.selected = true;
-                    kabSelect.appendChild(option);
-                });
-                kabSelect.disabled = false;
-            } catch (error) {
-                console.error('Error fetching regencies:', error);
-                kabSelect.innerHTML = '<option value="">Gagal memuat data</option>';
-            }
-        }
-
-        // Initial Load if Province is Selected
-        if (provSelect.value) {
-            loadRegencies(provSelect.value, currentKab);
-        }
-
-        // Change Event
-        provSelect.addEventListener('change', function() {
-            const provId = this.value;
-            if (provId) {
-                loadRegencies(provId);
-            } else {
-                kabSelect.innerHTML = '<option value="">Pilih Provinsi Terlebih Dahulu</option>';
-                kabSelect.disabled = true;
-            }
-        });
-    });
-</script>
 
 <?= $this->endSection() ?>
