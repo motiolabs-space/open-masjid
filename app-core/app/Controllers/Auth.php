@@ -100,7 +100,8 @@ class Auth extends BaseController
             
             // Check for Masjid Pengurus role
             $pengurusModel = new MasjidPengurusModel();
-            $pengurus = $pengurusModel->where('user_id', $user['id'])->first();
+            $pengurus = $pengurusModel->where('user_id', $user['id'])->findAll();
+            $pengurusCount = count($pengurus);
 
             $sessionData = [
                 'isLoggedIn' => true,
@@ -115,21 +116,29 @@ class Auth extends BaseController
                 return redirect()->to('superadmin')->with('success', 'Selamat datang di Panel Kontrol Pusat, ' . $user['name'] . '!');
             }
 
-            if ($pengurus) {
-                // Determine Masjid details
-                $masjidModel = new MasjidModel();
-                $masjid = $masjidModel->find($pengurus['masjid_id']);
-                
+            if ($pengurusCount > 0) {
                 $sessionData['role'] = 'pengurus';
-                $sessionData['masjid_id'] = $pengurus['masjid_id'];
-                $sessionData['masjid_name'] = $masjid['name'] ?? 'Masjid Saya';
-                $sessionData['masjid_username'] = $masjid['username'] ?? '';
+                
+                if ($pengurusCount === 1) {
+                    $p = $pengurus[0];
+                    $masjid = (new MasjidModel())->find($p['masjid_id']);
+                    
+                    $sessionData['masjid_id'] = $p['masjid_id'];
+                    $sessionData['masjid_name'] = $masjid['name'] ?? 'Masjid Saya';
+                    $sessionData['masjid_username'] = $masjid['username'] ?? '';
+                    
+                    $session->set($sessionData);
+                    return redirect()->to('dashboard')->with('success', 'Selamat datang kembali, ' . $user['name'] . '!');
+                } else {
+                    // Multi-masjid: need to select
+                    $session->set($sessionData);
+                    return redirect()->to('auth/select-masjid');
+                }
             } else {
                 $sessionData['role'] = 'jamaah';
+                $session->set($sessionData);
+                return redirect()->to('dashboard')->with('success', 'Selamat datang kembali, ' . $user['name'] . '!');
             }
-
-            $session->set($sessionData);
-            return redirect()->to('dashboard')->with('success', 'Selamat datang kembali, ' . $user['name'] . '!');
         }
 
         return redirect()->back()->withInput()->with('error', 'Email atau password salah.');
@@ -161,6 +170,60 @@ class Auth extends BaseController
         }
 
         return redirect()->back()->withInput()->with('error', 'Gagal mendaftarkan akun.');
+    }
+
+    public function selectMasjid()
+    {
+        if (!session()->get('isLoggedIn')) return redirect()->to('login');
+
+        $pengurusModel = new MasjidPengurusModel();
+        $masjidModel = new MasjidModel();
+
+        $pengurus = $pengurusModel->where('user_id', session()->get('user_id'))->findAll();
+        
+        $masjids = [];
+        foreach ($pengurus as $p) {
+            $m = $masjidModel->find($p['masjid_id']);
+            if ($m) $masjids[] = $m;
+        }
+
+        $data = [
+            'title'   => 'Pilih Masjid - Masj.id',
+            'masjids' => $masjids
+        ];
+
+        return view('auth/select_masjid', $data);
+    }
+
+    public function setMasjidContext($id)
+    {
+        if (!session()->get('isLoggedIn')) return redirect()->to('login');
+
+        // Security check: Verify user actually manages this masjid
+        $pengurusModel = new MasjidPengurusModel();
+        $isManaged = $pengurusModel->where([
+            'user_id'   => session()->get('user_id'),
+            'masjid_id' => $id
+        ])->first();
+
+        if (!$isManaged && session()->get('role') !== 'superadmin') {
+            return redirect()->to('login')->with('error', 'Akses ditolak.');
+        }
+
+        $masjidModel = new MasjidModel();
+        $masjid = $masjidModel->find($id);
+
+        if (!$masjid) {
+            return redirect()->back()->with('error', 'Masjid tidak ditemukan.');
+        }
+
+        session()->set([
+            'masjid_id'       => $masjid['id'],
+            'masjid_name'     => $masjid['name'],
+            'masjid_username' => $masjid['username']
+        ]);
+
+        return redirect()->to('dashboard')->with('success', 'Selamat datang di ' . $masjid['name']);
     }
 
     public function logout()

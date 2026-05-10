@@ -114,6 +114,8 @@ $routes->group('superadmin', ['filter' => 'dashboardGuard'], function($routes) {
     $routes->post('update-password', 'SuperAdmin::updatePassword');
 });
 $routes->get('auth/promote-me', 'Auth::promoteMe');
+$routes->get('auth/select-masjid', 'Auth::selectMasjid');
+$routes->get('auth/set-masjid/(:num)', 'Auth::setMasjidContext/$1');
 
 // Donation & Payment
 $routes->get('donation/(:segment)/form', 'Donation::create/$1');
