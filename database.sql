@@ -164,6 +164,28 @@ CREATE TABLE IF NOT EXISTS `masjid_finance_transactions` (
   CONSTRAINT `fin_trans_masjid_id_foreign` FOREIGN KEY (`masjid_id`) REFERENCES `masjid` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Payments Configuration
+CREATE TABLE IF NOT EXISTS `masjid_payments` (
+  `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `masjid_id` int(11) UNSIGNED NOT NULL,
+  `payment_mode` enum('manual','multipay','midtrans','xendit','bank_direct') DEFAULT 'manual',
+  -- Manual Transfer Info
+  `bank_name` varchar(100) DEFAULT NULL,
+  `bank_account_name` varchar(100) DEFAULT NULL,
+  `bank_account_number` varchar(50) DEFAULT NULL,
+  `qris_image` varchar(255) DEFAULT NULL,
+  -- Modular Config (Encrypted JSON or specific fields)
+  `api_key` varchar(255) DEFAULT NULL,
+  `api_secret` varchar(255) DEFAULT NULL,
+  `merchant_id` varchar(100) DEFAULT NULL,
+  `callback_token` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `masjid_id` (`masjid_id`),
+  CONSTRAINT `payments_masjid_id_foreign` FOREIGN KEY (`masjid_id`) REFERENCES `masjid` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- --------------------------------------------------------
 -- 3. Initial Dummy Data
 -- --------------------------------------------------------
