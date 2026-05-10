@@ -62,22 +62,4 @@ class SuperAdmin extends BaseController
         ];
         return view('superadmin/user_list', $data);
     }
-
-    // TEMPORARY: Use this to promote your first account manually via URL
-    // e.g., site.com/superadmin/promote-me?email=your@email.com
-    public function promoteMe()
-    {
-        $email = $this->request->getGet('email');
-        if (!$email) return "Email required.";
-        
-        $userModel = new UserModel();
-        $user = $userModel->where('email', $email)->first();
-        
-        if ($user) {
-            $userModel->update($user['id'], ['role' => 'superadmin']);
-            return "User with email $email has been promoted to Super Admin. Please re-login.";
-        }
-        
-        return "User not found.";
-    }
 }
