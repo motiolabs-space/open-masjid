@@ -2,6 +2,8 @@
 
 **Open Masjid** merupakan sebuah inisiatif dan gerakan pengembangan sistem sumber terbuka (*open-source*) yang didedikasikan untuk mewujudkan tata kelola masjid yang lebih modern dan transparan. Melalui platform ini, kami berikhtiar untuk menghadirkan kemudahan bagi para pengelola (DKM) dalam mengelola data jamaah, menyajikan transparansi laporan keuangan yang dapat diakses publik, serta mempublikasikan berbagai kegiatan syiar dan sosial secara terintegrasi.
 
+Sistem ini telah diimplementasikan pada layanan [**masj.id**](https://masj.id) sebagai platform SaaS (*Software as a Service*), namun kode sumber ini juga terbuka bagi siapa saja yang ingin memasangnya secara mandiri untuk kebutuhan **Single Masjid** (non-SaaS). Kami percaya bahwa setiap masjid memiliki hak untuk memiliki sistem manajemen yang handal dan transparan.
+
 ## ✨ Fitur Utama
 
 - **Landing Page Modern**: Tampilan publik yang profesional, informatif, dan responsif.
