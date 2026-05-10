@@ -109,6 +109,7 @@ $routes->group('superadmin', ['filter' => 'dashboardGuard'], function($routes) {
     $routes->get('masjid', 'SuperAdmin::masjid');
     $routes->get('users', 'SuperAdmin::users');
     $routes->post('masjid/suspend', 'SuperAdmin::suspendMasjid');
+    $routes->get('masjid/manage/(:num)', 'SuperAdmin::manageMasjid/$1');
 });
 $routes->get('auth/promote-me', 'Auth::promoteMe');
 

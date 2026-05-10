@@ -78,7 +78,7 @@
                         <td class="px-6 py-4 text-slate-500">@<?= esc($m['username']) ?></td>
                         <td class="px-6 py-4 text-slate-400 font-medium"><?= date('d M Y', strtotime($m['created_at'])) ?></td>
                         <td class="px-6 py-4 text-right">
-                            <button class="text-primary hover:underline font-bold text-xs">Detail</button>
+                            <a href="<?= base_url('superadmin/masjid/manage/' . $m['id']) ?>" class="text-primary hover:underline font-bold text-xs">Kelola</a>
                         </td>
                     </tr>
                     <?php endforeach; ?>

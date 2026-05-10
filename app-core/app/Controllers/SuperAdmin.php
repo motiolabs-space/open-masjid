@@ -62,4 +62,25 @@ class SuperAdmin extends BaseController
         ];
         return view('superadmin/user_list', $data);
     }
+
+    // Impersonate Masjid Management
+    public function manageMasjid($id)
+    {
+        $masjidModel = new MasjidModel();
+        $masjid = $masjidModel->find($id);
+
+        if (!$masjid) {
+            return redirect()->back()->with('error', 'Masjid tidak ditemukan.');
+        }
+
+        // Set masjid context in session
+        session()->set([
+            'masjid_id'       => $masjid['id'],
+            'masjid_name'     => $masjid['name'],
+            'masjid_username' => $masjid['username'],
+            // Keep role as superadmin so we can still access superadmin panel
+        ]);
+
+        return redirect()->to('dashboard')->with('success', 'Sekarang mengelola: ' . $masjid['name']);
+    }
 }
