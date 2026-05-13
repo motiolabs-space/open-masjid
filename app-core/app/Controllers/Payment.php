@@ -156,6 +156,27 @@ class Payment extends BaseController
             'donor_name'  => $donation['donor_name'],
             'donor_phone' => $donation['donor_phone'],
         ]);
+
+        // 3. Send WhatsApp Receipt if phone exists
+        if (!empty($donation['donor_phone'])) {
+            $masjidModel = new \App\Models\MasjidModel();
+            $masjid = $masjidModel->find($donation['masjid_id']);
+            
+            $programName = 'Umum';
+            if ($donation['program_id']) {
+                $prog = (new \App\Models\MasjidProgramModel())->find($donation['program_id']);
+                if ($prog) $programName = $prog['title'];
+            }
+
+            $wa = new \App\Libraries\WhatsAppService();
+            $wa->sendDonationReceipt($donation['donor_phone'], [
+                'masjid_name'     => $masjid['name'],
+                'masjid_username' => $masjid['username'],
+                'donor_name'      => $donation['donor_name'],
+                'amount'          => $donation['amount'],
+                'program_name'    => $programName
+            ]);
+        }
     }
 
     public function success($invoice)

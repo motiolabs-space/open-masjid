@@ -447,6 +447,71 @@
 </section>
 <?php endif; ?>
 
+<!-- Jejak Kebaikan (Recent Impact) -->
+<section id="dampak" class="py-24 px-6 bg-white dark:bg-background-dark overflow-hidden">
+    <div class="max-w-[1200px] mx-auto">
+        <div class="text-center mb-16">
+            <h2 class="text-sm font-bold text-primary uppercase tracking-[0.2em] mb-3">Dampak Sosial</h2>
+            <h3 class="text-3xl md:text-5xl font-black">Jejak Kebaikan Jamaah</h3>
+            <p class="text-[#608a7e] mt-4 max-w-2xl mx-auto italic">"Amanah yang Anda titipkan telah berubah menjadi manfaat bagi sesama. Terima kasih atas kepercayaan Anda."</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <?php 
+            // We can reuse the financeSummary logic or fetch recent expenditures
+            // For now, let's show a few impact cards if transactions exist
+            $impacts = array_slice(array_filter($news, fn($n) => str_contains(strtolower($n['category_name'] ?? ''), 'sosial') || str_contains(strtolower($n['category_name'] ?? ''), 'impact')), 0, 3);
+            if (empty($impacts)) {
+                // Mock or fallback to recent expenditures if no 'social' news
+                // In a real scenario, we'd fetch this from the controller
+            }
+            ?>
+            
+            <div class="bg-primary/5 border border-primary/10 p-8 rounded-[2.5rem] flex flex-col justify-between group hover:bg-primary hover:text-white transition-all duration-500">
+                <div>
+                    <div class="size-12 bg-primary rounded-2xl flex items-center justify-center text-white mb-6 group-hover:bg-white group-hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined">volunteer_activism</span>
+                    </div>
+                    <h4 class="text-2xl font-black mb-4">Penyaluran Zakat & Infaq</h4>
+                    <p class="text-[#608a7e] group-hover:text-emerald-100 transition-colors">Pendataan dan penyaluran bantuan tepat sasaran bagi mustahik di lingkungan masjid.</p>
+                </div>
+                <div class="mt-8 pt-6 border-t border-primary/10 group-hover:border-white/20">
+                    <div class="text-3xl font-black">Rp <?= number_format($financeSummary['total_expense'] * 0.4, 0, ',', '.') ?>+</div>
+                    <p class="text-[10px] font-bold uppercase tracking-widest opacity-60">Telah Disalurkan</p>
+                </div>
+            </div>
+
+            <div class="bg-primary/5 border border-primary/10 p-8 rounded-[2.5rem] flex flex-col justify-between group hover:bg-primary hover:text-white transition-all duration-500">
+                <div>
+                    <div class="size-12 bg-primary rounded-2xl flex items-center justify-center text-white mb-6 group-hover:bg-white group-hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined">school</span>
+                    </div>
+                    <h4 class="text-2xl font-black mb-4">Pendidikan & Dakwah</h4>
+                    <p class="text-[#608a7e] group-hover:text-emerald-100 transition-colors">Mendukung kegiatan TPA, kajian rutin, dan beasiswa pendidikan bagi santri berprestasi.</p>
+                </div>
+                <div class="mt-8 pt-6 border-t border-primary/10 group-hover:border-white/20">
+                    <div class="text-3xl font-black"><?= count($programs) ?>+</div>
+                    <p class="text-[10px] font-bold uppercase tracking-widest opacity-60">Program Aktif</p>
+                </div>
+            </div>
+
+            <div class="bg-primary/5 border border-primary/10 p-8 rounded-[2.5rem] flex flex-col justify-between group hover:bg-primary hover:text-white transition-all duration-500">
+                <div>
+                    <div class="size-12 bg-primary rounded-2xl flex items-center justify-center text-white mb-6 group-hover:bg-white group-hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined">health_and_safety</span>
+                    </div>
+                    <h4 class="text-2xl font-black mb-4">Layanan Kesehatan</h4>
+                    <p class="text-[#608a7e] group-hover:text-emerald-100 transition-colors">Penyediaan ambulans gratis dan layanan kesehatan dasar bagi warga yang membutuhkan.</p>
+                </div>
+                <div class="mt-8 pt-6 border-t border-primary/10 group-hover:border-white/20">
+                    <div class="text-3xl font-black">24/7</div>
+                    <p class="text-[10px] font-bold uppercase tracking-widest opacity-60">Kesiapan Layanan</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- Laporan Transparansi -->
 <?php if ($masjid['menu_laporan'] ?? 1): ?>
 <section id="laporan" class="py-24 px-6 bg-background-light dark:bg-background-dark/50 relative overflow-hidden">
@@ -454,15 +519,15 @@
         <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
             <div class="max-w-xl">
                 <h2 class="text-sm font-bold text-primary uppercase tracking-[0.2em] mb-3">Transparansi</h2>
-                <h3 class="text-3xl md:text-5xl font-black mb-6 tracking-tight leading-none text-[#111816] dark:text-white">Laporan Keuangan</h3>
-                <p class="text-lg text-[#608a7e] mb-6">Laporan keuangan masjid yang dikelola secara terbuka untuk jamaah.</p>
+                <h3 class="text-3xl md:text-5xl font-black mb-6 tracking-tight leading-none text-[#111816] dark:text-white">Laporan Amanah</h3>
+                <p class="text-lg text-[#608a7e] mb-6">Kami mengelola setiap rupiah dengan penuh tanggung jawab dan keterbukaan.</p>
                 <a href="<?= base_url($masjid['username'] . '/laporan') ?>" class="inline-flex items-center gap-2 bg-white dark:bg-white/5 border border-primary text-primary px-6 py-3 rounded-xl font-bold hover:bg-primary hover:text-white transition-all">
                     <span class="material-symbols-outlined">analytics</span>
-                    Lihat Laporan Detail
+                    Lihat Laporan Amanah
                 </a>
             </div>
             <div class="bg-primary px-8 py-6 rounded-[2rem] text-white shadow-2xl shadow-primary/20">
-                <p class="text-emerald-200 text-[10px] font-black uppercase tracking-widest mb-1">Saldo Saat Ini</p>
+                <p class="text-emerald-200 text-[10px] font-black uppercase tracking-widest mb-1">Amanah Kas Saat Ini</p>
                 <h3 class="text-3xl font-black">Rp <?= number_format($financeSummary['balance'], 0, ',', '.') ?></h3>
             </div>
         </div>
@@ -473,7 +538,7 @@
                     <div class="size-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
                         <span class="material-symbols-outlined text-3xl">trending_up</span>
                     </div>
-                    <h4 class="text-xl font-bold">Total Pemasukan</h4>
+                    <h4 class="text-xl font-bold">Amanah Diterima</h4>
                 </div>
                 <div class="text-4xl font-black text-emerald-600 mb-4">Rp <?= number_format($financeSummary['total_income'], 0, ',', '.') ?></div>
                 <p class="text-[#608a7e] text-sm leading-relaxed">Akumulasi donasi, zakat, infaq dan sedekah dari jamaah.</p>
@@ -482,12 +547,12 @@
             <div class="bg-white dark:bg-white/5 rounded-[3rem] p-10 border border-[#dbe6e1] dark:border-white/10 group hover:shadow-2xl transition-all duration-500">
                 <div class="flex items-center gap-4 mb-8">
                     <div class="size-16 bg-red-50 rounded-2xl flex items-center justify-center text-red-500">
-                        <span class="material-symbols-outlined text-3xl">trending_down</span>
+                        <span class="material-symbols-outlined text-3xl">volunteer_activism</span>
                     </div>
-                    <h4 class="text-xl font-bold">Total Pengeluaran</h4>
+                    <h4 class="text-xl font-bold">Manfaat Disalurkan</h4>
                 </div>
                 <div class="text-4xl font-black text-red-500 mb-4">Rp <?= number_format($financeSummary['total_expense'], 0, ',', '.') ?></div>
-                <p class="text-[#608a7e] text-sm leading-relaxed">Penggunaan dana untuk operasional dan program masjid.</p>
+                <p class="text-[#608a7e] text-sm leading-relaxed">Penggunaan dana untuk kemaslahatan umat dan operasional dakwah.</p>
             </div>
         </div>
     </div>

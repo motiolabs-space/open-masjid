@@ -21,19 +21,19 @@
             <?php if (session()->get('role') === 'pengurus' || session()->get('role') === 'superadmin'): ?>
             <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg <?= ($uri == 'dashboard/profil') ? $activeClass : $inactiveClass ?>" href="<?= base_url('dashboard/profil') ?>">
                 <span class="material-symbols-outlined text-xl">account_balance</span>
-                <span class="text-sm font-medium">Profil Masjid</span>
+                <span class="text-sm font-medium">Identitas Gerakan</span>
             </a>
             <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg <?= ($uri == 'dashboard/program') ? $activeClass : $inactiveClass ?>" href="<?= base_url('dashboard/program') ?>">
                 <span class="material-symbols-outlined text-xl">list_alt</span>
-                <span class="text-sm font-medium">Program & Kegiatan</span>
+                <span class="text-sm font-medium">Program Dampak</span>
             </a>
             <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg <?= ($uri == 'dashboard/berita') ? $activeClass : $inactiveClass ?>" href="<?= base_url('dashboard/berita') ?>">
                 <span class="material-symbols-outlined text-xl">newspaper</span>
-                <span class="text-sm font-medium">Berita & Dokumentasi</span>
+                <span class="text-sm font-medium">Cerita Dampak</span>
             </a>
             <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg <?= ($uri == 'dashboard/keuangan' || str_contains($uri, 'dashboard/keuangan')) ? $activeClass : $inactiveClass ?>" href="<?= base_url('dashboard/keuangan') ?>">
                 <span class="material-symbols-outlined text-xl">payments</span>
-                <span class="text-sm font-medium">Keuangan & Mutasi</span>
+                <span class="text-sm font-medium">Laporan Amanah</span>
             </a>
             <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg <?= ($uri == 'dashboard/distribution') ? $activeClass : $inactiveClass ?>" href="<?= base_url('dashboard/distribution') ?>">
                 <span class="material-symbols-outlined text-xl">volunteer_activism</span>
@@ -41,7 +41,11 @@
             </a>
             <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg <?= ($uri == 'dashboard/warga') ? $activeClass : $inactiveClass ?>" href="<?= base_url('dashboard/warga') ?>">
                 <span class="material-symbols-outlined text-xl">groups_3</span>
-                <span class="text-sm font-medium">Data Warga</span>
+                <span class="text-sm font-medium">Basis Komunitas</span>
+            </a>
+            <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg <?= ($uri == 'dashboard/volunteers') ? $activeClass : $inactiveClass ?>" href="<?= base_url('dashboard/volunteers') ?>">
+                <span class="material-symbols-outlined text-xl">person_pin</span>
+                <span class="text-sm font-medium">Relawan & Piket</span>
             </a>
 <?php else: ?>
 <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">

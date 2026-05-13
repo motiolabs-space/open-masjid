@@ -56,7 +56,7 @@
                         <select name="warga_id" class="w-full bg-[#f0f5f3] dark:bg-background-dark border-none rounded-xl focus:ring-2 focus:ring-primary p-4 font-bold text-[#111816] dark:text-white cursor-pointer">
                             <option value="">-- Umum / Non-Warga --</option>
                             <?php foreach ($warga as $w): ?>
-                                <option value="<?= $w['id'] ?>" <?= (isset($item) && $item['warga_id'] == $w['id']) ? 'selected' : '' ?>>
+                                <option value="<?= $w['id'] ?>" <?= (isset($item) && $item['warga_id'] == $w['id']) || (isset($selectedWargaId) && $selectedWargaId == $w['id']) ? 'selected' : '' ?>>
                                     <?= esc($w['name']) ?> (<?= esc($w['nik']) ?>)
                                 </option>
                             <?php endforeach; ?>

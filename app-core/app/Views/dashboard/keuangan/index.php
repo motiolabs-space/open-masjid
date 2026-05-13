@@ -94,7 +94,15 @@
                                     <div class="text-[10px] text-gray-400 uppercase"><?= date('H:i', strtotime($trans['created_at'])) ?></div>
                                 </td>
                                 <td class="px-8 py-5">
-                                    <div class="text-sm font-bold line-clamp-1"><?= esc($trans['description']) ?></div>
+                                    <div class="flex items-center gap-2">
+                                        <div class="text-sm font-bold line-clamp-1"><?= esc($trans['description']) ?></div>
+                                        <?php if ($trans['attachment']): ?>
+                                            <?php $storage = new \App\Libraries\Storage(); ?>
+                                            <a href="<?= $storage->url($trans['attachment']) ?>" target="_blank" class="text-primary hover:scale-110 transition-transform" title="Lihat Bukti">
+                                                <span class="material-symbols-outlined text-sm">image</span>
+                                            </a>
+                                        <?php endif; ?>
+                                    </div>
                                     <?php if ($trans['donor_name']): ?>
                                         <div class="text-[10px] text-primary font-bold uppercase flex items-center gap-1">
                                             <span class="material-symbols-outlined text-[10px]">person</span>
