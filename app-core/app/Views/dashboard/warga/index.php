@@ -67,6 +67,7 @@
                         <th class="p-6 font-bold text-[#111816]">Nama Lengkap</th>
                         <th class="p-6 font-bold text-[#111816]">Kontak / Alamat</th>
                         <th class="p-6 font-bold text-[#111816]">Status Ekonomi</th>
+                        <th class="p-6 font-bold text-[#111816]">Bantuan Terakhir</th>
                         <th class="p-6 font-bold text-[#111816]">Status Warga</th>
                         <th class="p-6 font-bold text-[#111816] text-right">Aksi</th>
                     </tr>
@@ -74,16 +75,23 @@
                 <tbody class="divide-y divide-[#dbe6e1]">
                     <?php if (empty($warga)): ?>
                         <tr>
-                            <td colspan="5" class="p-12 text-center text-[#608a7e]">
+                            <td colspan="6" class="p-12 text-center text-[#608a7e]">
                                 <span class="material-symbols-outlined text-6xl mb-4 opacity-20">person_search</span>
                                 <p>Belum ada data warga yang sesuai filter.</p>
                             </td>
                         </tr>
                     <?php else: ?>
-                        <?php foreach ($warga as $w): ?>
-                            <tr class="hover:bg-[#f8faf9] transition-colors group">
+                        <?php foreach ($warga as $w): 
+                            $isMustahik = in_array($w['economic_status'], ['kurang_mampu', 'fakir', 'miskin', 'yatim']);
+                        ?>
+                            <tr class="hover:bg-[#f8faf9] transition-colors group <?= $isMustahik ? 'bg-primary/5' : '' ?>">
                                 <td class="p-6">
-                                    <h3 class="font-bold text-[#111816]"><?= esc($w['name']) ?></h3>
+                                    <h3 class="font-bold text-[#111816] flex items-center gap-2">
+                                        <?= esc($w['name']) ?>
+                                        <?php if ($isMustahik): ?>
+                                            <span class="material-symbols-outlined text-primary text-sm" title="Mustahik">volunteer_activism</span>
+                                        <?php endif; ?>
+                                    </h3>
                                     <?php if ($w['nik']): ?>
                                         <p class="text-xs text-[#608a7e] mt-1">NIK: <?= esc($w['nik']) ?></p>
                                     <?php endif; ?>
@@ -114,6 +122,16 @@
                                     </span>
                                 </td>
                                 <td class="p-6">
+                                    <?php if ($w['last_aid_date']): ?>
+                                        <div class="text-sm font-bold text-primary">
+                                            <?= date('d M Y', strtotime($w['last_aid_date'])) ?>
+                                        </div>
+                                        <p class="text-[10px] text-[#608a7e] uppercase font-black tracking-widest">Penyaluran Terakhir</p>
+                                    <?php else: ?>
+                                        <span class="text-xs text-[#608a7e] italic">Belum ada catatan</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="p-6">
                                     <?php
                                     $statusColors = [
                                         'active'   => 'text-green-600',
@@ -136,6 +154,13 @@
                                 </td>
                                 <td class="p-6 text-right">
                                     <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <?php if ($isMustahik): ?>
+                                            <a href="<?= base_url('dashboard/distribution/new?warga_id=' . $w['id']) ?>" class="px-4 py-2 flex items-center gap-2 rounded-xl bg-primary text-white hover:bg-primary/90 transition-all text-xs font-bold" title="Beri Bantuan">
+                                                <span class="material-symbols-outlined text-sm">volunteer_activism</span>
+                                                Beri Bantuan
+                                            </a>
+                                        <?php endif; ?>
+                                        
                                         <?php if ($w['phone']): 
                                             $waPhone = preg_replace('/[^0-9]/', '', $w['phone']);
                                             if (strpos($waPhone, '0') === 0) $waPhone = '62' . substr($waPhone, 1);

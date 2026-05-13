@@ -128,6 +128,35 @@
             </div>
             <?php endif; ?>
 
+            <!-- Slide 4: Recent Impact Highlights -->
+            <?php if (!empty($impactHighlights)): ?>
+            <div class="swiper-slide flex flex-col items-center justify-center pt-24 px-12">
+                <div class="text-center mb-12">
+                    <h2 class="text-emerald-400 text-xl font-black uppercase tracking-[0.3em] mb-4">Jejak Kebaikan</h2>
+                    <h3 class="text-6xl font-black">Amanah Yang Terwujud</h3>
+                </div>
+                <div class="w-full max-w-5xl space-y-4">
+                    <?php foreach ($impactHighlights as $impact): ?>
+                    <div class="bg-glass border border-white/10 p-6 rounded-3xl flex justify-between items-center group hover:bg-white/10 transition-all">
+                        <div class="flex items-center gap-6">
+                            <div class="size-16 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                                <span class="material-symbols-outlined text-3xl">volunteer_activism</span>
+                            </div>
+                            <div>
+                                <h4 class="text-2xl font-bold"><?= esc($impact['description']) ?></h4>
+                                <p class="text-gray-400 text-sm font-bold uppercase tracking-widest"><?= esc($impact['category_name']) ?> • <?= date('d M Y', strtotime($impact['date'])) ?></p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-emerald-400 text-3xl font-black">Rp <?= number_format($impact['amount'], 0, ',', '.') ?></p>
+                            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em]">Disalurkan</p>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+
         </div>
         
         <!-- Progress Bar -->

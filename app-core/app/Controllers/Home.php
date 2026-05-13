@@ -408,13 +408,24 @@ class Home extends BaseController
         $transactions = $query->findAll();
         $summary = $financeModel->getSummary($masjid['id']);
 
+        // Impact Analysis: Group expenses by category
+        $expenditureByCat = $financeModel->select('masjid_finance_categories.name, SUM(amount) as total')
+            ->join('masjid_finance_categories', 'masjid_finance_categories.id = masjid_finance_transactions.category_id')
+            ->where(['masjid_finance_transactions.masjid_id' => $masjid['id'], 'type' => 'pengeluaran'])
+            ->where('date >=', $start)
+            ->where('date <=', $end)
+            ->groupBy('category_id')
+            ->get()
+            ->getResultArray();
+
         return view('public/finance_report', [
-            'title'        => 'Laporan Keuangan - ' . esc($masjid['name']),
-            'masjid'       => $masjid,
-            'transactions' => $transactions,
-            'summary'      => $summary,
-            'filters'      => ['start' => $start, 'end' => $end],
-            'storage'      => new \App\Libraries\Storage()
+            'title'            => 'Laporan Amanah - ' . esc($masjid['name']),
+            'masjid'           => $masjid,
+            'transactions'     => $transactions,
+            'summary'          => $summary,
+            'expenditureByCat' => $expenditureByCat,
+            'filters'          => ['start' => $start, 'end' => $end],
+            'storage'          => new \App\Libraries\Storage()
         ]);
     }
 
@@ -472,14 +483,23 @@ class Home extends BaseController
             }
         }
 
+        // 5. Social Impact Highlights (Recent Pengeluaran with non-empty descriptions)
+        $impactHighlights = $financeModel->select('masjid_finance_transactions.*, masjid_finance_categories.name as category_name')
+            ->join('masjid_finance_categories', 'masjid_finance_categories.id = masjid_finance_transactions.category_id', 'left')
+            ->where(['masjid_finance_transactions.masjid_id' => $masjidId, 'type' => 'pengeluaran'])
+            ->orderBy('date', 'DESC')
+            ->limit(5)
+            ->findAll();
+
         return view('public/display_tv', [
-            'title'          => 'Display TV - ' . esc($masjid['name']),
-            'masjid'         => $masjid,
-            'financeSummary' => $financeSummary,
-            'programs'       => $programs,
-            'news'           => $news,
-            'prayerData'     => $prayerData,
-            'storage'        => new \App\Libraries\Storage()
+            'title'            => 'Display TV - ' . esc($masjid['name']),
+            'masjid'           => $masjid,
+            'financeSummary'   => $financeSummary,
+            'programs'         => $programs,
+            'news'             => $news,
+            'impactHighlights' => $impactHighlights,
+            'prayerData'       => $prayerData,
+            'storage'          => new \App\Libraries\Storage()
         ]);
     }
 

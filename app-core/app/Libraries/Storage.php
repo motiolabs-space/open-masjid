@@ -43,12 +43,19 @@ class Storage
      * 
      * @param \CodeIgniter\HTTP\Files\UploadedFile $file
      * @param string $path Target directory/prefix
-     * @param array $allowedTypes Optional allowed extensions (default: images)
+     * @param array $allowedTypes Optional allowed extensions
+     * @param int $maxSize Max size in bytes (default 5MB)
      * @return string|null Filename/Key on success, null on failure
      */
-    public function upload($file, $path = 'uploads', $allowedTypes = ['jpg', 'jpeg', 'png', 'webp', 'gif'])
+    public function upload($file, $path = 'uploads', $allowedTypes = ['jpg', 'jpeg', 'png', 'webp', 'gif'], $maxSize = 5242880)
     {
         if (!$file->isValid() || $file->hasMoved()) {
+            return null;
+        }
+
+        // 0. Check File Size
+        if ($file->getSize() > $maxSize) {
+            log_message('error', 'Upload Blocked: File size exceeds limit ' . ($maxSize / 1024 / 1024) . 'MB');
             return null;
         }
 
@@ -76,16 +83,31 @@ class Storage
 
         // 2. Check MIME Type (More secure)
         $mime = $file->getMimeType();
-        $allowedMimes = [
-            'image/jpeg', 'image/png', 'image/webp', 'image/gif'
+        $baseMimes = [
+            'jpg'  => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png'  => 'image/png',
+            'webp' => 'image/webp',
+            'gif'  => 'image/gif',
+            'pdf'  => 'application/pdf',
         ];
-        
-        // If we are checking for images, enforce MIME check
-        if (array_intersect($allowedTypes, ['jpg', 'jpeg', 'png', 'webp', 'gif'])) {
-            if (!in_array($mime, $allowedMimes)) {
-                log_message('error', 'Upload Blocked: Malicious MIME type ' . $mime);
+
+        // Ensure MIME matches expected extension
+        if (isset($baseMimes[$ext])) {
+            if ($mime !== $baseMimes[$ext]) {
+                log_message('error', "Upload Blocked: MIME type mismatch for extension {$ext}. Got {$mime}");
                 return null;
             }
+        }
+
+        // Double check against global allowed list
+        $allowedMimes = [
+            'image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf'
+        ];
+        
+        if (!in_array($mime, $allowedMimes)) {
+            log_message('error', 'Upload Blocked: Malicious or unsupported MIME type ' . $mime);
+            return null;
         }
 
         // 3. Rename to random string (prevents directory traversal & original file name leaks)

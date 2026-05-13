@@ -1017,7 +1017,7 @@ class Admin extends BaseController
                     $storage->delete($oldTrans['attachment']);
                 }
             }
-            $uploadPath = $storage->upload($file, 'keuangan');
+            $uploadPath = $storage->upload($file, 'keuangan', ['jpg', 'jpeg', 'png', 'webp', 'gif', 'pdf']);
             if ($uploadPath) {
                 $data['attachment'] = $uploadPath;
             }
@@ -1085,7 +1085,10 @@ class Admin extends BaseController
             $query->where('economic_status', $economic);
         }
 
-        $warga = $query->orderBy('name', 'ASC')->findAll();
+        // Include Last Aid Date
+        $warga = $query->select('masjid_warga.*, (SELECT MAX(date) FROM masjid_distributions WHERE warga_id = masjid_warga.id) as last_aid_date')
+            ->orderBy('name', 'ASC')
+            ->findAll();
 
         return view('dashboard/warga/index', [
             'title' => 'Data Warga & Mustahik - Masj.id',
@@ -1173,6 +1176,26 @@ class Admin extends BaseController
         }
 
         return redirect()->to('dashboard/warga')->with('error', 'Data warga tidak ditemukan.');
+    }
+
+    public function volunteers()
+    {
+        $masjidId = session()->get('masjid_id');
+        $wargaModel = new \App\Models\MasjidWargaModel();
+
+        // Search for volunteers (tagged in notes or special status)
+        $volunteers = $wargaModel->where('masjid_id', $masjidId)
+            ->groupStart()
+                ->like('notes', '#relawan')
+                ->orLike('notes', '#volunteer')
+            ->groupEnd()
+            ->orderBy('name', 'ASC')
+            ->findAll();
+
+        return view('dashboard/volunteers/index', [
+            'title'      => 'Relawan & Piket - Masj.id',
+            'volunteers' => $volunteers
+        ]);
     }
 
     // --------------------------------------------------------------------
@@ -1637,7 +1660,8 @@ class Admin extends BaseController
         return view('dashboard/distribution/form', [
             'title'    => 'Input Penyaluran - Masj.id',
             'warga'    => $warga,
-            'programs' => $programs
+            'programs' => $programs,
+            'selectedWargaId' => $this->request->getGet('warga_id')
         ]);
     }
 

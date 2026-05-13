@@ -48,8 +48,8 @@
                 <span class="material-symbols-outlined">account_balance_wallet</span>
             </div>
         </div>
-        <p class="text-slate-500 text-sm font-medium">Dana Amanah Aktif</p>
-        <h3 class="text-3xl font-bold mt-1">Rp <?= number_format($stats['finance']['balance'] / 1000000, 1) ?>M</h3>
+        <p class="text-slate-500 text-sm font-medium">Amanah Dikelola</p>
+        <h3 class="text-3xl font-bold mt-1">Rp <?= number_format($stats['finance']['balance'] / 1000000, 1) ?>jt</h3>
     </div>
     <?php endif; ?>
 
@@ -59,21 +59,21 @@
                 <span class="material-symbols-outlined">auto_graph</span>
             </div>
         </div>
-        <p class="text-slate-500 text-sm font-medium">Program Berjalan</p>
+        <p class="text-slate-500 text-sm font-medium">Program Dampak</p>
         <h3 class="text-3xl font-bold mt-1"><?= number_format($stats['active_programs']) ?></h3>
     </div>
 
     <?php if (session()->get('role') === 'pengurus'): ?>
-    <div class="bg-red-50 dark:bg-red-950/30 p-6 rounded-xl border-2 border-red-200 dark:border-red-900/50 shadow-sm flex flex-col justify-between">
+    <div class="bg-primary/10 dark:bg-emerald-900/30 p-6 rounded-xl border-2 border-primary/20 shadow-sm flex flex-col justify-between">
         <div>
-            <div class="flex items-center gap-2 text-red-600 mb-2">
-                <span class="material-symbols-outlined text-xl">emergency</span>
-                <span class="text-xs font-bold uppercase tracking-wider">Alert Sosial</span>
+            <div class="flex items-center gap-2 text-primary mb-2">
+                <span class="material-symbols-outlined text-xl">volunteer_activism</span>
+                <span class="text-xs font-bold uppercase tracking-wider">Mustahik Care</span>
             </div>
-            <h3 class="text-xl font-bold text-slate-900 dark:text-white"><?= number_format($stats['social_alert']) ?> Warga</h3>
-            <p class="text-xs text-slate-600 dark:text-slate-400 mt-1 italic">Membutuhkan perhatian khusus (Fakir/Miskin/Yatim)</p>
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white"><?= number_format($stats['social_alert']) ?> Penerima Manfaat</h3>
+            <p class="text-xs text-slate-600 dark:text-slate-400 mt-1 italic">Warga lingkungan yang membutuhkan perhatian (Fakir/Miskin/Yatim)</p>
         </div>
-        <a href="<?= base_url('dashboard/warga') ?>" class="mt-4 w-full py-2 bg-red-600 text-white rounded-lg text-xs font-bold hover:bg-red-700 transition-colors flex items-center justify-center gap-2">
+        <a href="<?= base_url('dashboard/warga') ?>" class="mt-4 w-full py-2 bg-primary text-white rounded-lg text-xs font-bold hover:bg-primary/90 transition-colors flex items-center justify-center gap-2">
             Lihat Data <span class="material-symbols-outlined text-sm">arrow_forward</span>
         </a>
     </div>

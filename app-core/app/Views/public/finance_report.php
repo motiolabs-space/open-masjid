@@ -21,19 +21,37 @@
             </div>
         </div>
 
+        <!-- Impact Distribution Section -->
+        <?php if (!empty($expenditureByCat)): ?>
+        <div class="mb-12">
+            <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">volunteer_activism</span>
+                Distribusi Kebaikan (Amanah Terpenuhi)
+            </h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <?php foreach ($expenditureByCat as $item): ?>
+                <div class="bg-white dark:bg-white/5 border border-[#dbe6e3] dark:border-white/10 p-6 rounded-3xl group hover:border-primary transition-all">
+                    <p class="text-[#608a7e] text-[10px] font-black uppercase tracking-widest mb-2"><?= esc($item['name']) ?></p>
+                    <h4 class="text-xl font-black">Rp <?= number_format($item['total'], 0, ',', '.') ?></h4>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <?php endif; ?>
+
         <!-- Summary Grid -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
             <div class="bg-primary p-8 rounded-[2rem] text-white shadow-xl relative overflow-hidden group">
-                <p class="text-emerald-200 text-[10px] font-black uppercase tracking-widest mb-1">Saldo Kas Saat Ini</p>
+                <p class="text-emerald-200 text-[10px] font-black uppercase tracking-widest mb-1">Amanah Kas (Saldo)</p>
                 <h3 class="text-3xl font-black">Rp <?= number_format($summary['balance'], 0, ',', '.') ?></h3>
                 <span class="material-symbols-outlined absolute -bottom-4 -right-4 text-7xl opacity-10 group-hover:scale-110 transition-transform">account_balance_wallet</span>
             </div>
             <div class="bg-white dark:bg-white/5 border border-[#dbe6e3] dark:border-white/10 p-8 rounded-[2rem] group">
-                <p class="text-[#608a7e] text-[10px] font-black uppercase tracking-widest mb-1">Pemasukan (Periode Ini)</p>
+                <p class="text-[#608a7e] text-[10px] font-black uppercase tracking-widest mb-1">Amanah Diterima (Pemasukan)</p>
                 <h3 class="text-3xl font-black text-emerald-600">Rp <?= number_format(array_sum(array_column(array_filter($transactions, fn($t) => $t['type'] == 'pemasukan'), 'amount')), 0, ',', '.') ?></h3>
             </div>
             <div class="bg-white dark:bg-white/5 border border-[#dbe6e3] dark:border-white/10 p-8 rounded-[2rem] group">
-                <p class="text-[#608a7e] text-[10px] font-black uppercase tracking-widest mb-1">Pengeluaran (Periode Ini)</p>
+                <p class="text-[#608a7e] text-[10px] font-black uppercase tracking-widest mb-1">Manfaat Disalurkan (Pengeluaran)</p>
                 <h3 class="text-3xl font-black text-red-500">Rp <?= number_format(array_sum(array_column(array_filter($transactions, fn($t) => $t['type'] == 'pengeluaran'), 'amount')), 0, ',', '.') ?></h3>
             </div>
         </div>

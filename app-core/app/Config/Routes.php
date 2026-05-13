@@ -63,6 +63,7 @@ $routes->get('dashboard/warga/new', 'Admin::createWarga');
 $routes->get('dashboard/warga/edit/(:num)', 'Admin::editWarga/$1');
 $routes->post('dashboard/warga/save', 'Admin::saveWarga');
 $routes->get('dashboard/warga/delete/(:num)', 'Admin::deleteWarga/$1');
+$routes->get('dashboard/volunteers', 'Admin::volunteers');
 
 // Broadcast Newsletter
 $routes->get('dashboard/subscribers', 'Admin::subscribers');
