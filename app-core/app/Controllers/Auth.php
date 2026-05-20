@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Models\UserModel;
 use App\Models\MasjidModel;
 use App\Models\MasjidPengurusModel;
+use App\Libraries\TelegramLibrary;
 use CodeIgniter\RESTful\ResourceController;
 
 class Auth extends BaseController
@@ -76,6 +77,19 @@ class Auth extends BaseController
                 'masjid_name'     => $masjidData['name'],
                 'masjid_username' => $masjidData['username']
             ]);
+
+            // 4. Send Telegram Notification
+            try {
+                $telegram = new TelegramLibrary();
+                $msg = "<b>🆕 PENDAFTAR BARU!</b>\n\n";
+                $msg .= "Nama Masjid: <b>{$masjidData['name']}</b>\n";
+                $msg .= "Username: @{$masjidData['username']}\n";
+                $msg .= "PIC: {$userData['name']} ({$userData['phone']})\n";
+                $msg .= "Waktu: " . date('d M Y H:i:s') . "\n";
+                $telegram->sendMessage($msg);
+            } catch (\Exception $te) {
+                log_message('error', 'Failed to send Telegram notification: ' . $te->getMessage());
+            }
 
             return redirect()->to('dashboard')->with('success', 'Pendaftaran masjid berhasil. Selamat datang!');
 
