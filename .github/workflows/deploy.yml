@@ -1,3 +1,4 @@
+# Test deploy trigger
 name: Auto Deploy to SiteGround (Split Paths)
 
 on:
