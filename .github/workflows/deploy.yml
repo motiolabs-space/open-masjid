@@ -1,0 +1,42 @@
+name: Auto Deploy to SiteGround (SFTP)
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: FTP/SFTP Deploy to SiteGround
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.SITEGROUND_SFTP_HOST }}
+          username: ${{ secrets.SITEGROUND_SFTP_USERNAME }}
+          password: ${{ secrets.SITEGROUND_SFTP_PASSWORD }}
+          port: ${{ secrets.SITEGROUND_SFTP_PORT || 18765 }} # SiteGround default SFTP port is usually 18765
+          server-dir: ${{ secrets.SITEGROUND_DEPLOY_PATH || 'public_html/' }}
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/.env
+            **/app-core/.env
+            **/tests/**
+            **/phpunit.xml.dist
+            **/README.md
+            **/.vscode/**
+            **/.idea/**
+            **/.gemini/**
