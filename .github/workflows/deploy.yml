@@ -1,4 +1,4 @@
-# Test deploy trigger
+# Test deploy trigger - fixed secrets
 name: Auto Deploy to SiteGround (Split Paths)
 
 on:
