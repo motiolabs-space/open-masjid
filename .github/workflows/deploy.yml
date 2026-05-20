@@ -1,4 +1,4 @@
-name: Auto Deploy to SiteGround (SFTP)
+name: Auto Deploy to SiteGround (Split Paths)
 
 on:
   push:
@@ -20,23 +20,47 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: FTP/SFTP Deploy to SiteGround
+      # 1. DEPLOY CORE FILES (app-core/ -> /app-core/ di luar public_html)
+      - name: Deploy Core Files (app-core)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.SITEGROUND_SFTP_HOST }}
           username: ${{ secrets.SITEGROUND_SFTP_USERNAME }}
           password: ${{ secrets.SITEGROUND_SFTP_PASSWORD }}
-          port: ${{ secrets.SITEGROUND_SFTP_PORT || 18765 }} # SiteGround default SFTP port is usually 18765
-          server-dir: ${{ secrets.SITEGROUND_DEPLOY_PATH || 'public_html/' }}
+          port: ${{ secrets.SITEGROUND_SFTP_PORT || 18765 }}
+          local-dir: app-core/
+          server-dir: app-core/
           exclude: |
             **/.git*
             **/.git*/**
             **/node_modules/**
             **/.env
-            **/app-core/.env
+            **/writable/**
             **/tests/**
             **/phpunit.xml.dist
+            **/README.md
+
+      # 2. DEPLOY PUBLIC FILES (Root files & assets -> /public_html/)
+      - name: Deploy Public Files (public_html)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.SITEGROUND_SFTP_HOST }}
+          username: ${{ secrets.SITEGROUND_SFTP_USERNAME }}
+          password: ${{ secrets.SITEGROUND_SFTP_PASSWORD }}
+          port: ${{ secrets.SITEGROUND_SFTP_PORT || 18765 }}
+          local-dir: ./
+          server-dir: public_html/
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/app-core/**
+            **/.env
             **/README.md
             **/.vscode/**
             **/.idea/**
             **/.gemini/**
+            **/user.md
+            **/project_brief.md
+            **/prefixes.txt
+            **/database.sql
