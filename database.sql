@@ -153,7 +153,7 @@ CREATE TABLE IF NOT EXISTS `masjid_finance_categories` (
 
 CREATE TABLE IF NOT EXISTS `masjid_finance_transactions` (
   `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `masjid_id" int(11) UNSIGNED NOT NULL,
+  `masjid_id` int(11) UNSIGNED NOT NULL,
   `category_id` int(11) UNSIGNED DEFAULT NULL,
   `date` date NOT NULL,
   `amount` decimal(15,2) DEFAULT 0.00,

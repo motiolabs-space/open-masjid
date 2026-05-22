@@ -97,7 +97,74 @@ Jika Anda percaya bahwa masjid di Indonesia perlu menjadi lebih amanah, transpar
 - **Ikonografi**: [Material Symbols](https://fonts.google.com/icons)
 - **Database**: MySQL / MariaDB (Konfigurasi via `.env`)
 
-## 🛠️ Instalasi & Setup Lokal
+## 🐳 Menjalankan dengan Docker (disarankan)
+
+Cukup **Docker** dan **Docker Compose** — tidak perlu XAMPP/Laragon.
+
+### Persyaratan
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows/macOS) atau Docker Engine + Compose (Linux)
+
+### Langkah
+
+```bash
+git clone https://github.com/motiolabs-space/open-masjid.git
+cd open-masjid
+docker compose up --build
+```
+
+Tunggu hingga log menampilkan `Application ready`. Lalu buka:
+
+| URL | Keterangan |
+|-----|------------|
+| http://localhost:8080/ | Beranda |
+| http://localhost:8080/login | Login |
+| http://localhost:8080/dashboard | Dashboard (setelah login) |
+
+**Login default:** `admin@openmasjid.com` / `password123`
+
+### Yang dijalankan otomatis
+
+- **app** — PHP 8.2 + Apache (CodeIgniter, `mod_rewrite`)
+- **db** — MariaDB 10.11
+- Impor `database.sql` saat database pertama kali dibuat
+- Salin `docker/.env.docker` → `app-core/.env` (jika belum ada)
+- `composer install` di `app-core` (jika `vendor/` belum ada)
+- `php spark migrate`
+
+### Perintah berguna
+
+```bash
+# Jalankan di background
+docker compose up -d --build
+
+# Hentikan
+docker compose down
+
+# Reset database (hapus volume) lalu jalankan ulang
+docker compose down -v
+docker compose up --build
+```
+
+### Kustomisasi port / password
+
+Salin `.env.example` ke `.env` di root proyek (opsional):
+
+```bash
+cp .env.example .env
+```
+
+Contoh variabel:
+
+```ini
+APP_PORT=8080
+MYSQL_PORT=3307
+MYSQL_PASSWORD=open_masjid_secret
+```
+
+---
+
+## 🛠️ Instalasi & Setup Lokal (tanpa Docker)
 
 1. **Clone Repositori**
 
