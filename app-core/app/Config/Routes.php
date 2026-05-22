@@ -129,6 +129,9 @@ $routes->get('payment/simulation/(:segment)', 'Payment::simulation/$1');
 $routes->post('payment/callback', 'Payment::callback');
 $routes->get('payment/success/(:segment)', 'Payment::success/$1');
 
+// Telegram Webhook
+$routes->post('api/telegram/webhook/(:any)', 'Api\Telegram::webhook/$1');
+
 // Prevent asset paths from being captured by wildcard
 $routes->get('(images|assets|uploads|css|js|fonts)/(:any)', function() {
     throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();

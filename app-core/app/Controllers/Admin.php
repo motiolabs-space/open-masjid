@@ -1900,6 +1900,47 @@ class Admin extends BaseController
                     return redirect()->back()->with('error', 'Format file tidak sesuai atau data kosong.');
                 }
                 
+                // --- AI Auto-Categorization Integration ---
+                $masjidId = session()->get('masjid_id');
+                $programModel = new \App\Models\MasjidProgramModel();
+                $programs = $programModel->select('id, title')->where('masjid_id', $masjidId)->findAll();
+                
+                if (!empty($programs)) {
+                    $ai = new \App\Libraries\SumoPodAI();
+                    
+                    // Prepare data for AI
+                    $programListText = json_encode($programs);
+                    $transactionsText = json_encode(array_map(function($r) {
+                        return ['description' => $r['description']];
+                    }, $rows));
+
+                    $prompt = "Sebagai asisten keuangan masjid, tugas Anda adalah memetakan transaksi bank berikut ke dalam ID program masjid yang paling relevan berdasarkan keterangan transaksinya.\n\n"
+                            . "Daftar Program (JSON):\n{$programListText}\n\n"
+                            . "Daftar Transaksi (JSON):\n{$transactionsText}\n\n"
+                            . "Tolong kembalikan respons dalam format JSON murni (tanpa markdown), berupa array yang berisi daftar objek dengan key 'description' dan 'suggested_program_id'. Jika tidak yakin, isi null.";
+
+                    $aiResponse = $ai->chatCompletion($prompt, ['temperature' => 0.1]);
+                    
+                    if ($aiResponse) {
+                        // Clean up potential markdown formatting from AI output
+                        $aiResponse = trim(str_replace(['```json', '```'], '', $aiResponse));
+                        $suggestions = json_decode($aiResponse, true);
+                        
+                        if (is_array($suggestions)) {
+                            foreach ($rows as &$row) {
+                                $row['suggested_program_id'] = null;
+                                foreach ($suggestions as $suggestion) {
+                                    if (isset($suggestion['description'], $suggestion['suggested_program_id']) && $suggestion['description'] === $row['description']) {
+                                        $row['suggested_program_id'] = $suggestion['suggested_program_id'];
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                // --- End AI Integration ---
+
                 return redirect()->back()->with('mutations', $rows)->with('success', count($rows) . ' transaksi ditemukan. Silakan petakan ke program.');
             } catch (\Exception $e) {
                 return redirect()->back()->with('error', 'Gagal membaca file: ' . $e->getMessage());

@@ -13,10 +13,16 @@ class TelegramLibrary
     protected $chatId;
     protected $apiUrl = 'https://api.telegram.org/bot';
 
-    public function __construct()
+    public function __construct($botToken = null, $chatId = null)
     {
-        $this->botToken = env('telegram.botToken');
-        $this->chatId = env('telegram.chatId');
+        $this->botToken = $botToken ?: env('telegram.botToken');
+        $this->chatId = $chatId ?: env('telegram.chatId');
+    }
+
+    public function setChatId($chatId)
+    {
+        $this->chatId = $chatId;
+        return $this;
     }
 
     /**

@@ -90,10 +90,12 @@
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100 dark:divide-white/5">
-                                    <?php foreach ($mutations as $idx => $mut): ?>
-                                    <tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                                    <?php foreach ($mutations as $idx => $mut): 
+                                        $hasAiSuggestion = !empty($mut['suggested_program_id']);
+                                    ?>
+                                    <tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors <?= $hasAiSuggestion ? 'bg-emerald-50/50 dark:bg-emerald-900/10' : '' ?>">
                                         <td class="px-6 py-4">
-                                            <input type="checkbox" name="selected[]" value="<?= $idx ?>" class="row-checkbox rounded text-primary focus:ring-primary">
+                                            <input type="checkbox" name="selected[]" value="<?= $idx ?>" class="row-checkbox rounded text-primary focus:ring-primary" <?= $hasAiSuggestion ? 'checked' : '' ?>>
                                             <input type="hidden" name="date[<?= $idx ?>]" value="<?= $mut['date'] ?>">
                                             <input type="hidden" name="description[<?= $idx ?>]" value="<?= esc($mut['description']) ?>">
                                             <input type="hidden" name="amount[<?= $idx ?>]" value="<?= $mut['amount'] ?>">
@@ -108,12 +110,21 @@
                                             </span>
                                         </td>
                                         <td class="px-6 py-4">
-                                            <select name="program_id[<?= $idx ?>]" class="text-xs bg-slate-100 dark:bg-white/5 border-none rounded-lg focus:ring-2 focus:ring-primary p-2 w-full font-bold">
-                                                <option value="">Pilih Program...</option>
-                                                <?php foreach ($programs as $prog): ?>
-                                                    <option value="<?= $prog['id'] ?>"><?= esc($prog['title']) ?></option>
-                                                <?php endforeach; ?>
-                                            </select>
+                                            <div class="relative">
+                                                <select name="program_id[<?= $idx ?>]" class="text-xs <?= $hasAiSuggestion ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800' : 'bg-slate-100 dark:bg-white/5' ?> border-none rounded-lg focus:ring-2 focus:ring-primary p-2 w-full font-bold">
+                                                    <option value="">Pilih Program...</option>
+                                                    <?php foreach ($programs as $prog): ?>
+                                                        <option value="<?= $prog['id'] ?>" <?= (isset($mut['suggested_program_id']) && $mut['suggested_program_id'] == $prog['id']) ? 'selected' : '' ?>>
+                                                            <?= esc($prog['title']) ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                                <?php if ($hasAiSuggestion): ?>
+                                                    <div class="absolute -top-2 -right-2 bg-emerald-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-md shadow-sm flex items-center gap-0.5">
+                                                        <span class="material-symbols-outlined text-[10px]">smart_toy</span> AI
+                                                    </div>
+                                                <?php endif; ?>
+                                            </div>
                                         </td>
                                     </tr>
                                     <?php endforeach; ?>
