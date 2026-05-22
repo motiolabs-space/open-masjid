@@ -49,6 +49,7 @@ CREATE TABLE IF NOT EXISTS `masjid` (
   `phone` varchar(20) DEFAULT NULL,
   `whatsapp` varchar(20) DEFAULT NULL,
   `email` varchar(100) DEFAULT NULL,
+  `telegram_bot_token` varchar(255) DEFAULT NULL,
   `logo` varchar(255) DEFAULT NULL,
   `foto_utama` varchar(255) DEFAULT NULL,
   `about_us` text DEFAULT NULL,

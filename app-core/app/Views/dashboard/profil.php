@@ -261,6 +261,40 @@
         </div>
     </div>
 
+    <!-- Section: Integrasi Telegram Bot (AI Assistant) -->
+    <div class="bg-white dark:bg-white/5 rounded-xl border border-[#e5e7eb] dark:border-white/10 overflow-hidden mb-8">
+        <div class="p-6 border-b border-[#e5e7eb] dark:border-white/10 flex items-center justify-between">
+            <h2 class="text-xl font-bold text-[#111816] dark:text-white flex items-center gap-2">
+                <span class="material-symbols-outlined text-[#0088cc]">smart_toy</span>
+                Integrasi Bot Telegram (AI Assistant)
+            </h2>
+            <span class="text-[10px] px-2 py-1 bg-blue-100 text-blue-700 rounded-lg font-bold uppercase">AI Feature</span>
+        </div>
+        <div class="p-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="space-y-4">
+                    <p class="text-sm text-[#608a7e]">Aktifkan fitur tanya jawab seputar kondisi masjid (keuangan, kegiatan) via Telegram menggunakan AI. Untuk mengaktifkannya, Anda perlu membuat bot melalui <a href="https://t.me/BotFather" target="_blank" class="text-blue-500 hover:underline">@BotFather</a> dan memasukkan Token Bot di sini.</p>
+                    
+                    <div>
+                        <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-1.5">Telegram Bot Token</label>
+                        <input name="telegram_bot_token" class="w-full rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary font-mono text-sm" type="text" value="<?= esc($masjid['telegram_bot_token'] ?? '') ?>" placeholder="1234567890:AAH..."/>
+                    </div>
+                </div>
+                
+                <div class="bg-blue-50 dark:bg-blue-900/20 p-5 rounded-xl border border-blue-100 dark:border-blue-800/30">
+                    <h3 class="font-bold text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-sm">webhook</span>
+                        Webhook URL
+                    </h3>
+                    <p class="text-xs text-blue-700 dark:text-blue-400 mb-3">Setelah menyimpan Token Bot, daftarkan URL berikut ini sebagai Webhook bot Anda melalui browser:</p>
+                    <div class="bg-white dark:bg-black/20 p-2 rounded border border-blue-200 dark:border-blue-800/50 break-all select-all text-xs font-mono text-slate-700 dark:text-slate-300">
+                        https://api.telegram.org/bot<span class="text-blue-500 font-bold">&lt;TOKEN_ANDA&gt;</span>/setWebhook?url=<?= base_url('api/telegram/webhook/' . ($masjid['username'] ?? '')) ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Section 2: Lokasi & Wilayah -->
     <div class="bg-white dark:bg-white/5 rounded-xl border border-[#e5e7eb] dark:border-white/10 overflow-hidden mb-8">
         <div class="p-6 border-b border-[#e5e7eb] dark:border-white/10">

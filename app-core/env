@@ -74,3 +74,9 @@
 # telegram.botToken = ''
 # telegram.chatId = ''
 
+#--------------------------------------------------------------------
+# SUMOPOD AI API
+#--------------------------------------------------------------------
+# sumopod.apiUrl = 'https://ai.sumopod.com/v1'
+# sumopod.apiKey = ''
+# sumopod.model = 'gpt-4o-mini'
