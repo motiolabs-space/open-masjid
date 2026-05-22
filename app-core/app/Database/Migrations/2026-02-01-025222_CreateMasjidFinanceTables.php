@@ -9,6 +9,9 @@ class CreateMasjidFinanceTables extends Migration
     public function up()
     {
         // 1. Finance Categories Table
+        // The `masjid_finance_categories` table is already defined in `database.sql`.
+        // Commenting out to prevent "Table `masjid_finance_categories` already exists" error.
+        /*
         $this->forge->addField([
             'id' => [
                 'type'           => 'INT',
@@ -46,8 +49,12 @@ class CreateMasjidFinanceTables extends Migration
         $this->forge->addKey('id', true);
         $this->forge->addForeignKey('masjid_id', 'masjid', 'id', 'CASCADE', 'CASCADE');
         $this->forge->createTable('masjid_finance_categories');
+        */
 
         // 2. Finance Transactions Table
+        // The `masjid_finance_transactions` table is already defined in `database.sql`.
+        // Commenting out to prevent "Table `masjid_finance_transactions` already exists" error.
+        /*
         $this->forge->addField([
             'id' => [
                 'type'           => 'INT',
@@ -117,6 +124,7 @@ class CreateMasjidFinanceTables extends Migration
         $this->forge->addForeignKey('category_id', 'masjid_finance_categories', 'id', 'SET NULL', 'CASCADE');
         $this->forge->addForeignKey('program_id', 'masjid_programs', 'id', 'SET NULL', 'CASCADE');
         $this->forge->createTable('masjid_finance_transactions');
+        */
     }
 
     public function down()

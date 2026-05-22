@@ -8,32 +8,36 @@ class AddMenuSettingsToMasjid extends Migration
 {
     public function up()
     {
-        $this->forge->addColumn('masjid', [
-            'menu_berita' => [
-                'type' => 'TINYINT',
-                'constraint' => 1,
-                'default' => 1,
-                'after' => 'username_updated_at'
+        // The `menu_berita`, `menu_program`, `menu_laporan`, and `menu_kontak` columns are already defined in `database.sql`.
+        // Commenting out to prevent "Duplicate column name" errors.
+        /*
+        $this->forge->addColumn(\'masjid\', [
+            \'menu_berita\' => [
+                \'type\' => \'TINYINT\',
+                \'constraint\' => 1,
+                \'default\' => 1,
+                \'after\' => \'username_updated_at\'
             ],
-            'menu_program' => [
-                'type' => 'TINYINT',
-                'constraint' => 1,
-                'default' => 1,
-                'after' => 'menu_berita'
+            \'menu_program\' => [
+                \'type\' => \'TINYINT\',
+                \'constraint\' => 1,
+                \'default\' => 1,
+                \'after\' => \'menu_berita\'
             ],
-            'menu_laporan' => [
-                'type' => 'TINYINT',
-                'constraint' => 1,
-                'default' => 1,
-                'after' => 'menu_program'
+            \'menu_laporan\' => [
+                \'type\' => \'TINYINT\',
+                \'constraint\' => 1,
+                \'default\' => 1,
+                \'after\' => \'menu_program\'
             ],
-            'menu_kontak' => [
-                'type' => 'TINYINT',
-                'constraint' => 1,
-                'default' => 1,
-                'after' => 'menu_laporan'
+            \'menu_kontak\' => [
+                \'type\' => \'TINYINT\',
+                \'constraint\' => 1,
+                \'default\' => 1,
+                \'after\' => \'menu_laporan\'
             ],
         ]);
+        */
     }
 
     public function down()
