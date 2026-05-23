@@ -18,6 +18,8 @@ $routes->get('/login', 'Home::login');
 $routes->post('/login', 'Auth::login');
 $routes->get('/register', 'Home::register');
 $routes->get('/logout', 'Auth::logout');
+$routes->get('/auth/google', 'Auth::googleLogin');
+$routes->get('/auth/google/callback', 'Auth::googleCallback');
 $routes->get('/auth/check-username', 'Auth::checkUsername');
 $routes->get('/auth/check-email', 'Auth::checkEmail');
 $routes->post('/register/masjid', 'Auth::registerMasjid');
