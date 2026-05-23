@@ -57,7 +57,7 @@
                         <?= !empty($m['last_login']) ? date('d M Y, H:i', strtotime($m['last_login'])) : '<span class="text-slate-400 text-xs italic">Belum pernah</span>' ?>
                     </td>
                     <td class="px-6 py-4 text-right space-x-2">
-                        <a href="<?= base_url('superadmin/masjid/manage/' . $m['id']) ?>" class="bg-primary/10 text-primary hover:bg-primary hover:text-white px-3 py-1.5 rounded-lg font-bold text-xs transition-all inline-flex items-center gap-1">
+                        <a href="<?= base_url('superadmin/manage-masjid/' . $m['id']) ?>" class="bg-primary/10 text-primary hover:bg-primary hover:text-white px-3 py-1.5 rounded-lg font-bold text-xs transition-all inline-flex items-center gap-1">
                             <span class="material-symbols-outlined text-sm">settings_suggest</span>
                             Kelola
                         </a>
