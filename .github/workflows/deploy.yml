@@ -34,6 +34,7 @@ jobs:
           port: ${{ secrets.SITEGROUND_FTP_PORT || 21 }} # Menggunakan port default FTP (21)
           local-dir: app-core/
           server-dir: app-core/
+          state-name: .ftp-deploy-sync-state-v2.json
           exclude: |
             **/.git*
             **/.git*/**
@@ -54,6 +55,7 @@ jobs:
           port: ${{ secrets.SITEGROUND_FTP_PORT || 21 }} # Menggunakan port default FTP (21)
           local-dir: ./
           server-dir: public_html/
+          state-name: .ftp-deploy-sync-state-v2.json
           exclude: |
             **/.git*
             **/.git*/**
