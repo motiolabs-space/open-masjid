@@ -1,13 +1,9 @@
-# Test deploy trigger - fixed secrets
-name: Auto Deploy to SiteGround (Split Paths)
+name: Auto Deploy to SiteGround via SSH (Rsync)
 
 on:
   push:
     branches:
       - main
-
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -21,56 +17,31 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      # 1. DEPLOY CORE FILES (app-core/ -> /app-core/ di luar public_html)
+      # 1. DEPLOY APP-CORE
+      # Akan dikirim ke: {TARGET_PATH}/app-core/
       - name: Deploy Core Files (app-core)
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.SITEGROUND_FTP_HOST }}
-          username: ${{ secrets.SITEGROUND_FTP_USERNAME }}
-          password: ${{ secrets.SITEGROUND_FTP_PASSWORD }}
-          port: ${{ secrets.SITEGROUND_FTP_PORT || 21 }} # Menggunakan port default FTP (21)
-          protocol: ftps
-          timeout: 60000
-          local-dir: app-core/
-          server-dir: app-core/
-          state-name: .ftp-deploy-sync-state-v3.json
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/node_modules/**
-            **/.env
-            **/writable/**
-            **/tests/**
-            **/phpunit.xml.dist
-            **/README.md
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SITEGROUND_SSH_PRIVATE_KEY }}
+          ARGS: "-rlgoDzvc -i --delete"
+          SOURCE: "app-core/"
+          REMOTE_HOST: ${{ secrets.SITEGROUND_FTP_HOST }}
+          REMOTE_USER: ${{ secrets.SITEGROUND_FTP_USERNAME }}
+          REMOTE_PORT: ${{ secrets.SITEGROUND_SSH_PORT || '18765' }}
+          TARGET: "${{ secrets.SITEGROUND_SSH_TARGET_PATH }}/app-core/"
+          EXCLUDE: "/node_modules/, /.git/, /.env, /writable/cache/, /writable/session/, /tests/"
 
-      # 2. DEPLOY PUBLIC FILES (Root files & assets -> /public_html/)
+      # 2. DEPLOY PUBLIC_HTML
+      # Akan dikirim ke: {TARGET_PATH}/public_html/
       - name: Deploy Public Files (public_html)
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.SITEGROUND_FTP_HOST }}
-          username: ${{ secrets.SITEGROUND_FTP_USERNAME }}
-          password: ${{ secrets.SITEGROUND_FTP_PASSWORD }}
-          port: ${{ secrets.SITEGROUND_FTP_PORT || 21 }} # Menggunakan port default FTP (21)
-          protocol: ftps
-          timeout: 60000
-          local-dir: ./
-          server-dir: public_html/
-          state-name: .ftp-deploy-sync-state-v3.json
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/node_modules/**
-            **/app-core/**
-            **/.env
-            **/README.md
-            **/.vscode/**
-            **/.idea/**
-            **/.gemini/**
-            **/user.md
-            **/project_brief.md
-            **/prefixes.txt
-            **/database.sql
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SITEGROUND_SSH_PRIVATE_KEY }}
+          ARGS: "-rlgoDzvc -i"
+          SOURCE: "./"
+          REMOTE_HOST: ${{ secrets.SITEGROUND_FTP_HOST }}
+          REMOTE_USER: ${{ secrets.SITEGROUND_FTP_USERNAME }}
+          REMOTE_PORT: ${{ secrets.SITEGROUND_SSH_PORT || '18765' }}
+          TARGET: "${{ secrets.SITEGROUND_SSH_TARGET_PATH }}/public_html/"
+          EXCLUDE: "/node_modules/, /.git/, /app-core/, /.env, /.github/, /.vscode/, /.gemini/, /scratch/, /*.md, /database.sql"
