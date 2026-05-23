@@ -42,6 +42,10 @@ $routes->get('dashboard/program', 'Admin::program');
 
     $routes->get('dashboard/settings', 'Admin::settings');
 
+    // Virtual Auditor
+    $routes->get('dashboard/auditor', 'VirtualAuditor::index');
+    $routes->post('dashboard/auditor/run', 'VirtualAuditor::runAudit');
+
     // DKM Distribution & Mustahik Routes
     $routes->get('dashboard/distribution', 'Distribution::index');
     $routes->get('dashboard/distribution/mustahik/create', 'Distribution::createMustahik');
