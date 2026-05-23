@@ -84,5 +84,14 @@
 #--------------------------------------------------------------------
 # GOOGLE SSO
 #--------------------------------------------------------------------
-# GOOGLE_CLIENT_ID = 'your-google-client-id.apps.googleusercontent.com'
-# GOOGLE_CLIENT_SECRET = 'your-google-client-secret'
+# GOOGLE_CLIENT_ID = ''
+# GOOGLE_CLIENT_SECRET = ''
+
+#--------------------------------------------------------------------
+# SEO SETTINGS
+#--------------------------------------------------------------------
+# SEO_META_TITLE = 'Dashboard Masjid'
+# SEO_META_DESCRIPTION = 'Platform manajemen masjid.'
+# SEO_META_KEYWORDS = 'masjid, donasi'
+# SEO_OG_IMAGE = ''
+# SEO_TWITTER_HANDLE = ''
