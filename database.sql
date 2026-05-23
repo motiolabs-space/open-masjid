@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `role` enum('superadmin','user') DEFAULT 'user',
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
+  `last_login` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -154,7 +155,7 @@ CREATE TABLE IF NOT EXISTS `masjid_finance_categories` (
 
 CREATE TABLE IF NOT EXISTS `masjid_finance_transactions` (
   `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `masjid_id" int(11) UNSIGNED NOT NULL,
+  `masjid_id` int(11) UNSIGNED NOT NULL,
   `category_id` int(11) UNSIGNED DEFAULT NULL,
   `date` date NOT NULL,
   `amount` decimal(15,2) DEFAULT 0.00,
@@ -195,3 +196,50 @@ CREATE TABLE IF NOT EXISTS `masjid_payments` (
 -- Default Superadmin (Password: password123)
 INSERT INTO `users` (`name`, `email`, `password_hash`, `role`, `created_at`, `updated_at`) VALUES
 ('Super Admin', 'admin@openmasjid.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'superadmin', NOW(), NOW());
+
+-- --------------------------------------------------------
+-- 4. LMS Tables
+-- --------------------------------------------------------
+
+-- Table structure for `lms_modules`
+CREATE TABLE IF NOT EXISTS `lms_modules` (
+  `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `thumbnail` varchar(255) DEFAULT NULL,
+  `lembaga_pemateri` varchar(255) DEFAULT NULL,
+  `status` enum('published','draft') DEFAULT 'draft',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table structure for `lms_materials`
+CREATE TABLE IF NOT EXISTS `lms_materials` (
+  `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `module_id` int(11) UNSIGNED NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `type` enum('video','pdf','html') NOT NULL DEFAULT 'video',
+  `content` text NOT NULL,
+  `order_number` int(11) DEFAULT 0,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `lms_materials_module_id_foreign` FOREIGN KEY (`module_id`) REFERENCES `lms_modules` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table structure for `lms_progress`
+CREATE TABLE IF NOT EXISTS `lms_progress` (
+  `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) UNSIGNED NOT NULL,
+  `masjid_id` int(11) UNSIGNED NOT NULL,
+  `material_id` int(11) UNSIGNED NOT NULL,
+  `completed_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_material_unique` (`user_id`, `material_id`),
+  CONSTRAINT `lms_progress_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `lms_progress_masjid_id_foreign` FOREIGN KEY (`masjid_id`) REFERENCES `masjid` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `lms_progress_material_id_foreign` FOREIGN KEY (`material_id`) REFERENCES `lms_materials` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+

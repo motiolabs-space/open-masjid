@@ -110,6 +110,9 @@ class Auth extends BaseController
         $user = $userModel->where('email', $email)->first();
 
         if ($user && password_verify($password, $user['password_hash'])) {
+            // Record last login
+            $userModel->update($user['id'], ['last_login' => date('Y-m-d H:i:s')]);
+
             $session = session();
             
             // Check for Masjid Pengurus role

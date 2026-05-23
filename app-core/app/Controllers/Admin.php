@@ -1997,4 +1997,140 @@ class Admin extends BaseController
 
         return redirect()->to(base_url('dashboard/keuangan'))->with('success', $successCount . ' transaksi berhasil dipetakan ke laporan keuangan.');
     }
+
+    // --------------------------------------------------------------------
+    // AI REPORT GENERATOR
+    // --------------------------------------------------------------------
+
+    public function aiReportGenerator()
+    {
+        $masjidId = session()->get('masjid_id');
+        $month = $this->request->getGet('month') ?? date('Y-m');
+
+        return view('dashboard/reports/ai_report_generator', [
+            'title' => 'AI Report Generator - Masj.id',
+            'month' => $month,
+            'generatedText' => session()->getFlashdata('generatedText') ?? ''
+        ]);
+    }
+
+    public function generateAiReport()
+    {
+        $masjidId = session()->get('masjid_id');
+        $month = $this->request->getPost('month') ?? date('Y-m');
+        $startDate = $month . '-01';
+        $endDate = date('Y-m-t', strtotime($startDate));
+
+        $financeModel = new \App\Models\MasjidFinanceTransactionModel();
+        $programModel = new \App\Models\MasjidProgramModel();
+
+        // 1. Get Opening Balance (Saldo Awal) before Start Date
+        $prevTransactions = $financeModel->where('masjid_id', $masjidId)
+            ->where('date <', $startDate)
+            ->findAll();
+        
+        $openingBalance = 0;
+        foreach ($prevTransactions as $t) {
+            if ($t['type'] == 'income' || $t['type'] == 'pemasukan') $openingBalance += $t['amount'];
+            else $openingBalance -= $t['amount'];
+        }
+
+        // 2. Get Transactions in Range
+        $transactions = $financeModel->where('masjid_id', $masjidId)
+            ->where('date >=', $startDate)
+            ->where('date <=', $endDate)
+            ->findAll();
+
+        $totalIncome = 0;
+        $totalExpense = 0;
+        foreach ($transactions as $t) {
+            if ($t['type'] == 'income' || $t['type'] == 'pemasukan') $totalIncome += $t['amount'];
+            else $totalExpense += $t['amount'];
+        }
+        $closingBalance = $openingBalance + $totalIncome - $totalExpense;
+
+        // 3. Get Programs in Range
+        $programs = $programModel->where('masjid_id', $masjidId)
+            ->like('date_start', $month, 'after')
+            ->findAll();
+        
+        $programCount = count($programs);
+        $programNames = array_map(function($p) { return $p['title']; }, $programs);
+
+        // 4. Construct Prompt
+        $masjid = (new \App\Models\MasjidModel())->find($masjidId);
+        $masjidName = $masjid ? $masjid['name'] : 'Masjid';
+
+        $prompt = "Anda adalah Sekretaris Masjid Profesional untuk {$masjidName}. Buatkan narasi laporan bulanan (copywriting) untuk bulan " . date('F Y', strtotime($startDate)) . " yang hangat, transparan, dan mudah dibaca oleh jamaah awam.\n\n";
+        $prompt .= "Gunakan data berikut:\n";
+        $prompt .= "- Saldo Awal: Rp " . number_format($openingBalance, 0, ',', '.') . "\n";
+        $prompt .= "- Total Pemasukan: Rp " . number_format($totalIncome, 0, ',', '.') . "\n";
+        $prompt .= "- Total Pengeluaran: Rp " . number_format($totalExpense, 0, ',', '.') . "\n";
+        $prompt .= "- Saldo Akhir: Rp " . number_format($closingBalance, 0, ',', '.') . "\n";
+        $prompt .= "- Jumlah Kegiatan/Program Bulan Ini: {$programCount}\n";
+        if ($programCount > 0) {
+            $prompt .= "- Daftar Kegiatan: " . implode(', ', $programNames) . "\n";
+        }
+        $prompt .= "\nBuatkan teks yang menarik, mengucapkan terima kasih kepada donatur, merangkum kegiatan, dan menginformasikan saldo keuangan. Format dalam Markdown. Jangan gunakan kalimat pengantar AI seperti 'Tentu, ini laporannya', langsung berikan teksnya.";
+
+        // 5. Call SumoPod AI
+        $ai = new \App\Libraries\SumoPodAI();
+        $aiResponse = $ai->chatCompletion($prompt, ['temperature' => 0.6]);
+
+        if ($aiResponse) {
+            return redirect()->to(base_url('dashboard/reports/ai-generator?month=' . $month))
+                             ->with('generatedText', trim($aiResponse))
+                             ->with('success', 'Berhasil membuat laporan AI.');
+        } else {
+            return redirect()->back()->with('error', 'Gagal menghasilkan laporan dari AI.');
+        }
+    }
+
+    public function publishAiReport()
+    {
+        $masjidId = session()->get('masjid_id');
+        $month = $this->request->getPost('month');
+        $content = $this->request->getPost('content');
+        $action = $this->request->getPost('action'); // 'news' or 'broadcast'
+
+        if (empty($content)) {
+            return redirect()->back()->with('error', 'Konten laporan kosong.');
+        }
+
+        $title = "Laporan Kegiatan & Keuangan Bulan " . date('F Y', strtotime($month . '-01'));
+
+        if ($action === 'news') {
+            $newsModel = new \App\Models\MasjidNewsModel();
+            
+            // Create a slug
+            $slug = url_title($title, '-', true) . '-' . time();
+            
+            $newsModel->insert([
+                'masjid_id' => $masjidId,
+                'category_id' => null, // Optional, could map to a default
+                'title' => $title,
+                'slug' => $slug,
+                'content' => $content,
+                'status' => 'published',
+                'published_at' => date('Y-m-d H:i:s')
+            ]);
+
+            return redirect()->to(base_url('dashboard/berita'))->with('success', 'Laporan berhasil dipublikasikan ke Berita Masjid.');
+        } elseif ($action === 'broadcast') {
+            $broadcastModel = new \App\Models\MasjidBroadcastModel();
+            
+            $broadcastModel->insert([
+                'masjid_id' => $masjidId,
+                'subject'   => $title,
+                'content'   => $content,
+                'type'      => 'email',
+                'status'    => 'draft',
+                'recipient_count' => 0
+            ]);
+
+            return redirect()->to(base_url('dashboard/broadcast'))->with('success', 'Laporan berhasil disimpan sebagai draf Broadcast.');
+        }
+
+        return redirect()->back()->with('error', 'Aksi tidak valid.');
+    }
 }

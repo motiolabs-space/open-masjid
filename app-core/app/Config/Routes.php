@@ -34,6 +34,13 @@ $routes->post('dashboard/pengurus/delete', 'Admin::deletePengurus');
 $routes->post('dashboard/gallery/upload', 'Admin::uploadGallery');
 $routes->post('dashboard/gallery/delete', 'Admin::deleteGallery');
 $routes->get('dashboard/program', 'Admin::program');
+    // DKM LMS Routes
+    $routes->get('dashboard/lms', 'Lms::index');
+    $routes->get('dashboard/lms/module/(:segment)', 'Lms::module/$1');
+    $routes->get('dashboard/lms/material/(:num)', 'Lms::material/$1');
+    $routes->post('dashboard/lms/mark-completed/(:num)', 'Lms::markCompleted/$1');
+
+    $routes->get('dashboard/settings', 'Admin::settings');
 $routes->get('dashboard/berita', 'Admin::berita');
 $routes->get('dashboard/berita/create', 'Admin::createBerita');
 $routes->get('dashboard/berita/edit/(:num)', 'Admin::editBerita/$1');
@@ -84,6 +91,9 @@ $routes->get('dashboard/reports', 'Admin::reports');
 $routes->get('dashboard/reports/finance', 'Admin::generateFinanceReport');
 $routes->get('dashboard/reports/program', 'Admin::generateProgramReport');
 $routes->get('dashboard/reports/inventory', 'Admin::generateInventoryReport');
+$routes->get('dashboard/reports/ai-generator', 'Admin::aiReportGenerator');
+$routes->post('dashboard/reports/ai-generate', 'Admin::generateAiReport');
+$routes->post('dashboard/reports/ai-publish', 'Admin::publishAiReport');
 
 // Inventory Management
 $routes->get('dashboard/inventory', 'Admin::inventory');
@@ -109,10 +119,22 @@ $routes->group('superadmin', ['filter' => 'dashboardGuard'], function($routes) {
     $routes->get('/', 'SuperAdmin::index');
     $routes->get('masjid', 'SuperAdmin::masjid');
     $routes->get('users', 'SuperAdmin::users');
-    $routes->post('masjid/suspend', 'SuperAdmin::suspendMasjid');
-    $routes->get('masjid/manage/(:num)', 'SuperAdmin::manageMasjid/$1');
+    $routes->get('manage-masjid/(:num)', 'SuperAdmin::manageMasjid/$1');
     $routes->get('profile', 'SuperAdmin::profile');
-    $routes->post('update-password', 'SuperAdmin::updatePassword');
+    $routes->post('profile/password', 'SuperAdmin::updatePassword');
+
+    // Superadmin LMS Routes
+    $routes->get('lms', 'SuperAdmin::lmsModules');
+    $routes->get('lms/create', 'SuperAdmin::createLmsModule');
+    $routes->get('lms/edit/(:num)', 'SuperAdmin::editLmsModule/$1');
+    $routes->post('lms/save', 'SuperAdmin::saveLmsModule');
+    $routes->post('lms/delete/(:num)', 'SuperAdmin::deleteLmsModule/$1');
+    
+    $routes->get('lms/(:num)/materials', 'SuperAdmin::lmsMaterials/$1');
+    $routes->get('lms/(:num)/materials/create', 'SuperAdmin::createLmsMaterial/$1');
+    $routes->get('lms/materials/edit/(:num)', 'SuperAdmin::editLmsMaterial/$1');
+    $routes->post('lms/materials/save', 'SuperAdmin::saveLmsMaterial');
+    $routes->post('lms/materials/delete/(:num)', 'SuperAdmin::deleteLmsMaterial/$1');
 });
 $routes->get('auth/promote-me', 'Auth::promoteMe');
 $routes->get('auth/select-masjid', 'Auth::selectMasjid');
