@@ -149,6 +149,10 @@ $routes->group('superadmin', ['filter' => 'dashboardGuard'], function($routes) {
     $routes->get('manage-masjid/(:num)', 'SuperAdmin::manageMasjid/$1');
     $routes->get('profile', 'SuperAdmin::profile');
     $routes->post('profile/password', 'SuperAdmin::updatePassword');
+    
+    // Superadmin Settings
+    $routes->get('settings', 'SuperAdmin::settings');
+    $routes->post('settings/save', 'SuperAdmin::saveSettings');
 
     // Superadmin LMS Routes
     $routes->get('lms', 'SuperAdmin::lmsModules');

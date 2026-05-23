@@ -94,8 +94,39 @@
 </a>
 </nav>
 </div>
+</div>
 <?php endif; ?>
 </div>
+
+<?php 
+    // Fetch Platform Settings for Community Links
+    $settingModel = new \App\Models\PlatformSettingModel();
+    $waLink = $settingModel->find('community_wa_link')['setting_value'] ?? '';
+    $tgLink = $settingModel->find('community_tg_link')['setting_value'] ?? '';
+    
+    if (!empty($waLink) || !empty($tgLink)):
+?>
+<div class="px-4 pb-4">
+    <div class="bg-primary/10 border border-primary/20 rounded-xl p-4 text-center">
+        <span class="material-symbols-outlined text-primary mb-1">forum</span>
+        <h4 class="text-xs font-bold text-slate-800 dark:text-slate-100 mb-1">Diskusi Komunitas</h4>
+        <p class="text-[10px] text-slate-600 dark:text-slate-400 mb-3 leading-tight">Ikut berkontribusi dalam pengembangan platform Open Masjid.</p>
+        <div class="flex flex-col gap-2">
+            <?php if (!empty($waLink)): ?>
+            <a href="<?= esc($waLink) ?>" target="_blank" class="text-[11px] font-semibold bg-emerald-500 hover:bg-emerald-600 text-white py-1.5 px-3 rounded-lg transition-colors flex items-center justify-center gap-1">
+                WhatsApp
+            </a>
+            <?php endif; ?>
+            <?php if (!empty($tgLink)): ?>
+            <a href="<?= esc($tgLink) ?>" target="_blank" class="text-[11px] font-semibold bg-blue-500 hover:bg-blue-600 text-white py-1.5 px-3 rounded-lg transition-colors flex items-center justify-center gap-1">
+                Telegram
+            </a>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
 <div class="p-4 border-t border-slate-100 dark:border-slate-800">
 <a href="<?= base_url('logout') ?>" class="flex w-full items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
 <span class="material-symbols-outlined text-xl">logout</span>
