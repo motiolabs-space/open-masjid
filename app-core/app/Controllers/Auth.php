@@ -318,7 +318,11 @@ class Auth extends BaseController
 
     public function googleLogin()
     {
-        $clientId = env('GOOGLE_CLIENT_ID');
+        $clientId = $_ENV['GOOGLE_CLIENT_ID'] ?? getenv('GOOGLE_CLIENT_ID');
+        if (!$clientId) {
+            $clientId = env('GOOGLE_CLIENT_ID');
+        }
+
         if (!$clientId) {
             return redirect()->to('login')->with('error', 'Google Client ID belum dikonfigurasi.');
         }
@@ -341,8 +345,12 @@ class Auth extends BaseController
             return redirect()->to('login')->with('error', 'Google login dibatalkan atau gagal.');
         }
 
-        $clientId = env('GOOGLE_CLIENT_ID');
-        $clientSecret = env('GOOGLE_CLIENT_SECRET');
+        $clientId = $_ENV['GOOGLE_CLIENT_ID'] ?? getenv('GOOGLE_CLIENT_ID');
+        if (!$clientId) $clientId = env('GOOGLE_CLIENT_ID');
+        
+        $clientSecret = $_ENV['GOOGLE_CLIENT_SECRET'] ?? getenv('GOOGLE_CLIENT_SECRET');
+        if (!$clientSecret) $clientSecret = env('GOOGLE_CLIENT_SECRET');
+        
         $redirectUri = base_url('auth/google/callback');
 
         // Exchange code for token
