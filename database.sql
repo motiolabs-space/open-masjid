@@ -282,3 +282,18 @@ CREATE TABLE IF NOT EXISTS `masjid_mustahik_distributions` (
   CONSTRAINT `dist_masjid_id_foreign` FOREIGN KEY (`masjid_id`) REFERENCES `masjid` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- --------------------------------------------------------
+-- 6. System Settings
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `platform_settings` (
+  `setting_key` varchar(100) NOT NULL,
+  `setting_value` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`setting_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT IGNORE INTO `platform_settings` (`setting_key`, `setting_value`, `created_at`, `updated_at`) VALUES
+('community_wa_link', '', NOW(), NOW()),
+('community_tg_link', '', NOW(), NOW());
+

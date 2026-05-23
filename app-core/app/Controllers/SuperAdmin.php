@@ -169,6 +169,52 @@ class SuperAdmin extends BaseController
 
         return redirect()->to('superadmin/profile')->with('success', 'Password berhasil diperbarui.');
     }
+
+    // --------------------------------------------------------------------
+    // SETTINGS (SUPER ADMIN)
+    // --------------------------------------------------------------------
+    public function settings()
+    {
+        $settingModel = new \App\Models\PlatformSettingModel();
+        
+        // Fetch all settings and map key-value
+        $settingsRaw = $settingModel->findAll();
+        $settings = [];
+        foreach ($settingsRaw as $row) {
+            $settings[$row['setting_key']] = $row['setting_value'];
+        }
+
+        $data = [
+            'title' => 'Pengaturan Platform - Super Admin',
+            'settings' => $settings
+        ];
+
+        return view('superadmin/settings', $data);
+    }
+
+    public function saveSettings()
+    {
+        $settingModel = new \App\Models\PlatformSettingModel();
+        
+        $keysToUpdate = ['community_wa_link', 'community_tg_link'];
+
+        foreach ($keysToUpdate as $key) {
+            $value = $this->request->getPost($key);
+            
+            // Check if key exists
+            $existing = $settingModel->find($key);
+            if ($existing) {
+                $settingModel->update($key, ['setting_value' => $value]);
+            } else {
+                $settingModel->insert([
+                    'setting_key' => $key,
+                    'setting_value' => $value
+                ]);
+            }
+        }
+
+        return redirect()->to('superadmin/settings')->with('success', 'Pengaturan berhasil disimpan.');
+    }
     // --------------------------------------------------------------------
     // LMS MANAGEMENT (SUPER ADMIN)
     // --------------------------------------------------------------------
