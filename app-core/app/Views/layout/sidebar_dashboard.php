@@ -76,6 +76,10 @@
 <span class="material-symbols-outlined text-xl">auto_awesome</span>
 <span class="text-sm font-medium">AI Report Generator</span>
 </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg <?= ($uri == 'dashboard/auditor') ? $activeClass : $inactiveClass ?>" href="<?= base_url('dashboard/auditor') ?>">
+<span class="material-symbols-outlined text-xl">policy</span>
+<span class="text-sm font-medium">Virtual Auditor</span>
+</a>
 <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg <?= (str_contains($uri, 'dashboard/lms')) ? $activeClass : $inactiveClass ?>" href="<?= base_url('dashboard/lms') ?>">
 <span class="material-symbols-outlined text-xl">school</span>
 <span class="text-sm font-medium">E-Learning (LMS)</span>

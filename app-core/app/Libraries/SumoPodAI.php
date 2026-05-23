@@ -130,4 +130,42 @@ class SumoPodAI
 
         return null;
     }
+    /**
+     * Run Financial Audit
+     *
+     * @param array $currentData
+     * @param array $historicalData
+     * @return array|null
+     */
+    public function runFinancialAudit(array $currentData, array $historicalData)
+    {
+        $prompt = "Kamu adalah Auditor Finansial Masjid profesional yang tajam.\n";
+        $prompt .= "Bandingkan pengeluaran bulan ini dengan rata-rata 3 bulan terakhir. Cari anomali, lonjakan tidak wajar, atau pengeluaran mencurigakan.\n\n";
+        
+        $prompt .= "Data Rata-rata 3 Bulan Terakhir:\n" . json_encode($historicalData, JSON_PRETTY_PRINT) . "\n\n";
+        $prompt .= "Data Pengeluaran Bulan Ini:\n" . json_encode($currentData, JSON_PRETTY_PRINT) . "\n\n";
+        
+        $prompt .= "Output HANYA berupa array JSON valid. Setiap objek harus memiliki key:\n";
+        $prompt .= "- 'category_name' (string)\n";
+        $prompt .= "- 'finding' (string: penjelasan singkat)\n";
+        $prompt .= "- 'severity' (string: 'high', 'medium', 'low')\n";
+        $prompt .= "- 'recommendation' (string: saran tindakan)\n";
+        $prompt .= "Jika tidak ada anomali sama sekali, kembalikan array kosong [].\n";
+        $prompt .= "HANYA output JSON TANPA tag ```json atau teks lain.";
+
+        $response = $this->chatCompletion($prompt, [
+            'temperature' => 0.2,
+            'max_tokens'  => 800
+        ]);
+
+        if ($response) {
+            $response = str_replace(['```json', '```'], '', trim($response));
+            $decoded = json_decode($response, true);
+            if (is_array($decoded)) {
+                return $decoded;
+            }
+        }
+
+        return null;
+    }
 }
