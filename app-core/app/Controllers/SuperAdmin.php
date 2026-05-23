@@ -168,6 +168,7 @@ class SuperAdmin extends BaseController
         ]);
 
         return redirect()->to('superadmin/profile')->with('success', 'Password berhasil diperbarui.');
+    }
     // --------------------------------------------------------------------
     // LMS MANAGEMENT (SUPER ADMIN)
     // --------------------------------------------------------------------
