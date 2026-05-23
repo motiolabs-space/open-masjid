@@ -95,7 +95,7 @@ class SuperAdmin extends BaseController
         // Get the creator/main admin of the masjid
         $builder->join('masjid_pengurus mp', 'mp.masjid_id = masjid.id AND mp.is_creator = 1', 'left');
         $builder->join('users u', 'u.id = mp.user_id', 'left');
-        $builder->orderBy('masjid.name', 'ASC');
+        $builder->orderBy('masjid.created_at', 'DESC');
         
         $data = [
             'title' => 'Manajemen Masjid - Super Admin',
