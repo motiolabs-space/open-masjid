@@ -97,4 +97,37 @@ class SumoPodAI
         log_message('error', 'SumoPod AI: All fallback models failed.');
         return null;
     }
+
+    /**
+     * Generate an AI Scoring and Reasoning for Mustahik
+     *
+     * @param array $mustahikData Data containing income, dependents, house status, etc.
+     * @return array|null Associative array with 'score' and 'reasoning' keys
+     */
+    public function scoreMustahik(array $mustahikData)
+    {
+        $prompt = "Anda adalah AI Asisten Amil Zakat. Berikan penilaian objyektif kelayakan menerima bantuan (skor 1-100) berdasarkan data Mustahik berikut:\n";
+        $prompt .= "Nama: " . ($mustahikData['name'] ?? '-') . "\n";
+        $prompt .= "Pendapatan per Bulan: Rp " . number_format($mustahikData['income_per_month'] ?? 0, 0, ',', '.') . "\n";
+        $prompt .= "Jumlah Tanggungan: " . ($mustahikData['dependents_count'] ?? 0) . " orang\n";
+        $prompt .= "Status Kepemilikan Rumah: " . ($mustahikData['house_ownership'] ?? 'lainnya') . "\n\n";
+        $prompt .= "Output HANYA dalam format JSON valid tanpa markdown block seperti berikut:\n";
+        $prompt .= "{\"score\": 85, \"reasoning\": \"Alasan maksimal 2 kalimat.\"}";
+
+        $response = $this->chatCompletion($prompt, [
+            'temperature' => 0.2, // Low temperature for consistent scoring
+            'max_tokens'  => 100
+        ]);
+
+        if ($response) {
+            // Clean markdown if AI accidentally adds it
+            $response = str_replace(['```json', '```'], '', $response);
+            $decoded = json_decode(trim($response), true);
+            if (isset($decoded['score']) && isset($decoded['reasoning'])) {
+                return $decoded;
+            }
+        }
+
+        return null;
+    }
 }
