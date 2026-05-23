@@ -61,6 +61,10 @@
                 <span class="material-symbols-outlined">group</span>
                 Manajemen User
             </a>
+            <a href="<?= base_url('superadmin/lms') ?>" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition-colors <?= str_contains(current_url(), 'lms') ? 'bg-primary text-white' : 'text-slate-400' ?>">
+                <span class="material-symbols-outlined">school</span>
+                LMS & Pelatihan
+            </a>
             <a href="<?= base_url('superadmin/profile') ?>" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition-colors <?= str_contains(current_url(), 'profile') ? 'bg-primary text-white' : 'text-slate-400' ?>">
                 <span class="material-symbols-outlined">lock_person</span>
                 Profil & Password

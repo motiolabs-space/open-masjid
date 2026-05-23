@@ -70,7 +70,15 @@
 </a>
 <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg <?= ($uri == 'dashboard/reports') ? $activeClass : $inactiveClass ?>" href="<?= base_url('dashboard/reports') ?>">
 <span class="material-symbols-outlined text-xl">description</span>
-<span class="text-sm font-medium">Laporan</span>
+<span class="text-sm font-medium">Laporan & Rekap</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg <?= ($uri == 'dashboard/reports/ai-generator') ? $activeClass : $inactiveClass ?>" href="<?= base_url('dashboard/reports/ai-generator') ?>">
+<span class="material-symbols-outlined text-xl">auto_awesome</span>
+<span class="text-sm font-medium">AI Report Generator</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg <?= (str_contains($uri, 'dashboard/lms')) ? $activeClass : $inactiveClass ?>" href="<?= base_url('dashboard/lms') ?>">
+<span class="material-symbols-outlined text-xl">school</span>
+<span class="text-sm font-medium">E-Learning (LMS)</span>
 </a>
 <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg <?= ($uri == 'dashboard/pembayaran') ? $activeClass : $inactiveClass ?>" href="<?= base_url('dashboard/pembayaran') ?>">
 <span class="material-symbols-outlined text-xl">payments</span>

@@ -25,9 +25,9 @@
                 <tr>
                     <th class="px-6 py-4 tracking-wider">ID</th>
                     <th class="px-6 py-4 tracking-wider">Nama Masjid</th>
-                    <th class="px-6 py-4 tracking-wider">Username</th>
-                    <th class="px-6 py-4 tracking-wider">Alamat</th>
+                    <th class="px-6 py-4 tracking-wider">PIC (Kontak)</th>
                     <th class="px-6 py-4 tracking-wider">Tanggal Daftar</th>
+                    <th class="px-6 py-4 tracking-wider">Last Login</th>
                     <th class="px-6 py-4 text-right tracking-wider">Aksi</th>
                 </tr>
             </thead>
@@ -35,12 +35,27 @@
                 <?php foreach($masjids as $m): ?>
                 <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
                     <td class="px-6 py-4 text-[10px] font-bold text-slate-400">#<?= $m['id'] ?></td>
-                    <td class="px-6 py-4 font-bold text-slate-900 dark:text-white"><?= esc($m['name']) ?></td>
-                    <td class="px-6 py-4">
-                        <span class="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-xs">@<?= esc($m['username']) ?></span>
+                    <td class="px-6 py-4 font-bold text-slate-900 dark:text-white">
+                        <a href="<?= base_url($m['username']) ?>" target="_blank" class="text-primary hover:underline"><?= esc($m['name']) ?></a>
+                        <div class="text-[10px] font-normal text-slate-400 mt-0.5">@<?= esc($m['username']) ?></div>
                     </td>
-                    <td class="px-6 py-4 truncate max-w-[200px]"><?= !empty($m['address']) ? esc($m['address']) : '<span class="italic text-slate-400">Belum diisi</span>' ?></td>
-                    <td class="px-6 py-4 text-slate-500 font-medium"><?= date('d M Y', strtotime($m['created_at'])) ?></td>
+                    <td class="px-6 py-4">
+                        <div class="font-bold text-slate-700 dark:text-slate-300"><?= esc($m['pic_name'] ?? 'Tidak ada') ?></div>
+                        <?php if(!empty($m['pic_phone'])): ?>
+                            <a href="https://wa.me/<?= preg_replace('/[^0-9]/', '', $m['pic_phone']) ?>" target="_blank" class="inline-flex items-center text-xs text-emerald-600 hover:underline mt-1 mr-2">
+                                <span class="material-symbols-outlined text-[14px] mr-0.5">chat</span> WA
+                            </a>
+                        <?php endif; ?>
+                        <?php if(!empty($m['pic_email'])): ?>
+                            <a href="mailto:<?= esc($m['pic_email']) ?>" class="inline-flex items-center text-xs text-blue-600 hover:underline mt-1">
+                                <span class="material-symbols-outlined text-[14px] mr-0.5">mail</span> Email
+                            </a>
+                        <?php endif; ?>
+                    </td>
+                    <td class="px-6 py-4 text-slate-500 font-medium"><?= date('d M Y, H:i', strtotime($m['created_at'])) ?></td>
+                    <td class="px-6 py-4 text-slate-500 font-medium">
+                        <?= !empty($m['last_login']) ? date('d M Y, H:i', strtotime($m['last_login'])) : '<span class="text-slate-400 text-xs italic">Belum pernah</span>' ?>
+                    </td>
                     <td class="px-6 py-4 text-right space-x-2">
                         <a href="<?= base_url('superadmin/masjid/manage/' . $m['id']) ?>" class="bg-primary/10 text-primary hover:bg-primary hover:text-white px-3 py-1.5 rounded-lg font-bold text-xs transition-all inline-flex items-center gap-1">
                             <span class="material-symbols-outlined text-sm">settings_suggest</span>

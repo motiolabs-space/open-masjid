@@ -46,7 +46,7 @@
                             <?= esc($u['role']) ?>
                         </span>
                     </td>
-                    <td class="px-6 py-4 text-slate-500 font-medium"><?= date('d M Y', strtotime($u['created_at'])) ?></td>
+                    <td class="px-6 py-4 text-slate-500 font-medium"><?= date('d M Y, H:i', strtotime($u['created_at'])) ?></td>
                     <td class="px-6 py-4 text-right space-x-2">
                         <button class="text-primary hover:text-primary-dark font-bold text-xs">Edit</button>
                         <?php if($u['role'] != 'superadmin'): ?>
