@@ -82,6 +82,14 @@ $routes->post('dashboard/keuangan/delete', 'Admin::deleteFinanceTransaction');
 $routes->post('dashboard/keuangan/category/save', 'Admin::saveFinanceCategory');
 $routes->post('dashboard/keuangan/category/delete', 'Admin::deleteFinanceCategory');
 
+// Finance AI Features
+$routes->get('dashboard/keuangan/import-csv', 'FinanceAI::importCSV');
+$routes->post('dashboard/keuangan/import-csv/process', 'FinanceAI::processCSV');
+$routes->get('dashboard/keuangan/review-csv', 'FinanceAI::reviewCSV');
+$routes->post('dashboard/keuangan/import-csv/save', 'FinanceAI::saveCSV');
+$routes->get('dashboard/keuangan/report', 'FinanceAI::generateReport');
+$routes->post('dashboard/keuangan/report', 'FinanceAI::generateReport');
+
 $routes->get('dashboard/warga', 'Admin::warga');
 $routes->get('dashboard/warga/new', 'Admin::createWarga');
 $routes->get('dashboard/warga/edit/(:num)', 'Admin::editWarga/$1');
