@@ -26,7 +26,7 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SITEGROUND_SSH_PRIVATE_KEY }}
           ARGS: "-rlgoDzvc -i --delete"
           SOURCE: "app-core/"
-          REMOTE_HOST: ${{ secrets.SITEGROUND_FTP_HOST }}
+          REMOTE_HOST: ${{ secrets.SITEGROUND_SSH_HOST }}
           REMOTE_USER: ${{ secrets.SITEGROUND_SSH_USERNAME }}
           REMOTE_PORT: ${{ secrets.SITEGROUND_SSH_PORT || '18765' }}
           TARGET: "${{ secrets.SITEGROUND_SSH_TARGET_PATH }}/app-core/"
@@ -40,7 +40,7 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SITEGROUND_SSH_PRIVATE_KEY }}
           ARGS: "-rlgoDzvc -i"
           SOURCE: "./"
-          REMOTE_HOST: ${{ secrets.SITEGROUND_FTP_HOST }}
+          REMOTE_HOST: ${{ secrets.SITEGROUND_SSH_HOST }}
           REMOTE_USER: ${{ secrets.SITEGROUND_SSH_USERNAME }}
           REMOTE_PORT: ${{ secrets.SITEGROUND_SSH_PORT || '18765' }}
           TARGET: "${{ secrets.SITEGROUND_SSH_TARGET_PATH }}/public_html/"
