@@ -41,6 +41,19 @@ $routes->get('dashboard/program', 'Admin::program');
     $routes->post('dashboard/lms/mark-completed/(:num)', 'Lms::markCompleted/$1');
 
     $routes->get('dashboard/settings', 'Admin::settings');
+
+    // DKM Distribution & Mustahik Routes
+    $routes->get('dashboard/distribution', 'Distribution::index');
+    $routes->get('dashboard/distribution/mustahik/create', 'Distribution::createMustahik');
+    $routes->get('dashboard/distribution/mustahik/edit/(:num)', 'Distribution::editMustahik/$1');
+    $routes->post('dashboard/distribution/mustahik/save', 'Distribution::saveMustahik');
+    $routes->post('dashboard/distribution/mustahik/delete/(:num)', 'Distribution::deleteMustahik/$1');
+    $routes->post('dashboard/distribution/mustahik/rescore/(:num)', 'Distribution::generateScore/$1');
+
+    $routes->get('dashboard/distribution/history', 'Distribution::history');
+    $routes->get('dashboard/distribution/create', 'Distribution::createDistribution');
+    $routes->get('dashboard/distribution/create/(:num)', 'Distribution::createDistribution/$1');
+    $routes->post('dashboard/distribution/save', 'Distribution::saveDistribution');
 $routes->get('dashboard/berita', 'Admin::berita');
 $routes->get('dashboard/berita/create', 'Admin::createBerita');
 $routes->get('dashboard/berita/edit/(:num)', 'Admin::editBerita/$1');

@@ -243,3 +243,42 @@ CREATE TABLE IF NOT EXISTS `lms_progress` (
   CONSTRAINT `lms_progress_material_id_foreign` FOREIGN KEY (`material_id`) REFERENCES `lms_materials` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- --------------------------------------------------------
+-- 5. Mustahik Scoring & Recommendations (Module 4)
+-- --------------------------------------------------------
+
+-- Table structure for `masjid_mustahik`
+CREATE TABLE IF NOT EXISTS `masjid_mustahik` (
+  `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `masjid_id` int(11) UNSIGNED NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `nik` varchar(50) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `address` text DEFAULT NULL,
+  `income_per_month` decimal(15,2) DEFAULT 0.00,
+  `dependents_count` int(11) DEFAULT 0,
+  `house_ownership` enum('milik_sendiri','ngontrak','numpang','lainnya') DEFAULT 'lainnya',
+  `status` enum('active','inactive') DEFAULT 'active',
+  `ai_score` int(11) DEFAULT NULL,
+  `ai_reasoning` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `mustahik_masjid_id_foreign` FOREIGN KEY (`masjid_id`) REFERENCES `masjid` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table structure for `masjid_mustahik_distributions`
+CREATE TABLE IF NOT EXISTS `masjid_mustahik_distributions` (
+  `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `masjid_id` int(11) UNSIGNED NOT NULL,
+  `mustahik_id` int(11) UNSIGNED NOT NULL,
+  `date` date NOT NULL,
+  `amount` decimal(15,2) DEFAULT 0.00,
+  `description` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `dist_mustahik_id_foreign` FOREIGN KEY (`mustahik_id`) REFERENCES `masjid_mustahik` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `dist_masjid_id_foreign` FOREIGN KEY (`masjid_id`) REFERENCES `masjid` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
