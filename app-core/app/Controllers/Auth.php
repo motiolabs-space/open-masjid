@@ -110,52 +110,7 @@ class Auth extends BaseController
         $user = $userModel->where('email', $email)->first();
 
         if ($user && password_verify($password, $user['password_hash'])) {
-            // Record last login
-            $userModel->update($user['id'], ['last_login' => date('Y-m-d H:i:s')]);
-
-            $session = session();
-            
-            // Check for Masjid Pengurus role
-            $pengurusModel = new MasjidPengurusModel();
-            $pengurus = $pengurusModel->where('user_id', $user['id'])->findAll();
-            $pengurusCount = count($pengurus);
-
-            $sessionData = [
-                'isLoggedIn' => true,
-                'user_id'    => $user['id'],
-                'user_name'  => $user['name'],
-                'user_email' => $user['email'],
-            ];
-
-            if ($user['role'] === 'superadmin') {
-                $sessionData['role'] = 'superadmin';
-                $session->set($sessionData);
-                return redirect()->to('superadmin')->with('success', 'Selamat datang di Panel Kontrol Pusat, ' . $user['name'] . '!');
-            }
-
-            if ($pengurusCount > 0) {
-                $sessionData['role'] = 'pengurus';
-                
-                if ($pengurusCount === 1) {
-                    $p = $pengurus[0];
-                    $masjid = (new MasjidModel())->find($p['masjid_id']);
-                    
-                    $sessionData['masjid_id'] = $p['masjid_id'];
-                    $sessionData['masjid_name'] = $masjid['name'] ?? 'Masjid Saya';
-                    $sessionData['masjid_username'] = $masjid['username'] ?? '';
-                    
-                    $session->set($sessionData);
-                    return redirect()->to('dashboard')->with('success', 'Selamat datang kembali, ' . $user['name'] . '!');
-                } else {
-                    // Multi-masjid: need to select
-                    $session->set($sessionData);
-                    return redirect()->to('auth/select-masjid');
-                }
-            } else {
-                $sessionData['role'] = 'jamaah';
-                $session->set($sessionData);
-                return redirect()->to('dashboard')->with('success', 'Selamat datang kembali, ' . $user['name'] . '!');
-            }
+            return $this->processLogin($user);
         }
 
         return redirect()->back()->withInput()->with('error', 'Email atau password salah.');
@@ -311,5 +266,137 @@ class Auth extends BaseController
         }
         
         return "User not found.";
+    }
+
+    private function processLogin($user)
+    {
+        $userModel = new \App\Models\UserModel();
+        $userModel->update($user['id'], ['last_login' => date('Y-m-d H:i:s')]);
+
+        $session = session();
+        
+        $pengurusModel = new \App\Models\MasjidPengurusModel();
+        $pengurus = $pengurusModel->where('user_id', $user['id'])->findAll();
+        $pengurusCount = count($pengurus);
+
+        $sessionData = [
+            'isLoggedIn' => true,
+            'user_id'    => $user['id'],
+            'user_name'  => $user['name'],
+            'user_email' => $user['email'],
+        ];
+
+        if ($user['role'] === 'superadmin') {
+            $sessionData['role'] = 'superadmin';
+            $session->set($sessionData);
+            return redirect()->to('superadmin')->with('success', 'Selamat datang di Panel Kontrol Pusat, ' . $user['name'] . '!');
+        }
+
+        if ($pengurusCount > 0) {
+            $sessionData['role'] = 'pengurus';
+            
+            if ($pengurusCount === 1) {
+                $p = $pengurus[0];
+                $masjid = (new \App\Models\MasjidModel())->find($p['masjid_id']);
+                
+                $sessionData['masjid_id'] = $p['masjid_id'];
+                $sessionData['masjid_name'] = $masjid['name'] ?? 'Masjid Saya';
+                $sessionData['masjid_username'] = $masjid['username'] ?? '';
+                
+                $session->set($sessionData);
+                return redirect()->to('dashboard')->with('success', 'Selamat datang kembali, ' . $user['name'] . '!');
+            } else {
+                $session->set($sessionData);
+                return redirect()->to('auth/select-masjid');
+            }
+        } else {
+            $sessionData['role'] = 'jamaah';
+            $session->set($sessionData);
+            return redirect()->to('dashboard')->with('success', 'Selamat datang kembali, ' . $user['name'] . '!');
+        }
+    }
+
+    public function googleLogin()
+    {
+        $clientId = env('GOOGLE_CLIENT_ID');
+        if (!$clientId) {
+            return redirect()->to('login')->with('error', 'Google Client ID belum dikonfigurasi.');
+        }
+
+        $redirectUri = base_url('auth/google/callback');
+        $authUrl = "https://accounts.google.com/o/oauth2/v2/auth?" . http_build_query([
+            'client_id' => $clientId,
+            'redirect_uri' => $redirectUri,
+            'response_type' => 'code',
+            'scope' => 'email profile',
+            'access_type' => 'online',
+        ]);
+        return redirect()->to($authUrl);
+    }
+
+    public function googleCallback()
+    {
+        $code = $this->request->getGet('code');
+        if (!$code) {
+            return redirect()->to('login')->with('error', 'Google login dibatalkan atau gagal.');
+        }
+
+        $clientId = env('GOOGLE_CLIENT_ID');
+        $clientSecret = env('GOOGLE_CLIENT_SECRET');
+        $redirectUri = base_url('auth/google/callback');
+
+        // Exchange code for token
+        $ch = curl_init('https://oauth2.googleapis.com/token');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
+            'client_id' => $clientId,
+            'client_secret' => $clientSecret,
+            'redirect_uri' => $redirectUri,
+            'code' => $code,
+            'grant_type' => 'authorization_code',
+        ]));
+        $response = curl_exec($ch);
+        curl_close($ch);
+        $tokenData = json_decode($response, true);
+
+        if (!isset($tokenData['access_token'])) {
+            return redirect()->to('login')->with('error', 'Gagal mendapatkan token dari Google.');
+        }
+
+        // Get user info
+        $chInfo = curl_init('https://www.googleapis.com/oauth2/v3/userinfo');
+        curl_setopt($chInfo, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($chInfo, CURLOPT_HTTPHEADER, [
+            'Authorization: Bearer ' . $tokenData['access_token']
+        ]);
+        $userInfoResponse = curl_exec($chInfo);
+        curl_close($chInfo);
+        $googleUser = json_decode($userInfoResponse, true);
+
+        if (!isset($googleUser['email'])) {
+            return redirect()->to('login')->with('error', 'Gagal mendapatkan informasi profil Google.');
+        }
+
+        $userModel = new \App\Models\UserModel();
+        $user = $userModel->where('email', $googleUser['email'])->first();
+
+        if ($user) {
+            return $this->processLogin($user);
+        } else {
+            $userData = [
+                'name'          => $googleUser['name'],
+                'email'         => $googleUser['email'],
+                'phone'         => '',
+                'password_hash' => password_hash(bin2hex(random_bytes(10)), PASSWORD_DEFAULT),
+                'role'          => 'user'
+            ];
+            
+            $userId = $userModel->insert($userData);
+            if ($userId) {
+                $user = $userModel->find($userId);
+                return $this->processLogin($user);
+            }
+            return redirect()->to('login')->with('error', 'Gagal membuat akun.');
+        }
     }
 }
