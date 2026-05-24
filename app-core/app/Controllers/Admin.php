@@ -103,6 +103,12 @@ class Admin extends BaseController
             'recentNews' => $recentNews,
             'upcomingSchedules' => $upcomingSchedules
         ];
+        
+        if (session()->get('role') !== 'pengurus' && session()->get('role') !== 'superadmin') {
+            // Jamaah Dashboard View
+            return view('dashboard/index_jamaah', $data);
+        }
+
         return view('dashboard/index', $data);
     }
     public function profil(): string
