@@ -17,11 +17,20 @@ class Lms extends BaseController
             $masjidMap[$m['id']] = $m['name'];
         }
 
+        $materialModel = new \App\Models\LmsMaterialModel();
+
         foreach ($modules as &$mod) {
             if (is_numeric($mod['lembaga_pemateri']) && isset($masjidMap[$mod['lembaga_pemateri']])) {
                 $mod['lembaga_nama'] = $masjidMap[$mod['lembaga_pemateri']];
             } else {
                 $mod['lembaga_nama'] = $mod['lembaga_pemateri'];
+            }
+            
+            // Check materials count
+            $materials = $materialModel->where('module_id', $mod['id'])->orderBy('order_number', 'ASC')->findAll();
+            $mod['material_count'] = count($materials);
+            if ($mod['material_count'] == 1) {
+                $mod['first_material_id'] = $materials[0]['id'];
             }
         }
 
