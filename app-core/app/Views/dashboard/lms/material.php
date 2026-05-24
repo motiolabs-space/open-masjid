@@ -40,13 +40,13 @@
                     // Extract YouTube ID
                     $url = $material['content'];
                     $videoId = '';
-                    if (preg_match('%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/\s]{11})%i', $url, $match)) {
+                    if (preg_match('%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=|shorts/|live/)|youtu\.be/)([^"&?/\s]{11})%i', $url, $match)) {
                         $videoId = $match[1];
                     }
                 ?>
                 <div class="aspect-video w-full">
                     <?php if ($videoId): ?>
-                        <iframe class="w-full h-full" src="https://www.youtube.com/embed/<?= $videoId ?>" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        <iframe class="w-full h-full" src="https://www.youtube.com/embed/<?= $videoId ?>?rel=0&modestbranding=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                     <?php else: ?>
                         <div class="w-full h-full flex flex-col items-center justify-center bg-slate-100 text-slate-500 p-6 text-center">
                             <span class="material-symbols-outlined text-4xl mb-2">error</span>
