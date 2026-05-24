@@ -15,7 +15,12 @@
     <?php endif; ?>
 
     <?php foreach($modules as $m): ?>
-    <a href="<?= base_url('dashboard/lms/module/' . $m['slug']) ?>" class="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden hover:shadow-md hover:border-primary/50 transition-all">
+    <?php 
+        $targetUrl = ($m['material_count'] == 1) 
+            ? base_url('dashboard/lms/material/' . $m['first_material_id']) 
+            : base_url('dashboard/lms/module/' . $m['slug']);
+    ?>
+    <a href="<?= $targetUrl ?>" class="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden hover:shadow-md hover:border-primary/50 transition-all">
         <?php if ($m['thumbnail']): ?>
             <?php 
                 $storage = new \App\Libraries\Storage(); 
