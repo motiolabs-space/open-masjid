@@ -26,7 +26,14 @@
                 
                 <div>
                     <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Lembaga Pemateri</label>
-                    <input type="text" name="lembaga_pemateri" value="<?= esc($module['lembaga_pemateri'] ?? '') ?>" class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:outline-none" placeholder="Contoh: Masjid Jogokariyan">
+                    <select name="lembaga_pemateri" class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:outline-none">
+                        <option value="">-- Pilih Masjid / Lembaga --</option>
+                        <?php foreach($masjids as $masjid): ?>
+                            <option value="<?= esc($masjid['id']) ?>" <?= ($module['lembaga_pemateri'] ?? '') == $masjid['id'] ? 'selected' : '' ?>>
+                                <?= esc($masjid['name']) ?> (@<?= esc($masjid['username']) ?>)
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
 
                 <div>

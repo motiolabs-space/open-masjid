@@ -46,7 +46,7 @@
                         </div>
                     </div>
                 </td>
-                <td class="px-6 py-4 font-medium"><?= esc($m['lembaga_pemateri'] ?? '-') ?></td>
+                <td class="px-6 py-4 font-medium"><?= esc($m['lembaga_nama'] ?? '-') ?></td>
                 <td class="px-6 py-4">
                     <span class="px-2 py-1 rounded text-[10px] uppercase font-bold <?= $m['status'] == 'published' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600' ?>">
                         <?= esc($m['status']) ?>
