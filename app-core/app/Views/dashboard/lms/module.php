@@ -12,7 +12,8 @@
     <div class="lg:col-span-1 space-y-6">
         <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
             <?php if ($module['thumbnail']): ?>
-                <img src="<?= asset_url('uploads/lms/' . $module['thumbnail']) ?>" class="w-full h-48 object-cover">
+                <?php $storage = new \App\Libraries\Storage(); ?>
+                <img src="<?= $storage->url($module['thumbnail']) ?>" class="w-full h-48 object-cover">
             <?php endif; ?>
             <div class="p-6">
                 <?php if (!empty($module['lembaga_pemateri'])): ?>

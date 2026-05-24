@@ -17,7 +17,8 @@
     <?php foreach($modules as $m): ?>
     <a href="<?= base_url('dashboard/lms/module/' . $m['slug']) ?>" class="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden hover:shadow-md hover:border-primary/50 transition-all">
         <?php if ($m['thumbnail']): ?>
-            <img src="<?= asset_url('uploads/lms/' . $m['thumbnail']) ?>" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500">
+            <?php $storage = new \App\Libraries\Storage(); ?>
+            <img src="<?= $storage->url($m['thumbnail']) ?>" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500">
         <?php else: ?>
             <div class="w-full h-48 bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
                 <span class="material-symbols-outlined text-4xl text-slate-300">school</span>
