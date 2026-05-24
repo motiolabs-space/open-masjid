@@ -49,12 +49,24 @@
             </a>
 <?php else: ?>
 <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
-<span class="material-symbols-outlined text-xl">volunteer_activism</span>
-<span class="text-sm font-medium">Riwayat Donasi</span>
+<span class="material-symbols-outlined text-xl">search</span>
+<span class="text-sm font-medium">Cari Masjid</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-xl">mosque</span>
+<span class="text-sm font-medium">Masjid Saya</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg <?= (str_contains($uri, 'dashboard/lms')) ? $activeClass : $inactiveClass ?>" href="<?= base_url('dashboard/lms') ?>">
+<span class="material-symbols-outlined text-xl">school</span>
+<span class="text-sm font-medium">E-Learning (LMS)</span>
 </a>
 <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
 <span class="material-symbols-outlined text-xl">favorite</span>
 <span class="text-sm font-medium">Program Diikuti</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-xl">volunteer_activism</span>
+<span class="text-sm font-medium">Riwayat Donasi</span>
 </a>
 <?php endif; ?>
 </nav>
