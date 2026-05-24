@@ -61,8 +61,12 @@
                     <?php if (str_starts_with($material['content'], 'http')): ?>
                         <iframe src="<?= esc($material['content']) ?>" class="w-full h-full" frameborder="0"></iframe>
                     <?php else: ?>
-                        <?php $storage = new \App\Libraries\Storage(); ?>
-                        <iframe src="<?= $storage->url($material['content']) ?>" class="w-full h-full" frameborder="0"></iframe>
+                        <?php 
+                            $storage = new \App\Libraries\Storage(); 
+                            // Backward compatibility for old files that don't have paths in their DB entry
+                            $pdfPath = (strpos($material['content'], '/') === false) ? 'uploads/lms/' . $material['content'] : $material['content'];
+                        ?>
+                        <iframe src="<?= $storage->url($pdfPath) ?>" class="w-full h-full" frameborder="0"></iframe>
                     <?php endif; ?>
                 </div>
 
