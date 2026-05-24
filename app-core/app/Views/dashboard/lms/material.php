@@ -61,7 +61,8 @@
                     <?php if (str_starts_with($material['content'], 'http')): ?>
                         <iframe src="<?= esc($material['content']) ?>" class="w-full h-full" frameborder="0"></iframe>
                     <?php else: ?>
-                        <iframe src="<?= asset_url('uploads/lms/' . $material['content']) ?>" class="w-full h-full" frameborder="0"></iframe>
+                        <?php $storage = new \App\Libraries\Storage(); ?>
+                        <iframe src="<?= $storage->url($material['content']) ?>" class="w-full h-full" frameborder="0"></iframe>
                     <?php endif; ?>
                 </div>
 
