@@ -222,31 +222,52 @@ class SuperAdmin extends BaseController
     public function lmsModules()
     {
         $moduleModel = new \App\Models\LmsModuleModel();
+        $masjidModel = new \App\Models\MasjidModel();
+        
+        $modules = $moduleModel->findAll();
+        $masjids = $masjidModel->findAll();
+        $masjidMap = [];
+        foreach ($masjids as $m) {
+            $masjidMap[$m['id']] = $m['name'];
+        }
+
+        foreach ($modules as &$mod) {
+            if (is_numeric($mod['lembaga_pemateri']) && isset($masjidMap[$mod['lembaga_pemateri']])) {
+                $mod['lembaga_nama'] = $masjidMap[$mod['lembaga_pemateri']];
+            } else {
+                $mod['lembaga_nama'] = $mod['lembaga_pemateri'];
+            }
+        }
+
         $data = [
-            'title' => 'Manajemen LMS Modul - Super Admin',
-            'modules' => $moduleModel->orderBy('created_at', 'DESC')->findAll(),
+            'title' => 'LMS Modules',
+            'modules' => $modules
         ];
         return view('superadmin/lms/modules', $data);
     }
 
     public function createLmsModule()
     {
+        $masjidModel = new \App\Models\MasjidModel();
         return view('superadmin/lms/module_form', [
-            'title' => 'Buat Modul Baru - Super Admin',
-            'module' => null
+            'title' => 'Tambah Modul Baru',
+            'module' => null,
+            'masjids' => $masjidModel->findAll()
         ]);
     }
 
     public function editLmsModule($id)
     {
         $moduleModel = new \App\Models\LmsModuleModel();
+        $masjidModel = new \App\Models\MasjidModel();
         $module = $moduleModel->find($id);
 
-        if (!$module) return redirect()->to('superadmin/lms')->with('error', 'Modul tidak ditemukan.');
+        if (!$module) return redirect()->back()->with('error', 'Modul tidak ditemukan.');
 
         return view('superadmin/lms/module_form', [
-            'title' => 'Edit Modul - Super Admin',
-            'module' => $module
+            'title' => 'Edit Modul',
+            'module' => $module,
+            'masjids' => $masjidModel->findAll()
         ]);
     }
 

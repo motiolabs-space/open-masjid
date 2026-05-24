@@ -66,6 +66,9 @@
     </form>
 </div>
 
+<!-- Load TinyMCE from CDN -->
+<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+
 <script>
 function toggleContentField() {
     const type = document.getElementById('material_type').value;
@@ -79,14 +82,34 @@ function toggleContentField() {
         fieldPdf.style.display = 'none';
         labelContent.innerText = 'Link YouTube Video';
         helpContent.innerText = 'Masukkan full URL YouTube (contoh: https://www.youtube.com/watch?v=...)';
+        if (tinymce.get('input_content')) {
+            tinymce.get('input_content').remove();
+        }
     } else if (type === 'html') {
         fieldContent.style.display = 'block';
         fieldPdf.style.display = 'none';
         labelContent.innerText = 'Konten Artikel (HTML)';
-        helpContent.innerText = 'Masukkan teks berformat HTML untuk artikel materi.';
+        helpContent.innerText = 'Masukkan teks artikel/materi Anda di bawah ini.';
+        
+        // Initialize TinyMCE
+        if (!tinymce.get('input_content')) {
+            tinymce.init({
+                selector: '#input_content',
+                height: 400,
+                plugins: 'lists link image table code',
+                toolbar: 'undo redo | blocks | bold italic | alignleft aligncenter alignright | bullist numlist outdent indent | link image table | code',
+                menubar: false,
+                promotion: false,
+                skin: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'oxide-dark' : 'oxide',
+                content_css: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default',
+            });
+        }
     } else if (type === 'pdf') {
         fieldContent.style.display = 'none';
         fieldPdf.style.display = 'block';
+        if (tinymce.get('input_content')) {
+            tinymce.get('input_content').remove();
+        }
     }
 }
 
