@@ -18,7 +18,7 @@
                 <?php if (!empty($module['lembaga_pemateri'])): ?>
                     <div class="text-[10px] font-bold text-primary uppercase mb-2 flex items-center gap-1">
                         <span class="material-symbols-outlined text-[12px]">verified</span>
-                        Oleh: <?= esc($module['lembaga_pemateri']) ?>
+                        Oleh: <?= esc($module['lembaga_nama']) ?>
                     </div>
                 <?php endif; ?>
                 <h2 class="text-xl font-bold text-slate-800 dark:text-white mb-2"><?= esc($module['title']) ?></h2>

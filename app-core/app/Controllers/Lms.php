@@ -7,10 +7,27 @@ class Lms extends BaseController
     public function index()
     {
         $moduleModel = new \App\Models\LmsModuleModel();
+        $masjidModel = new \App\Models\MasjidModel();
         
+        $modules = $moduleModel->where('status', 'published')->orderBy('created_at', 'DESC')->findAll();
+        
+        $masjids = $masjidModel->findAll();
+        $masjidMap = [];
+        foreach ($masjids as $m) {
+            $masjidMap[$m['id']] = $m['name'];
+        }
+
+        foreach ($modules as &$mod) {
+            if (is_numeric($mod['lembaga_pemateri']) && isset($masjidMap[$mod['lembaga_pemateri']])) {
+                $mod['lembaga_nama'] = $masjidMap[$mod['lembaga_pemateri']];
+            } else {
+                $mod['lembaga_nama'] = $mod['lembaga_pemateri'];
+            }
+        }
+
         $data = [
             'title' => 'E-Learning (LMS) - Masj.id',
-            'modules' => $moduleModel->where('status', 'published')->orderBy('created_at', 'DESC')->findAll(),
+            'modules' => $modules,
         ];
         
         return view('dashboard/lms/index', $data);
@@ -26,6 +43,14 @@ class Lms extends BaseController
         
         $module = $moduleModel->where('slug', $slug)->first();
         if (!$module) return redirect()->to('dashboard/lms')->with('error', 'Modul tidak ditemukan.');
+
+        $masjidModel = new \App\Models\MasjidModel();
+        if (is_numeric($module['lembaga_pemateri'])) {
+            $masjid = $masjidModel->find($module['lembaga_pemateri']);
+            $module['lembaga_nama'] = $masjid ? $masjid['name'] : $module['lembaga_pemateri'];
+        } else {
+            $module['lembaga_nama'] = $module['lembaga_pemateri'];
+        }
 
         $materials = $materialModel->where('module_id', $module['id'])->orderBy('order_number', 'ASC')->findAll();
         
@@ -67,6 +92,13 @@ class Lms extends BaseController
 
         $module = $moduleModel->find($material['module_id']);
         
+        $masjidModel = new \App\Models\MasjidModel();
+        if (is_numeric($module['lembaga_pemateri'])) {
+            $masjid = $masjidModel->find($module['lembaga_pemateri']);
+            $module['lembaga_nama'] = $masjid ? $masjid['name'] : $module['lembaga_pemateri'];
+        } else {
+            $module['lembaga_nama'] = $module['lembaga_pemateri'];
+        }
         // Check if completed
         $isCompleted = $progressModel->where(['user_id' => $userId, 'material_id' => $id])->first() ? true : false;
 
