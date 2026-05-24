@@ -46,14 +46,14 @@
 <div class="w-full h-full bg-center bg-no-repeat bg-cover opacity-20 grayscale" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBudonmMogHC4Qe65DREMA52svEPfFH92RtpMlwG0k2wRfQcIcuOPsOk9Ep3zWe8gPilv4CEBZ-K6fkkfXzEoYmu9gEAT_ukIUA5qejOT9j1ZQJZFViULJg7BIX3KDhxvvmeXCpt-HtQI-FHQ9i4i2fd3RFMdZuik91j0maZskUhjRx8pEUZsFPGVYllQYHrL9H4k5t42I-l_yXom8f8rWRkyiw0SMJ3NkgL2Jd9UqWQBxIzrHSsu3Z7n5rfEY-8Zv7mEUNJCCnIqO6");'>
 </div>
 </div>
-<main class="relative z-20 w-full max-w-[440px] px-6 py-12">
-<div class="bg-white dark:bg-slate-900 shadow-xl shadow-emerald-950/5 rounded-2xl border border-zinc-100 dark:border-slate-800 p-8 md:p-10">
-<header class="flex flex-col items-center mb-10 text-center">
-<img src="<?= asset_url('logo_masjid_200.png') ?>" alt="Logo Masjid" class="size-16 mx-auto mb-6">
-<h2 class="text-slate-900 dark:text-white tracking-tight text-2xl font-bold leading-tight">
+<main class="relative z-20 w-full max-w-[440px] px-6 py-6">
+<div class="bg-white dark:bg-slate-900 shadow-xl shadow-emerald-950/5 rounded-2xl border border-zinc-100 dark:border-slate-800 p-6 md:p-8">
+<header class="flex flex-col items-center mb-6 text-center">
+<img src="<?= asset_url('logo_masjid_200.png') ?>" alt="Logo Masjid" class="size-12 mx-auto mb-3">
+<h2 class="text-slate-900 dark:text-white tracking-tight text-xl font-bold leading-tight">
                     Dashboard Masjid
                 </h2>
-<p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-relaxed mt-3 max-w-[280px]">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-relaxed mt-1 max-w-[280px]">
                     Selamat datang kembali untuk menyebarkan kebaikan bersama masjid
                 </p>
 </header>
@@ -126,14 +126,14 @@
 </div>
 </div>
 </form>
-<footer class="mt-10 pt-8 border-t border-slate-100 dark:border-slate-800 flex flex-col items-center gap-6">
+<footer class="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-col items-center gap-4">
 <a class="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-primary text-sm font-medium transition-colors" href="<?= base_url() ?>">
 <span class="material-symbols-outlined text-[18px]">arrow_back</span>
                     Kembali ke Beranda
                 </a>
 </footer>
 </div>
-<p class="mt-8 text-center text-slate-400 dark:text-slate-500 text-[10px] uppercase tracking-[0.2em] font-medium">
+<p class="mt-4 text-center text-slate-400 dark:text-slate-500 text-[10px] uppercase tracking-[0.2em] font-medium">
             © <?= date('Y') ?> <?= env('APP_FOUNDATION_NAME', 'Yayasan Masjid Digital Indonesia') ?>
         </p>
 </main>
