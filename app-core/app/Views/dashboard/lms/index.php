@@ -28,7 +28,7 @@
             <?php if (!empty($m['lembaga_pemateri'])): ?>
                 <div class="text-[10px] font-bold text-primary uppercase mb-2 flex items-center gap-1">
                     <span class="material-symbols-outlined text-[12px]">verified</span>
-                    Oleh: <?= esc($m['lembaga_pemateri']) ?>
+                    Oleh: <?= esc($m['lembaga_nama']) ?>
                 </div>
             <?php endif; ?>
             <h3 class="font-bold text-lg text-slate-800 dark:text-white group-hover:text-primary transition-colors line-clamp-2"><?= esc($m['title']) ?></h3>
