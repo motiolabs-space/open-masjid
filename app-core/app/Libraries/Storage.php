@@ -130,7 +130,11 @@ class Storage
         } else {
             // Local
             // Use configured uploadPath instead of FCPATH directly
-            if ($file->move($this->uploadPath . $path, $newName)) {
+            $targetDir = rtrim($this->uploadPath . $path, '/\\');
+            if (!is_dir($targetDir)) {
+                mkdir($targetDir, 0777, true);
+            }
+            if ($file->move($targetDir, $newName)) {
                 return $path . '/' . $newName;
             }
         }
