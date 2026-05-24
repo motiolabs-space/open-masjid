@@ -2139,4 +2139,64 @@ class Admin extends BaseController
 
         return redirect()->back()->with('error', 'Aksi tidak valid.');
     }
+
+    public function followers(): string
+    {
+        $masjidId = session()->get('masjid_id');
+        $db = \Config\Database::connect();
+        
+        // Use Query Builder instead of model to join with users table
+        $followers = $db->table('masjid_followers mf')
+            ->select('mf.id as follow_id, mf.created_at, u.id as user_id, u.name, u.email, u.phone, u.avatar')
+            ->join('users u', 'u.id = mf.user_id')
+            ->where('mf.masjid_id', $masjidId)
+            ->orderBy('mf.created_at', 'DESC')
+            ->get()->getResultArray();
+
+        // Pass pengurus info to check if a follower is already a pengurus
+        $pengurusIds = $db->table('masjid_pengurus')
+            ->select('user_id')
+            ->where('masjid_id', $masjidId)
+            ->get()->getResultArray();
+            
+        $pengurusIds = array_column($pengurusIds, 'user_id');
+
+        return view('dashboard/followers/index', [
+            'title'       => 'Daftar Jamaah (Follower) - Masj.id',
+            'followers'   => $followers,
+            'pengurusIds' => $pengurusIds
+        ]);
+    }
+
+    public function promoteFollower()
+    {
+        $masjidId = session()->get('masjid_id');
+        $userId = $this->request->getPost('user_id');
+        $role = $this->request->getPost('role') ?? 'admin';
+        $title = $this->request->getPost('title') ?? 'Pengurus';
+
+        if (empty($userId)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'User tidak ditemukan.']);
+        }
+
+        $pengurusModel = new \App\Models\MasjidPengurusModel();
+        
+        $exists = $pengurusModel->where(['masjid_id' => $masjidId, 'user_id' => $userId])->first();
+        if ($exists) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Pengguna ini sudah menjadi pengurus.']);
+        }
+
+        $data = [
+            'masjid_id' => $masjidId,
+            'user_id'   => $userId,
+            'role'      => $role,
+            'title'     => $title
+        ];
+
+        if ($pengurusModel->insert($data)) {
+            return $this->response->setJSON(['status' => 'success', 'message' => 'Jamaah berhasil diangkat menjadi pengurus.']);
+        }
+
+        return $this->response->setJSON(['status' => 'error', 'message' => 'Gagal mengangkat pengurus.']);
+    }
 }

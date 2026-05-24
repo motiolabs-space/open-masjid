@@ -43,6 +43,10 @@
                 <span class="material-symbols-outlined text-xl">groups_3</span>
                 <span class="text-sm font-medium">Basis Komunitas</span>
             </a>
+            <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg <?= ($uri == 'dashboard/followers') ? $activeClass : $inactiveClass ?>" href="<?= base_url('dashboard/followers') ?>">
+                <span class="material-symbols-outlined text-xl">diversity_3</span>
+                <span class="text-sm font-medium">Daftar Pengikut</span>
+            </a>
             <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg <?= ($uri == 'dashboard/volunteers') ? $activeClass : $inactiveClass ?>" href="<?= base_url('dashboard/volunteers') ?>">
                 <span class="material-symbols-outlined text-xl">person_pin</span>
                 <span class="text-sm font-medium">Relawan & Piket</span>

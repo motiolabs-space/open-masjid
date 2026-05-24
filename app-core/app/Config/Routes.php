@@ -26,6 +26,8 @@ $routes->post('/register/masjid', 'Auth::registerMasjid');
 $routes->post('/register/jamaah', 'Auth::registerJamaah');
 $routes->get('dashboard', 'Admin::index');
 $routes->post('subscribe', 'Home::subscribe');
+$routes->get('dashboard/followers', 'Admin::followers');
+$routes->post('dashboard/followers/promote', 'Admin::promoteFollower');
 $routes->get('dashboard/profil', 'Admin::profil');
 $routes->post('dashboard/profil', 'Admin::updateProfile');
 $routes->get('dashboard/regencies/(:num)', 'Admin::getRegencies/$1');
