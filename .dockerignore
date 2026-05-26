@@ -1,0 +1,14 @@
+.git
+.github
+app-core/vendor
+app-core/writable/cache/*
+app-core/writable/debugbar/*
+app-core/writable/logs/*
+app-core/writable/session/*
+app-core/writable/uploads/*
+!app-core/writable/uploads/.gitkeep
+docs
+*.md
+!README.md
+.env
+app-core/.env

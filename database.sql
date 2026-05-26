@@ -136,6 +136,7 @@ CREATE TABLE IF NOT EXISTS `masjid_programs` (
   `status` enum('published','draft') DEFAULT 'published',
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
+  `quota` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   CONSTRAINT `programs_masjid_id_foreign` FOREIGN KEY (`masjid_id`) REFERENCES `masjid` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

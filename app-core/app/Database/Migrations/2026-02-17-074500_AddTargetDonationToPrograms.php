@@ -8,6 +8,9 @@ class AddTargetDonationToPrograms extends Migration
 {
     public function up()
     {
+        // The `target_donation` column is already defined in `database.sql`.
+        // Commenting out to prevent "Duplicate column name `target_donation`" error.
+        /*
         $this->forge->addColumn('masjid_programs', [
             'target_donation' => [
                 'type'       => 'DECIMAL',
@@ -16,6 +19,7 @@ class AddTargetDonationToPrograms extends Migration
                 'after'      => 'quota'
             ]
         ]);
+        */
     }
 
     public function down()
