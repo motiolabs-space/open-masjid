@@ -1,0 +1,44 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: open-masjid-app
+    ports:
+      - "${APP_PORT:-8080}:80"
+    environment:
+      DB_HOST: db
+      DB_NAME: ${MYSQL_DATABASE:-open_masjid}
+      DB_USER: ${MYSQL_USER:-open_masjid}
+      DB_PASSWORD: ${MYSQL_PASSWORD:-open_masjid_secret}
+      APP_PORT: ${APP_PORT:-8080}
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: mariadb:10.11
+    container_name: open-masjid-db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_secret}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-open_masjid}
+      MYSQL_USER: ${MYSQL_USER:-open_masjid}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-open_masjid_secret}
+    ports:
+      - "${MYSQL_PORT:-3307}:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./database.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+volumes:
+  db_data:

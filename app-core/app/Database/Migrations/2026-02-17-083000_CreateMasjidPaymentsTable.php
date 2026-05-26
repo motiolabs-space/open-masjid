@@ -8,6 +8,9 @@ class CreateMasjidPaymentsTable extends Migration
 {
     public function up()
     {
+        // The `masjid_payments` table is already defined in `database.sql`.
+        // Commenting out to prevent "Table `masjid_payments` already exists" error.
+        /*
         $this->forge->addField([
             'id' => [
                 'type'           => 'INT',
@@ -69,6 +72,7 @@ class CreateMasjidPaymentsTable extends Migration
         $this->forge->addKey('id', true);
         $this->forge->addForeignKey('masjid_id', 'masjid', 'id', 'CASCADE', 'CASCADE');
         $this->forge->createTable('masjid_payments');
+        */
     }
 
     public function down()

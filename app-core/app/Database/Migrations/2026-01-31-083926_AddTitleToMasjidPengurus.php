@@ -8,14 +8,14 @@ class AddTitleToMasjidPengurus extends Migration
 {
     public function up()
     {
-        $this->forge->addColumn('masjid_pengurus', [
-            'title' => [
-                'type'       => 'VARCHAR',
-                'constraint' => '100',
-                'null'       => true,
-                'after'      => 'role'
-            ],
-        ]);
+        // $this->forge->addColumn('masjid_pengurus', [
+        //     'title' => [
+        //         'type'       => 'VARCHAR',
+        //         'constraint' => '100',
+        //         'null'       => true,
+        //         'after'      => 'role'
+        //     ],
+        // ]);
     }
 
     public function down()
