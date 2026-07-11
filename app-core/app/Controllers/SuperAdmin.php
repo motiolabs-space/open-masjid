@@ -27,6 +27,32 @@ class SuperAdmin extends BaseController
         $financeModel = new MasjidFinanceTransactionModel();
         $wargaModel = new MasjidWargaModel();
         $programModel = new MasjidProgramModel();
+        $mustahikModel = new \App\Models\MustahikModel();
+        $settingModel = new \App\Models\PlatformSettingModel();
+
+        // Get Settings for North Star Metrics
+        $settingsRaw = $settingModel->findAll();
+        $settings = [];
+        foreach ($settingsRaw as $row) {
+            $settings[$row['setting_key']] = $row['setting_value'];
+        }
+
+        $yearStart = date('Y-01-01 00:00:00');
+        $yearEnd = date('Y-12-31 23:59:59');
+        $yearStartObj = date('Y-01-01');
+        $yearEndObj = date('Y-12-31');
+
+        $capaian_masjid = $masjidModel->where('created_at >=', $yearStart)->where('created_at <=', $yearEnd)->countAllResults();
+        $capaian_program = $programModel->where('created_at >=', $yearStart)->where('created_at <=', $yearEnd)->countAllResults();
+        $capaian_jamaah = $userModel->where('created_at >=', $yearStart)->where('created_at <=', $yearEnd)->countAllResults();
+        $capaian_mustahik = $mustahikModel->where('created_at >=', $yearStart)->where('created_at <=', $yearEnd)->countAllResults();
+        
+        $danaRow = $financeModel->selectSum('amount')
+            ->where('type', 'pengeluaran')
+            ->where('date >=', $yearStartObj)
+            ->where('date <=', $yearEndObj)
+            ->first();
+        $capaian_donasi = $danaRow['amount'] ?? 0;
 
         // Calculate Social Impact Metrics
         $db = \Config\Database::connect();
@@ -76,6 +102,13 @@ class SuperAdmin extends BaseController
                 'ltv'           => $ltv,
                 'total_programs'  => $totalPrograms,
                 'active_programs' => $activePrograms,
+            ],
+            'north_star' => [
+                'masjid' => ['capaian' => $capaian_masjid, 'target' => $settings['target_masjid'] ?? 0],
+                'program' => ['capaian' => $capaian_program, 'target' => $settings['target_program'] ?? 0],
+                'jamaah' => ['capaian' => $capaian_jamaah, 'target' => $settings['target_jamaah'] ?? 0],
+                'mustahik' => ['capaian' => $capaian_mustahik, 'target' => $settings['target_mustahik'] ?? 0],
+                'donasi' => ['capaian' => $capaian_donasi, 'target' => $settings['target_donasi'] ?? 0],
             ],
             'chart' => [
                 'labels' => json_encode($chartLabels),
@@ -133,6 +166,103 @@ class SuperAdmin extends BaseController
         ]);
 
         return redirect()->to('dashboard')->with('success', 'Sekarang mengelola: ' . $masjid['name']);
+    }
+
+    public function editMasjid($id)
+    {
+        $masjidModel = new MasjidModel();
+        $userModel = new UserModel();
+        $masjid = $masjidModel->find($id);
+
+        if (!$masjid) {
+            return redirect()->back()->with('error', 'Masjid tidak ditemukan.');
+        }
+
+        $db = \Config\Database::connect();
+        $currentAdmin = $db->table('masjid_pengurus')
+            ->where('masjid_id', $id)
+            ->where('is_creator', 1)
+            ->get()->getRowArray();
+
+        $data = [
+            'title' => 'Edit Masjid - Super Admin',
+            'masjid' => $masjid,
+            'currentAdminId' => $currentAdmin ? $currentAdmin['user_id'] : null,
+            'users' => $userModel->findAll(),
+        ];
+        
+        return view('superadmin/masjid_edit', $data);
+    }
+
+    public function updateMasjid($id)
+    {
+        $masjidModel = new MasjidModel();
+        $masjid = $masjidModel->find($id);
+
+        if (!$masjid) {
+            return redirect()->back()->with('error', 'Masjid tidak ditemukan.');
+        }
+
+        $status = $this->request->getPost('status') ?: 'active';
+        $newAdminId = $this->request->getPost('admin_id');
+
+        // Update basic masjid data
+        $updateData = [
+            'name' => $this->request->getPost('name'),
+            'username' => $this->request->getPost('username'),
+            'status' => $status,
+            'phone' => $this->request->getPost('phone'),
+            'whatsapp' => $this->request->getPost('whatsapp'),
+            'email' => $this->request->getPost('email'),
+        ];
+        
+        // Update password functionality can be added if needed, but not in basic edit.
+        $masjidModel->update($id, $updateData);
+
+        // Update Admin
+        if ($newAdminId) {
+            $db = \Config\Database::connect();
+            $currentAdmin = $db->table('masjid_pengurus')
+                ->where('masjid_id', $id)
+                ->where('is_creator', 1)
+                ->get()->getRowArray();
+
+            if (!$currentAdmin || $currentAdmin['user_id'] != $newAdminId) {
+                // Remove old creator flag
+                $db->table('masjid_pengurus')->where('masjid_id', $id)->update(['is_creator' => 0]);
+                
+                // Check if new admin is already a pengurus
+                $existing = $db->table('masjid_pengurus')->where('masjid_id', $id)->where('user_id', $newAdminId)->get()->getRowArray();
+                if ($existing) {
+                    $db->table('masjid_pengurus')->where('id', $existing['id'])->update(['is_creator' => 1, 'role' => 'admin']);
+                } else {
+                    $db->table('masjid_pengurus')->insert([
+                        'masjid_id' => $id,
+                        'user_id' => $newAdminId,
+                        'role' => 'admin',
+                        'is_creator' => 1,
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s'),
+                    ]);
+                }
+            }
+        }
+
+        return redirect()->to('superadmin/masjid')->with('success', 'Data Masjid berhasil diperbarui.');
+    }
+
+    public function deleteMasjid($id)
+    {
+        $masjidModel = new MasjidModel();
+        $masjid = $masjidModel->find($id);
+
+        if (!$masjid) {
+            return redirect()->back()->with('error', 'Masjid tidak ditemukan.');
+        }
+
+        $masjidModel->delete($id);
+
+        return redirect()->to('superadmin/masjid')->with('success', 'Masjid ' . esc($masjid['name']) . ' berhasil dihapus karena terindikasi spam.');
     }
 
     public function profile()
@@ -196,7 +326,7 @@ class SuperAdmin extends BaseController
     {
         $settingModel = new \App\Models\PlatformSettingModel();
         
-        $keysToUpdate = ['community_wa_link', 'community_tg_link'];
+        $keysToUpdate = ['community_wa_link', 'community_tg_link', 'target_masjid', 'target_program', 'target_jamaah', 'target_mustahik', 'target_donasi'];
 
         foreach ($keysToUpdate as $key) {
             $value = $this->request->getPost($key);

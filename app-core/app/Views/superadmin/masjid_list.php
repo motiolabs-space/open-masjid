@@ -37,6 +37,9 @@
                     <td class="px-6 py-4 text-[10px] font-bold text-slate-400">#<?= $m['id'] ?></td>
                     <td class="px-6 py-4 font-bold text-slate-900 dark:text-white">
                         <a href="<?= base_url($m['username']) ?>" target="_blank" class="text-primary hover:underline"><?= esc($m['name']) ?></a>
+                        <?php if(isset($m['status']) && $m['status'] == 'suspended'): ?>
+                            <span class="ml-2 bg-rose-100 text-rose-600 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">Suspended</span>
+                        <?php endif; ?>
                         <div class="text-[10px] font-normal text-slate-400 mt-0.5">@<?= esc($m['username']) ?></div>
                     </td>
                     <td class="px-6 py-4">
@@ -61,7 +64,16 @@
                             <span class="material-symbols-outlined text-sm">settings_suggest</span>
                             Kelola
                         </a>
-                        <button class="text-rose-500 hover:text-rose-600 font-bold text-xs">Suspend</button>
+                        <a href="<?= base_url('superadmin/masjid/edit/' . $m['id']) ?>" class="bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-white px-3 py-1.5 rounded-lg font-bold text-xs transition-all inline-flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">edit</span>
+                            Edit/Suspend
+                        </a>
+                        <form action="<?= base_url('superadmin/masjid/delete/' . $m['id']) ?>" method="post" class="inline-block" onsubmit="return confirm('Yakin ingin menghapus masjid ini (indikasi SPAM)? Semua data terkait akan terhapus permanen.');">
+                            <button type="submit" class="bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white px-3 py-1.5 rounded-lg font-bold text-xs transition-all inline-flex items-center gap-1" title="Hapus karena indikasi Spam">
+                                <span class="material-symbols-outlined text-sm">delete_forever</span>
+                                Hapus (Spam)
+                            </button>
+                        </form>
                     </td>
                 </tr>
                 <?php endforeach; ?>

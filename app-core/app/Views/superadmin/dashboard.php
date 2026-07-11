@@ -61,6 +61,52 @@
     </div>
 </div>
 
+<!-- North Star Metrics (Yearly) -->
+<div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm mt-8">
+    <div class="flex justify-between items-end mb-6">
+        <div>
+            <h4 class="font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">stars</span>
+                North Star Metrics
+            </h4>
+            <p class="text-xs text-slate-500 mt-1">Progres capaian tahun <?= date('Y') ?></p>
+        </div>
+        <a href="<?= base_url('superadmin/settings') ?>" class="text-xs font-bold text-primary hover:underline">Ubah Target</a>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+        <?php 
+        $metrics = [
+            ['label' => 'Masjid Bergabung', 'key' => 'masjid', 'color' => 'emerald', 'format' => 'number'],
+            ['label' => 'Program Terlaksana', 'key' => 'program', 'color' => 'blue', 'format' => 'number'],
+            ['label' => 'Jamaah Terjangkau', 'key' => 'jamaah', 'color' => 'indigo', 'format' => 'number'],
+            ['label' => 'Mustahik Terbantu', 'key' => 'mustahik', 'color' => 'amber', 'format' => 'number'],
+            ['label' => 'Dana Disalurkan', 'key' => 'donasi', 'color' => 'rose', 'format' => 'currency'],
+        ];
+        foreach($metrics as $m):
+            $capaian = $north_star[$m['key']]['capaian'];
+            $target = $north_star[$m['key']]['target'];
+            $percent = $target > 0 ? min(100, round(($capaian / $target) * 100)) : 0;
+            $val = $m['format'] == 'currency' ? 'Rp ' . number_format($capaian, 0, ',', '.') : number_format($capaian, 0, ',', '.');
+            $targetVal = $m['format'] == 'currency' ? 'Rp ' . number_format($target, 0, ',', '.') : number_format($target, 0, ',', '.');
+        ?>
+        <div>
+            <div class="flex justify-between items-end mb-2">
+                <span class="text-xs font-bold text-slate-500"><?= $m['label'] ?></span>
+                <span class="text-xs font-black text-<?= $m['color'] ?>-600"><?= $percent ?>%</span>
+            </div>
+            <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 mb-2">
+                <div class="bg-<?= $m['color'] ?>-500 h-2 rounded-full" style="width: <?= $percent ?>%"></div>
+            </div>
+            <div class="flex justify-between text-[10px] font-medium text-slate-400">
+                <span><?= $val ?></span>
+                <span>Target: <?= $targetVal ?></span>
+            </div>
+        </div>
+        <?php endforeach; ?>
+    </div>
+</div>
+
 <div class="grid lg:grid-cols-2 gap-8 mt-8">
     <!-- Registration Chart -->
     <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
