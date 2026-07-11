@@ -45,3 +45,16 @@ jobs:
           REMOTE_PORT: ${{ secrets.SITEGROUND_SSH_PORT || '18765' }}
           TARGET: "${{ secrets.SITEGROUND_SSH_TARGET_PATH }}/public_html/"
           EXCLUDE: "/node_modules/, /.git/, /app-core/, /.env, /.github/, /.vscode/, /.gemini/, /scratch/, /*.md, /database.sql"
+
+      # 3. RUN POST-DEPLOY COMMANDS
+      - name: Post-Deploy Scripts
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: "35.213.150.39"
+          username: ${{ secrets.SITEGROUND_SSH_USERNAME }}
+          key: ${{ secrets.SITEGROUND_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SITEGROUND_SSH_PORT || '18765' }}
+          script: |
+            cd ${{ secrets.SITEGROUND_SSH_TARGET_PATH }}/app-core
+            composer install --no-dev --optimize-autoloader
+            php spark migrate

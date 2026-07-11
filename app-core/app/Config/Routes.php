@@ -150,6 +150,9 @@ $routes->group('superadmin', ['filter' => 'dashboardGuard'], function($routes) {
     $routes->get('users', 'SuperAdmin::users');
     $routes->get('manage-masjid/(:num)', 'SuperAdmin::manageMasjid/$1');
     $routes->get('masjid/manage/(:num)', 'SuperAdmin::manageMasjid/$1'); // Backward compatibility / Alias
+    $routes->get('masjid/edit/(:num)', 'SuperAdmin::editMasjid/$1');
+    $routes->post('masjid/update/(:num)', 'SuperAdmin::updateMasjid/$1');
+    $routes->post('masjid/delete/(:num)', 'SuperAdmin::deleteMasjid/$1');
     $routes->get('profile', 'SuperAdmin::profile');
     $routes->post('profile/password', 'SuperAdmin::updatePassword');
     
