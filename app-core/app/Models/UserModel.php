@@ -12,7 +12,7 @@ class UserModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['name', 'email', 'phone', 'password_hash', 'role', 'telegram_chat_id', 'last_login'];
+    protected $allowedFields    = ['name', 'email', 'phone', 'password_hash', 'role', 'telegram_chat_id', 'last_login', 'register_ip', 'register_country'];
 
     // Dates
     protected $useTimestamps = true;
