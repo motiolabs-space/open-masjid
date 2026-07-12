@@ -93,4 +93,43 @@
         </form>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Cari semua input bertipe number
+    const numberInputs = document.querySelectorAll('input[type="number"]');
+    
+    numberInputs.forEach(input => {
+        // Ubah tipe ke text agar bisa menerima karakter titik (.)
+        input.type = 'text';
+        
+        // Format nilai awal saat halaman dimuat
+        if (input.value) {
+            input.value = formatNumber(input.value);
+        }
+
+        // Format angka saat user mengetik
+        input.addEventListener('input', function(e) {
+            let val = this.value.replace(/\D/g, ''); // Hapus semua selain angka
+            this.value = formatNumber(val);
+        });
+    });
+
+    // Hapus titik sebelum form di-submit (agar database menerima angka utuh)
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function() {
+            numberInputs.forEach(input => {
+                input.value = input.value.replace(/\D/g, '');
+            });
+        });
+    }
+
+    // Fungsi format ribuan
+    function formatNumber(num) {
+        if (!num) return '';
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+});
+</script>
 <?= $this->endSection() ?>
