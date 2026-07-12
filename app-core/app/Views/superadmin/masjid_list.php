@@ -79,15 +79,27 @@
                         </div>
                     </td>
                     <td class="px-6 py-4 text-right space-x-2">
+                        <?php 
+                        $isInactive = empty($m['last_login']) || strtotime($m['last_login']) < strtotime('-30 days'); 
+                        if ($isInactive && !empty($m['pic_phone'])): 
+                            $waMessage = "Halo {$m['pic_name']}, kami dari Tim Masj.id. Kami perhatikan " . esc($m['name']) . " belum banyak beraktivitas akhir-akhir ini. Apakah ada kendala saat menggunakan aplikasi? Biar kami bantu ya!";
+                            $waLink = "https://wa.me/" . format_wa($m['pic_phone']) . "?text=" . urlencode($waMessage);
+                        ?>
+                            <a href="<?= $waLink ?>" target="_blank" class="bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500 hover:text-white px-3 py-1.5 rounded-lg font-bold text-xs transition-all inline-flex items-center gap-1 mb-1" title="Sapa Pengurus (Kurang Aktif)">
+                                <span class="material-symbols-outlined text-sm">waving_hand</span>
+                                Sapa
+                            </a>
+                        <?php endif; ?>
+                        
                         <a href="<?= base_url('superadmin/manage-masjid/' . $m['id']) ?>" class="bg-primary/10 text-primary hover:bg-primary hover:text-white px-3 py-1.5 rounded-lg font-bold text-xs transition-all inline-flex items-center gap-1">
                             <span class="material-symbols-outlined text-sm">settings_suggest</span>
                             Kelola
                         </a>
-                        <a href="<?= base_url('superadmin/masjid/edit/' . $m['id']) ?>" class="bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-white px-3 py-1.5 rounded-lg font-bold text-xs transition-all inline-flex items-center gap-1">
+                        <a href="<?= base_url('superadmin/masjid/edit/' . $m['id']) ?>" class="bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-white px-3 py-1.5 rounded-lg font-bold text-xs transition-all inline-flex items-center gap-1 mt-1">
                             <span class="material-symbols-outlined text-sm">edit</span>
                             Edit/Suspend
                         </a>
-                        <form action="<?= base_url('superadmin/masjid/delete/' . $m['id']) ?>" method="post" class="inline-block" onsubmit="return confirm('Yakin ingin menghapus masjid ini (indikasi SPAM)? Semua data terkait akan terhapus permanen.');">
+                        <form action="<?= base_url('superadmin/masjid/delete/' . $m['id']) ?>" method="post" class="inline-block mt-1" onsubmit="return confirm('Yakin ingin menghapus masjid ini (indikasi SPAM)? Semua data terkait akan terhapus permanen.');">
                             <?= csrf_field() ?>
                             <button type="submit" class="bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white px-3 py-1.5 rounded-lg font-bold text-xs transition-all inline-flex items-center gap-1" title="Hapus karena indikasi Spam">
                                 <span class="material-symbols-outlined text-sm">delete_forever</span>
