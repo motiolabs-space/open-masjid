@@ -272,14 +272,20 @@
     <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
         <div class="flex items-center gap-4">
             <div class="size-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500">
-                <span class="material-symbols-outlined">support_agent</span>
+                <span class="material-symbols-outlined">forum</span>
             </div>
             <div>
-                <p class="font-bold text-sm">Butuh bantuan teknis?</p>
-                <p class="text-xs text-slate-500">Hubungi tim support Masj.id (Respon &lt; 10mnt)</p>
+                <p class="font-bold text-sm">Masuk ke group support</p>
+                <p class="text-xs text-slate-500">Bergabung dengan komunitas pengurus masjid lainnya</p>
             </div>
         </div>
-        <button class="px-5 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-bold hover:bg-slate-200 transition-colors">Hubungi CS</button>
+        <?php if (!empty($community_wa_link)): ?>
+            <a href="<?= esc($community_wa_link) ?>" target="_blank" class="px-5 py-2.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-lg text-xs font-bold hover:bg-emerald-200 transition-colors inline-flex items-center gap-1">
+                Join Grup WA
+            </a>
+        <?php else: ?>
+            <button disabled class="px-5 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-lg text-xs font-bold cursor-not-allowed">Belum Tersedia</button>
+        <?php endif; ?>
     </div>
     <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
         <div class="flex items-center gap-4">
