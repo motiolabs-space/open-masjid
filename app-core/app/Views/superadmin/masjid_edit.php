@@ -19,6 +19,7 @@
         <?php endif; ?>
 
         <form action="<?= base_url('superadmin/masjid/update/' . $masjid['id']) ?>" method="post" class="space-y-6">
+            <?= csrf_field() ?>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Data Dasar -->
