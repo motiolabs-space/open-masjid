@@ -20,10 +20,10 @@
                     <input type="text" name="q" value="<?= esc($_GET['q'] ?? '') ?>" placeholder="Cari masjid..." class="pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary w-64">
                 </div>
             </form>
-            <button class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2">
+            <a href="<?= base_url('superadmin/masjid/create') ?>" class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2">
                 <span class="material-symbols-outlined text-sm">add</span>
                 Tambah Manual
-            </button>
+            </a>
         </div>
     </div>
     <div class="overflow-x-auto">

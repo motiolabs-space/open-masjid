@@ -165,6 +165,45 @@ class SuperAdmin extends BaseController
         return view('superadmin/masjid_list', $data);
     }
 
+    public function createMasjid()
+    {
+        $data = [
+            'title' => 'Tambah Masjid - Super Admin',
+        ];
+        return view('superadmin/masjid_form', $data);
+    }
+
+    public function saveMasjid()
+    {
+        $rules = [
+            'name' => 'required',
+            'username' => 'required|alpha_dash|is_unique[masjid.username]',
+            'email' => 'permit_empty|valid_email',
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('error', $this->validator->listErrors());
+        }
+
+        $db = \Config\Database::connect();
+        $builder = $db->table('masjid');
+        
+        $data = [
+            'name' => $this->request->getPost('name'),
+            'username' => $this->request->getPost('username'),
+            'address' => $this->request->getPost('address'),
+            'phone' => $this->request->getPost('phone'),
+            'whatsapp' => $this->request->getPost('whatsapp'),
+            'email' => $this->request->getPost('email'),
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ];
+
+        $builder->insert($data);
+
+        return redirect()->to(base_url('superadmin/masjid'))->with('success', 'Masjid berhasil ditambahkan secara manual.');
+    }
+
     public function programs(): string
     {
         $db = \Config\Database::connect();
