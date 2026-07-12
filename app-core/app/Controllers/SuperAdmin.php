@@ -133,11 +133,34 @@ class SuperAdmin extends BaseController
         // Get the creator/main admin of the masjid
         $builder->join('masjid_pengurus mp', 'mp.masjid_id = masjid.id AND mp.is_creator = 1', 'left');
         $builder->join('users u', 'u.id = mp.user_id', 'left');
+        
+        $filter = $this->request->getGet('filter') ?? 'all';
+        if ($filter == 'active') {
+            $builder->groupStart()
+                    ->where('u.last_login >=', date('Y-m-d H:i:s', strtotime('-30 days')))
+                    ->groupEnd();
+        } elseif ($filter == 'inactive') {
+            $builder->groupStart()
+                    ->where('u.last_login <', date('Y-m-d H:i:s', strtotime('-30 days')))
+                    ->orWhere('u.last_login IS NULL')
+                    ->groupEnd();
+        }
+
+        $search = $this->request->getGet('q');
+        if (!empty($search)) {
+            $builder->groupStart()
+                    ->like('masjid.name', $search)
+                    ->orLike('masjid.username', $search)
+                    ->orLike('u.name', $search)
+                    ->groupEnd();
+        }
+
         $builder->orderBy('masjid.created_at', 'DESC');
         
         $data = [
             'title' => 'Manajemen Masjid - Super Admin',
             'masjids' => $builder->get()->getResultArray(),
+            'current_filter' => $filter
         ];
         return view('superadmin/masjid_list', $data);
     }
