@@ -9,6 +9,10 @@
             <p class="text-xs text-slate-500 mt-1">Total: <?= count($users) ?> User terdaftar</p>
         </div>
         <div class="flex items-center gap-2">
+            <a href="<?= base_url('superadmin/users/create') ?>" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg text-sm font-bold shadow-lg shadow-primary/30 transition-all flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">add</span>
+                Tambah User
+            </a>
             <div class="relative">
                 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
                 <input type="text" placeholder="Cari nama atau email..." class="pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary w-64">
@@ -47,10 +51,13 @@
                         </span>
                     </td>
                     <td class="px-6 py-4 text-slate-500 font-medium"><?= date('d M Y, H:i', strtotime($u['created_at'])) ?></td>
-                    <td class="px-6 py-4 text-right space-x-2">
-                        <button class="text-primary hover:text-primary-dark font-bold text-xs">Edit</button>
-                        <?php if($u['role'] != 'superadmin'): ?>
-                        <button class="text-emerald-600 hover:text-emerald-700 font-bold text-xs">Promote</button>
+                    <td class="px-6 py-4 text-right space-x-2 whitespace-nowrap">
+                        <a href="<?= base_url('superadmin/users/edit/' . $u['id']) ?>" class="text-primary hover:text-primary-dark font-bold text-xs">Edit</a>
+                        <?php if($u['id'] != session()->get('user_id')): ?>
+                        <form action="<?= base_url('superadmin/users/delete/' . $u['id']) ?>" method="post" class="inline-block" onsubmit="return confirm('Yakin ingin menghapus user ini?');">
+                            <?= csrf_field() ?>
+                            <button type="submit" class="text-rose-600 hover:text-rose-700 font-bold text-xs">Hapus</button>
+                        </form>
                         <?php endif; ?>
                     </td>
                 </tr>
