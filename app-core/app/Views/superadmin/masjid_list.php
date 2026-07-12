@@ -45,7 +45,7 @@
                     <td class="px-6 py-4">
                         <div class="font-bold text-slate-700 dark:text-slate-300"><?= esc($m['pic_name'] ?? 'Tidak ada') ?></div>
                         <?php if(!empty($m['pic_phone'])): ?>
-                            <a href="https://wa.me/<?= preg_replace('/[^0-9]/', '', $m['pic_phone']) ?>" target="_blank" class="inline-flex items-center text-xs text-emerald-600 hover:underline mt-1 mr-2">
+                            <a href="https://wa.me/<?= format_wa($m['pic_phone']) ?>" target="_blank" class="inline-flex items-center text-xs text-emerald-600 hover:underline mt-1 mr-2">
                                 <span class="material-symbols-outlined text-[14px] mr-0.5">chat</span> WA
                             </a>
                         <?php endif; ?>
