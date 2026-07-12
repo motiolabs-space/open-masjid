@@ -31,7 +31,10 @@
                 <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
                     <td class="px-6 py-4 text-[10px] font-bold text-slate-400">#<?= $p['id'] ?></td>
                     <td class="px-6 py-4">
-                        <div class="font-bold text-slate-900 dark:text-white"><?= esc($p['title']) ?></div>
+                        <a href="<?= base_url(esc($p['masjid_username']) . '/program/' . esc($p['slug'])) ?>" target="_blank" class="font-bold text-slate-900 dark:text-white hover:text-primary transition-colors inline-flex items-center gap-1">
+                            <?= esc($p['title']) ?>
+                            <span class="material-symbols-outlined text-[14px] opacity-50">open_in_new</span>
+                        </a>
                         <div class="text-[10px] text-slate-400 mt-0.5"><?= esc($p['slug']) ?></div>
                     </td>
                     <td class="px-6 py-4">
