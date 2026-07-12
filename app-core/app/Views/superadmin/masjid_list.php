@@ -69,6 +69,7 @@
                             Edit/Suspend
                         </a>
                         <form action="<?= base_url('superadmin/masjid/delete/' . $m['id']) ?>" method="post" class="inline-block" onsubmit="return confirm('Yakin ingin menghapus masjid ini (indikasi SPAM)? Semua data terkait akan terhapus permanen.');">
+                            <?= csrf_field() ?>
                             <button type="submit" class="bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white px-3 py-1.5 rounded-lg font-bold text-xs transition-all inline-flex items-center gap-1" title="Hapus karena indikasi Spam">
                                 <span class="material-symbols-outlined text-sm">delete_forever</span>
                                 Hapus (Spam)
