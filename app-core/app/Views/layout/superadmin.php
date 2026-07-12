@@ -57,6 +57,10 @@
                 <span class="material-symbols-outlined">mosque</span>
                 Daftar Masjid
             </a>
+            <a href="<?= base_url('superadmin/programs') ?>" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition-colors <?= str_contains(current_url(), 'superadmin/programs') ? 'bg-primary text-white' : 'text-slate-400' ?>">
+                <span class="material-symbols-outlined">event</span>
+                Monitoring Program
+            </a>
             <a href="<?= base_url('superadmin/users') ?>" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition-colors <?= str_contains(current_url(), 'users') ? 'bg-primary text-white' : 'text-slate-400' ?>">
                 <span class="material-symbols-outlined">group</span>
                 Manajemen User
