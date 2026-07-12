@@ -124,7 +124,12 @@ class SuperAdmin extends BaseController
     {
         $db = \Config\Database::connect();
         $builder = $db->table('masjid');
-        $builder->select('masjid.*, u.name as pic_name, u.email as pic_email, u.phone as pic_phone, u.last_login');
+        $builder->select('masjid.*, u.name as pic_name, u.email as pic_email, u.phone as pic_phone, u.last_login,
+            (SELECT COUNT(id) FROM masjid_programs WHERE masjid_programs.masjid_id = masjid.id) as total_programs,
+            (SELECT COUNT(id) FROM masjid_warga WHERE masjid_warga.masjid_id = masjid.id) as total_jamaah,
+            (SELECT COUNT(id) FROM masjid_mustahik WHERE masjid_mustahik.masjid_id = masjid.id) as total_mustahik,
+            (SELECT SUM(amount) FROM masjid_finance_transactions WHERE masjid_finance_transactions.masjid_id = masjid.id AND type="pemasukan") as total_dana
+        ');
         // Get the creator/main admin of the masjid
         $builder->join('masjid_pengurus mp', 'mp.masjid_id = masjid.id AND mp.is_creator = 1', 'left');
         $builder->join('users u', 'u.id = mp.user_id', 'left');
