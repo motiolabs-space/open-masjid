@@ -21,12 +21,15 @@ class Auth extends BaseController
 
         try {
             // 1. Create User (PIC)
+            $ip = $this->request->getIPAddress();
             $userData = [
                 'name'          => $this->request->getPost('nama_pic'),
                 'email'         => $this->request->getPost('email_pic'),
                 'phone'         => $this->request->getPost('phone_pic'),
                 'password_hash' => password_hash($this->request->getPost('password_pic'), PASSWORD_DEFAULT),
-                'role'          => 'user'
+                'role'          => 'user',
+                'register_ip'   => $ip,
+                'register_country' => $this->_getCountryFromIp($ip)
             ];
             $userId = $userModel->insert($userData);
 
@@ -132,12 +135,15 @@ class Auth extends BaseController
     {
         $userModel = new UserModel();
 
+        $ip = $this->request->getIPAddress();
         $userData = [
             'name'          => $this->request->getPost('nama_lengkap'),
             'email'         => $this->request->getPost('email'),
             'phone'         => $this->request->getPost('phone'),
             'password_hash' => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
-            'role'          => 'user'
+            'role'          => 'user',
+            'register_ip'   => $ip,
+            'register_country' => $this->_getCountryFromIp($ip)
         ];
 
         if ($userId = $userModel->insert($userData)) {
@@ -418,5 +424,24 @@ class Auth extends BaseController
             }
             return redirect()->to('login')->with('error', 'Gagal membuat akun.');
         }
+    }
+
+    private function _getCountryFromIp($ip)
+    {
+        if (empty($ip) || $ip == '::1' || $ip == '127.0.0.1') return 'Localhost';
+        
+        $ch = curl_init("http://ip-api.com/json/{$ip}?fields=country");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 2);
+        $response = curl_exec($ch);
+        curl_close($ch);
+        
+        if ($response) {
+            $data = json_decode($response, true);
+            if (isset($data['country'])) {
+                return $data['country'];
+            }
+        }
+        return 'Unknown';
     }
 }

@@ -37,6 +37,8 @@ CREATE TABLE IF NOT EXISTS `users` (
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   `last_login` datetime DEFAULT NULL,
+  `register_ip` varchar(50) DEFAULT NULL,
+  `register_country` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -148,6 +148,7 @@ $routes->group('superadmin', ['filter' => 'dashboardGuard'], function($routes) {
     $routes->get('/', 'SuperAdmin::index');
     $routes->get('masjid', 'SuperAdmin::masjid');
     $routes->get('users', 'SuperAdmin::users');
+    $routes->get('users/analytics/(:num)', 'SuperAdmin::userAnalytics/$1');
     $routes->get('users/create', 'SuperAdmin::createUser');
     $routes->post('users/save', 'SuperAdmin::saveUser');
     $routes->get('users/edit/(:num)', 'SuperAdmin::editUser/$1');

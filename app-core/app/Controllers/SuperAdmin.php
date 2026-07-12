@@ -251,6 +251,33 @@ class SuperAdmin extends BaseController
         return redirect()->to('superadmin/users')->with('error', 'User tidak ditemukan.');
     }
 
+    public function userAnalytics($id)
+    {
+        $userModel = new UserModel();
+        $user = $userModel->find($id);
+
+        if (!$user) {
+            return redirect()->to('superadmin/users')->with('error', 'User tidak ditemukan.');
+        }
+
+        $db = \Config\Database::connect();
+        
+        // Get Masjid Affiliations
+        $affiliations = $db->table('masjid_pengurus')
+            ->select('masjid_pengurus.*, masjid.name as masjid_name, masjid.username as masjid_username')
+            ->join('masjid', 'masjid.id = masjid_pengurus.masjid_id')
+            ->where('masjid_pengurus.user_id', $id)
+            ->get()->getResultArray();
+
+        $data = [
+            'title' => 'User Analytics - Super Admin',
+            'user' => $user,
+            'affiliations' => $affiliations,
+        ];
+        
+        return view('superadmin/user_analytics', $data);
+    }
+
     // Impersonate Masjid Management
     public function manageMasjid($id)
     {

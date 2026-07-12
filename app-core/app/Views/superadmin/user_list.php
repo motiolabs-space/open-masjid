@@ -27,6 +27,7 @@
                     <th class="px-6 py-4 tracking-wider">Email & Phone</th>
                     <th class="px-6 py-4 tracking-wider">Role</th>
                     <th class="px-6 py-4 tracking-wider">Bergabung</th>
+                    <th class="px-6 py-4 tracking-wider">Last Login</th>
                     <th class="px-6 py-4 text-right tracking-wider">Aksi</th>
                 </tr>
             </thead>
@@ -36,8 +37,13 @@
                     <td class="px-6 py-4 font-bold text-slate-900 dark:text-white"><?= esc($u['name']) ?></td>
                     <td class="px-6 py-4">
                         <div class="flex flex-col">
-                            <span class="font-medium text-slate-900 dark:text-white"><?= esc($u['email']) ?></span>
-                            <span class="text-[10px] text-slate-400"><?= esc($u['phone'] ?? '-') ?></span>
+                            <a href="mailto:<?= esc($u['email']) ?>" class="font-medium text-blue-600 hover:underline dark:text-blue-400"><?= esc($u['email']) ?></a>
+                            <?php $cleanPhone = preg_replace('/[^0-9]/', '', $u['phone'] ?? ''); ?>
+                            <?php if($cleanPhone): ?>
+                            <a href="https://wa.me/<?= $cleanPhone ?>" target="_blank" class="text-[10px] text-emerald-600 hover:underline mt-0.5"><?= esc($u['phone']) ?></a>
+                            <?php else: ?>
+                            <span class="text-[10px] text-slate-400">-</span>
+                            <?php endif; ?>
                         </div>
                     </td>
                     <td class="px-6 py-4">
@@ -51,7 +57,11 @@
                         </span>
                     </td>
                     <td class="px-6 py-4 text-slate-500 font-medium"><?= date('d M Y, H:i', strtotime($u['created_at'])) ?></td>
+                    <td class="px-6 py-4 text-slate-500 font-medium">
+                        <?= !empty($u['last_login']) ? date('d M Y, H:i', strtotime($u['last_login'])) : '<span class="text-slate-300">Belum pernah</span>' ?>
+                    </td>
                     <td class="px-6 py-4 text-right space-x-2 whitespace-nowrap">
+                        <a href="<?= base_url('superadmin/users/analytics/' . $u['id']) ?>" class="text-indigo-600 hover:text-indigo-700 font-bold text-xs">Analytics</a>
                         <a href="<?= base_url('superadmin/users/edit/' . $u['id']) ?>" class="text-primary hover:text-primary-dark font-bold text-xs">Edit</a>
                         <?php if($u['id'] != session()->get('user_id')): ?>
                         <form action="<?= base_url('superadmin/users/delete/' . $u['id']) ?>" method="post" class="inline-block" onsubmit="return confirm('Yakin ingin menghapus user ini?');">
