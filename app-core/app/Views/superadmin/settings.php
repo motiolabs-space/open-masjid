@@ -15,6 +15,7 @@
 
     <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-6">
         <form action="<?= base_url('superadmin/settings/save') ?>" method="post">
+            <?= csrf_field() ?>
             
             <h3 class="text-lg font-bold mb-4 text-slate-800 dark:text-slate-100 flex items-center gap-2">
                 <span class="material-symbols-outlined text-primary">forum</span>
