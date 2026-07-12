@@ -9,10 +9,17 @@
             <p class="text-xs text-slate-500 mt-1">Total: <?= count($masjids) ?> Masjid terdaftar</p>
         </div>
         <div class="flex items-center gap-2">
-            <div class="relative">
-                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
-                <input type="text" placeholder="Cari masjid..." class="pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary w-64">
-            </div>
+            <form action="" method="get" class="flex gap-2" id="filterForm">
+                <select name="filter" onchange="document.getElementById('filterForm').submit()" class="py-2 pl-3 pr-8 bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary font-medium text-slate-700 dark:text-slate-200">
+                    <option value="all" <?= ($current_filter ?? '') == 'all' ? 'selected' : '' ?>>Semua Masjid</option>
+                    <option value="active" <?= ($current_filter ?? '') == 'active' ? 'selected' : '' ?>>Aktif (30 Hari Terakhir)</option>
+                    <option value="inactive" <?= ($current_filter ?? '') == 'inactive' ? 'selected' : '' ?>>Kurang Aktif</option>
+                </select>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+                    <input type="text" name="q" value="<?= esc($_GET['q'] ?? '') ?>" placeholder="Cari masjid..." class="pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary w-64">
+                </div>
+            </form>
             <button class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2">
                 <span class="material-symbols-outlined text-sm">add</span>
                 Tambah Manual
