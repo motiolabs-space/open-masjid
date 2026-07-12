@@ -38,7 +38,7 @@
             <div>
                 <p class="text-xs text-slate-500 mb-1">WhatsApp / Phone</p>
                 <?php 
-                $cleanPhone = preg_replace('/[^0-9]/', '', $user['phone'] ?? ''); 
+                $cleanPhone = format_wa($user['phone'] ?? ''); 
                 if($cleanPhone): 
                 ?>
                 <a href="https://wa.me/<?= $cleanPhone ?>" target="_blank" class="font-medium text-emerald-600 hover:underline flex items-center gap-2">

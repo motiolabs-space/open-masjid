@@ -38,7 +38,7 @@
                     <td class="px-6 py-4">
                         <div class="flex flex-col">
                             <a href="mailto:<?= esc($u['email']) ?>" class="font-medium text-blue-600 hover:underline dark:text-blue-400"><?= esc($u['email']) ?></a>
-                            <?php $cleanPhone = preg_replace('/[^0-9]/', '', $u['phone'] ?? ''); ?>
+                            <?php $cleanPhone = format_wa($u['phone'] ?? ''); ?>
                             <?php if($cleanPhone): ?>
                             <a href="https://wa.me/<?= $cleanPhone ?>" target="_blank" class="text-[10px] text-emerald-600 hover:underline mt-0.5"><?= esc($u['phone']) ?></a>
                             <?php else: ?>
