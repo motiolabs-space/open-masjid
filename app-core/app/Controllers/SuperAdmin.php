@@ -142,6 +142,21 @@ class SuperAdmin extends BaseController
         return view('superadmin/masjid_list', $data);
     }
 
+    public function programs(): string
+    {
+        $db = \Config\Database::connect();
+        $builder = $db->table('masjid_programs');
+        $builder->select('masjid_programs.*, masjid.name as masjid_name, masjid.username as masjid_username');
+        $builder->join('masjid', 'masjid.id = masjid_programs.masjid_id');
+        $builder->orderBy('masjid_programs.created_at', 'DESC');
+        
+        $data = [
+            'title' => 'Monitoring Program - Super Admin',
+            'programs' => $builder->get()->getResultArray(),
+        ];
+        return view('superadmin/program_list', $data);
+    }
+
     public function users(): string
     {
         $userModel = new UserModel();
