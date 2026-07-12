@@ -90,6 +90,11 @@ class Admin extends BaseController
             // Placeholder logic: In real app, check if 'report_generated' flag exists
         }
 
+        // Fetch Global Settings
+        $settingModel = new \App\Models\PlatformSettingModel();
+        $waLinkSetting = $settingModel->where('setting_key', 'community_wa_link')->first();
+        $communityWaLink = $waLinkSetting ? $waLinkSetting['setting_value'] : '';
+
         $data = [
             'title' => 'Dashboard Utama - ' . $name,
             'stats' => [
@@ -97,11 +102,12 @@ class Admin extends BaseController
                 'total_assets' => $totalAssetItems,
                 'finance' => $financeSummary,
                 'active_programs' => $activeProgramsCount,
-                'social_alert' => $socialAlertCount
+                'social_alert' => $socialAlertCount,
             ],
             'recentPrograms' => $recentPrograms,
             'recentNews' => $recentNews,
-            'upcomingSchedules' => $upcomingSchedules
+            'upcomingSchedules' => $upcomingSchedules,
+            'community_wa_link' => $communityWaLink
         ];
         
         if (session()->get('role') !== 'pengurus' && session()->get('role') !== 'superadmin') {
