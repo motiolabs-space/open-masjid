@@ -147,6 +147,110 @@ class SuperAdmin extends BaseController
         return view('superadmin/user_list', $data);
     }
 
+    public function createUser()
+    {
+        $data = [
+            'title' => 'Tambah User - Super Admin',
+        ];
+        return view('superadmin/user_form', $data);
+    }
+
+    public function saveUser()
+    {
+        $rules = [
+            'name' => 'required',
+            'email' => 'required|valid_email|is_unique[users.email]',
+            'password' => 'required|min_length[6]',
+            'role' => 'required'
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('error', $this->validator->listErrors());
+        }
+
+        $userModel = new UserModel();
+        $userModel->insert([
+            'name' => $this->request->getPost('name'),
+            'email' => $this->request->getPost('email'),
+            'phone' => $this->request->getPost('phone'),
+            'password_hash' => password_hash($this->request->getPost('password'), PASSWORD_BCRYPT),
+            'role' => $this->request->getPost('role'),
+            'telegram_chat_id' => $this->request->getPost('telegram_chat_id') ?: null,
+        ]);
+
+        return redirect()->to('superadmin/users')->with('success', 'User berhasil ditambahkan.');
+    }
+
+    public function editUser($id)
+    {
+        $userModel = new UserModel();
+        $user = $userModel->find($id);
+        
+        if (!$user) {
+            return redirect()->to('superadmin/users')->with('error', 'User tidak ditemukan.');
+        }
+
+        $data = [
+            'title' => 'Edit User - Super Admin',
+            'user' => $user,
+        ];
+        return view('superadmin/user_form', $data);
+    }
+
+    public function updateUser($id)
+    {
+        $userModel = new UserModel();
+        $user = $userModel->find($id);
+
+        if (!$user) {
+            return redirect()->to('superadmin/users')->with('error', 'User tidak ditemukan.');
+        }
+
+        $rules = [
+            'name' => 'required',
+            'email' => "required|valid_email|is_unique[users.email,id,{$id}]",
+            'role' => 'required'
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('error', $this->validator->listErrors());
+        }
+
+        $updateData = [
+            'name' => $this->request->getPost('name'),
+            'email' => $this->request->getPost('email'),
+            'phone' => $this->request->getPost('phone'),
+            'role' => $this->request->getPost('role'),
+            'telegram_chat_id' => $this->request->getPost('telegram_chat_id') ?: null,
+        ];
+
+        $password = $this->request->getPost('password');
+        if (!empty($password)) {
+            $updateData['password_hash'] = password_hash($password, PASSWORD_BCRYPT);
+        }
+
+        $userModel->update($id, $updateData);
+
+        return redirect()->to('superadmin/users')->with('success', 'Data user berhasil diperbarui.');
+    }
+
+    public function deleteUser($id)
+    {
+        if ($id == session()->get('user_id')) {
+            return redirect()->to('superadmin/users')->with('error', 'Anda tidak dapat menghapus akun Anda sendiri saat sedang login.');
+        }
+
+        $userModel = new UserModel();
+        $user = $userModel->find($id);
+        
+        if ($user) {
+            $userModel->delete($id);
+            return redirect()->to('superadmin/users')->with('success', 'User berhasil dihapus.');
+        }
+        
+        return redirect()->to('superadmin/users')->with('error', 'User tidak ditemukan.');
+    }
+
     // Impersonate Masjid Management
     public function manageMasjid($id)
     {
