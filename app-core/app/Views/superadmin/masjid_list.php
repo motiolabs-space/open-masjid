@@ -26,8 +26,8 @@
                     <th class="px-6 py-4 tracking-wider">ID</th>
                     <th class="px-6 py-4 tracking-wider">Nama Masjid</th>
                     <th class="px-6 py-4 tracking-wider">PIC (Kontak)</th>
-                    <th class="px-6 py-4 tracking-wider">Tanggal Daftar</th>
-                    <th class="px-6 py-4 tracking-wider">Last Login</th>
+                    <th class="px-6 py-4 tracking-wider">Statistik</th>
+                    <th class="px-6 py-4 tracking-wider">Waktu & Aktivitas</th>
                     <th class="px-6 py-4 text-right tracking-wider">Aksi</th>
                 </tr>
             </thead>
@@ -55,9 +55,21 @@
                             </a>
                         <?php endif; ?>
                     </td>
-                    <td class="px-6 py-4 text-slate-500 font-medium"><?= date('d M Y, H:i', strtotime($m['created_at'])) ?></td>
-                    <td class="px-6 py-4 text-slate-500 font-medium">
-                        <?= !empty($m['last_login']) ? date('d M Y, H:i', strtotime($m['last_login'])) : '<span class="text-slate-400 text-xs italic">Belum pernah</span>' ?>
+                    <td class="px-6 py-4 text-xs space-y-1">
+                        <div class="flex justify-between items-center gap-4"><span class="text-slate-400">Program:</span> <span class="font-bold text-slate-700 dark:text-slate-200"><?= number_format($m['total_programs']) ?></span></div>
+                        <div class="flex justify-between items-center gap-4"><span class="text-slate-400">Jamaah:</span> <span class="font-bold text-slate-700 dark:text-slate-200"><?= number_format($m['total_jamaah']) ?></span></div>
+                        <div class="flex justify-between items-center gap-4"><span class="text-slate-400">Mustahik:</span> <span class="font-bold text-slate-700 dark:text-slate-200"><?= number_format($m['total_mustahik']) ?></span></div>
+                        <div class="flex justify-between items-center gap-4"><span class="text-slate-400">Dana Pemasukan:</span> <span class="font-bold text-emerald-600">Rp <?= number_format($m['total_dana'] ?? 0, 0, ',', '.') ?></span></div>
+                    </td>
+                    <td class="px-6 py-4 text-xs space-y-2">
+                        <div>
+                            <span class="text-slate-400 block mb-0.5">Daftar:</span>
+                            <span class="font-medium text-slate-700 dark:text-slate-300"><?= date('d M Y, H:i', strtotime($m['created_at'])) ?></span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block mb-0.5">Login Terakhir:</span>
+                            <?= !empty($m['last_login']) ? '<span class="font-medium text-slate-700 dark:text-slate-300">'.date('d M Y, H:i', strtotime($m['last_login'])).'</span>' : '<span class="text-slate-400 italic">Belum pernah</span>' ?>
+                        </div>
                     </td>
                     <td class="px-6 py-4 text-right space-x-2">
                         <a href="<?= base_url('superadmin/manage-masjid/' . $m['id']) ?>" class="bg-primary/10 text-primary hover:bg-primary hover:text-white px-3 py-1.5 rounded-lg font-bold text-xs transition-all inline-flex items-center gap-1">
