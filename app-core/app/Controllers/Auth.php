@@ -80,13 +80,25 @@ class Auth extends BaseController
 
             // 4. Send Telegram Notification
             try {
-                $telegram = new TelegramLibrary();
-                $msg = "<b>🆕 PENDAFTAR BARU!</b>\n\n";
-                $msg .= "Nama Masjid: <b>{$masjidData['name']}</b>\n";
-                $msg .= "Username: @{$masjidData['username']}\n";
-                $msg .= "PIC: {$userData['name']} ({$userData['phone']})\n";
-                $msg .= "Waktu: " . date('d M Y H:i:s') . "\n";
-                $telegram->sendMessage($msg);
+                $userModel = new \App\Models\UserModel();
+                $superAdmins = $userModel->where('role', 'superadmin')
+                                         ->where('telegram_chat_id IS NOT NULL')
+                                         ->findAll();
+                
+                if (!empty($superAdmins)) {
+                    $telegram = new TelegramLibrary();
+                    $msg = "<b>🆕 PENDAFTAR BARU!</b>\n\n";
+                    $msg .= "Nama Masjid: <b>{$masjidData['name']}</b>\n";
+                    $msg .= "Username: @{$masjidData['username']}\n";
+                    $msg .= "PIC: {$userData['name']} ({$userData['phone']})\n";
+                    $msg .= "Waktu: " . date('d M Y H:i:s') . "\n";
+                    
+                    foreach ($superAdmins as $admin) {
+                        if (!empty($admin['telegram_chat_id'])) {
+                            $telegram->setChatId($admin['telegram_chat_id'])->sendMessage($msg);
+                        }
+                    }
+                }
             } catch (\Exception $te) {
                 log_message('error', 'Failed to send Telegram notification: ' . $te->getMessage());
             }
