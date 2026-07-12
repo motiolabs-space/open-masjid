@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `phone` varchar(20) DEFAULT NULL,
   `password_hash` varchar(255) NOT NULL,
   `role` enum('superadmin','user') DEFAULT 'user',
+  `telegram_chat_id` varchar(50) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   `last_login` datetime DEFAULT NULL,
