@@ -44,7 +44,13 @@ $routes->get('dashboard/program', 'Admin::program');
     $routes->get('dashboard/lms/material/(:num)', 'Lms::material/$1');
     $routes->post('dashboard/lms/mark-completed/(:num)', 'Lms::markCompleted/$1');
 
-    $routes->get('dashboard/settings', 'Admin::settings');
+    // Area Jamaah (pengguna umum)
+    $routes->get('dashboard/cari-masjid', 'Jamaah::cariMasjid');
+    $routes->get('dashboard/masjid-saya', 'Jamaah::masjidSaya');
+    $routes->post('dashboard/masjid-saya/follow/(:num)', 'Jamaah::follow/$1');
+    $routes->post('dashboard/masjid-saya/unfollow/(:num)', 'Jamaah::unfollow/$1');
+    $routes->get('dashboard/program-diikuti', 'Jamaah::programDiikuti');
+    $routes->get('dashboard/riwayat-donasi', 'Jamaah::riwayatDonasi');
 
     // Virtual Auditor
     $routes->get('dashboard/auditor', 'VirtualAuditor::index');
@@ -108,12 +114,13 @@ $routes->get('dashboard/broadcast', 'Admin::broadcasts');
 $routes->get('dashboard/broadcast/new', 'Admin::createBroadcast');
 $routes->post('dashboard/broadcast/send', 'Admin::sendBroadcast');
 
-// Aid Distribution (Penyaluran)
-$routes->get('dashboard/distribution', 'Admin::distributions');
-$routes->get('dashboard/distribution/new', 'Admin::createDistribution');
-$routes->get('dashboard/distribution/edit/(:num)', 'Admin::editDistribution/$1');
-$routes->post('dashboard/distribution/save', 'Admin::saveDistribution');
-$routes->get('dashboard/distribution/delete/(:num)', 'Admin::deleteDistribution/$1');
+// Aid Distribution to Warga (Penyaluran Bantuan berbasis warga)
+// Namespace terpisah dari modul Mustahik ('dashboard/distribution/*') agar
+// tidak saling menimpa. Alur ini dipicu dari halaman Warga ("Beri Bantuan").
+$routes->get('dashboard/bantuan-warga/new', 'Admin::createDistribution');
+$routes->get('dashboard/bantuan-warga/edit/(:num)', 'Admin::editDistribution/$1');
+$routes->post('dashboard/bantuan-warga/save', 'Admin::saveDistribution');
+$routes->get('dashboard/bantuan-warga/delete/(:num)', 'Admin::deleteDistribution/$1');
 
 // Reporting (Laporan)
 $routes->get('dashboard/reports', 'Admin::reports');
@@ -182,7 +189,6 @@ $routes->group('superadmin', ['filter' => 'dashboardGuard'], function($routes) {
     $routes->post('lms/materials/save', 'SuperAdmin::saveLmsMaterial');
     $routes->post('lms/materials/delete/(:num)', 'SuperAdmin::deleteLmsMaterial/$1');
 });
-$routes->get('auth/promote-me', 'Auth::promoteMe');
 $routes->get('auth/select-masjid', 'Auth::selectMasjid');
 $routes->get('auth/set-masjid/(:num)', 'Auth::setMasjidContext/$1');
 

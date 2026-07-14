@@ -248,44 +248,6 @@ class Auth extends BaseController
         return $this->response->setJSON(['available' => !$exists]);
     }
 
-    // TEMPORARY: Use this to promote your first account manually via URL
-    // e.g., site.com/auth/promote-me?email=your@email.com
-    public function promoteMe()
-    {
-        $userModel = new UserModel();
-        
-        // Security check: If a superadmin already exists, disable this backdoor
-        $anySuperAdmin = $userModel->where('role', 'superadmin')->first();
-        if ($anySuperAdmin) {
-            return "Fitur ini dinonaktifkan demi keamanan karena Super Admin sudah terdaftar. Silakan minta akses ke Super Admin yang ada.";
-        }
-
-        $email = $this->request->getGet('email');
-        if (!$email) return "Email required.";
-        
-        $user = $userModel->where('email', $email)->first();
-        
-        if ($user) {
-            $updateData = ['role' => 'superadmin'];
-            
-            // Optional: Reset password if provided in URL
-            $newPassword = $this->request->getGet('password');
-            if ($newPassword) {
-                $updateData['password_hash'] = password_hash($newPassword, PASSWORD_DEFAULT);
-            }
-
-            // Using direct query builder to bypass any model limitations or ENUM issues
-            $db = \Config\Database::connect();
-            $db->table('users')->where('id', $user['id'])->update($updateData);
-            
-            $msg = "User with email $email has been promoted to Super Admin.";
-            if ($newPassword) $msg .= " Password has been reset to '$newPassword'.";
-            return $msg . " Please re-login.";
-        }
-        
-        return "User not found.";
-    }
-
     private function processLogin($user)
     {
         $userModel = new \App\Models\UserModel();
