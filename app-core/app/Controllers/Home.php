@@ -144,7 +144,14 @@ class Home extends BaseController
         $masjid = $masjidModel->where('username', $username)->first();
 
         if (!$masjid) {
-            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Masjid dengan username @$username tidak ditemukan.");
+            // Rute catch-all '(:any)' membuat setiap URL tak dikenal mendarat di
+            // sini, jadi tampilkan halaman ramah + ajakan mendaftar bagi pengurus,
+            // bukan 404 mentah. Status tetap 404 agar tidak terindeks mesin pencari.
+            $this->response->setStatusCode(404);
+            return view('public/masjid_not_found', [
+                'title'    => 'Masjid Tidak Ditemukan - Masj.id',
+                'username' => $username,
+            ]);
         }
 
         $masjidId = $masjid['id'];
