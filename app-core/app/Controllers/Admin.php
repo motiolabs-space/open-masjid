@@ -846,8 +846,15 @@ class Admin extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => 'Data tidak lengkap.']);
         }
 
+        // Kolom role adalah enum('admin','staff'). Nilai di luar itu ditolak MySQL:
+        // pada mode strict gagal dengan "Data truncated", pada mode longgar tersimpan
+        // sebagai string kosong. Keduanya sama-sama tidak diinginkan.
+        if (!in_array($role, ['admin', 'staff'], true)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Jabatan tidak valid.']);
+        }
+
         $pengurusModel = new MasjidPengurusModel();
-        
+
         // Check if already exist
         $exists = $pengurusModel->where([
             'masjid_id' => $masjidId,
@@ -880,6 +887,11 @@ class Admin extends BaseController
 
         if (empty($id) || empty($role)) {
             return $this->response->setJSON(['status' => 'error', 'message' => 'Data tidak lengkap.']);
+        }
+
+        // Sama seperti addPengurus: role harus cocok dengan enum('admin','staff').
+        if (!in_array($role, ['admin', 'staff'], true)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Jabatan tidak valid.']);
         }
 
         $pengurusModel = new MasjidPengurusModel();
