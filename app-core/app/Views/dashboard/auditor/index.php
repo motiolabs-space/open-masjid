@@ -109,6 +109,10 @@ document.getElementById('btnRunAudit').addEventListener('click', async function(
     try {
         const formData = new FormData();
         formData.append('month_year', monthYear);
+        // Token CSRF wajib: filter 'csrf' aktif untuk seluruh POST, sehingga
+        // tanpa baris ini permintaan selalu ditolak 403 dan audit tidak pernah
+        // dapat dijalankan.
+        formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
 
         const response = await fetch('<?= base_url('dashboard/auditor/run') ?>', {
             method: 'POST',
