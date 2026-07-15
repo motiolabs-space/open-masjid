@@ -197,9 +197,24 @@ CREATE TABLE IF NOT EXISTS `masjid_payments` (
 -- 3. Initial Dummy Data
 -- --------------------------------------------------------
 
--- Default Superadmin (Password: password123)
-INSERT INTO `users` (`name`, `email`, `password_hash`, `role`, `created_at`, `updated_at`) VALUES
-('Super Admin', 'admin@openmasjid.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'superadmin', NOW(), NOW());
+-- Superadmin TIDAK dibuat otomatis di sini.
+--
+-- Sebelumnya berkas ini men-seed akun 'admin@openmasjid.com' dengan password
+-- bawaan yang tertulis terang-terangan. Karena repositori ini publik, siapa pun
+-- dapat membaca kredensial tersebut dan masuk sebagai superadmin pada setiap
+-- pemasangan yang memakainya. Seed itu dihapus.
+--
+-- Buat akun superadmin pertama secara manual, dengan password Anda sendiri:
+--
+-- 1) Hasilkan hash password (jalankan di terminal):
+--
+--      php -r "echo password_hash('PasswordRahasiaAnda', PASSWORD_DEFAULT), PHP_EOL;"
+--
+-- 2) Jalankan INSERT di bawah ini setelah mengganti email dan menempelkan
+--    hash dari langkah 1. Jangan pernah menulis password aslinya di berkas ini.
+--
+-- INSERT INTO `users` (`name`, `email`, `password_hash`, `role`, `created_at`, `updated_at`)
+-- VALUES ('Super Admin', 'email-anda@domain.com', '<TEMPEL_HASH_DI_SINI>', 'superadmin', NOW(), NOW());
 
 -- --------------------------------------------------------
 -- 4. LMS Tables
