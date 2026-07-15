@@ -321,6 +321,20 @@ class Admin extends BaseController
         $data = $this->request->getPost();
     $oldMasjid = $masjidModel->find($masjidId);
 
+    // Jeda iqomah dikirim sebagai 5 input terpisah (iqomah[Subuh] dst),
+    // disatukan menjadi satu kolom JSON. Nilai di luar 0-60 menit diabaikan.
+    if (isset($data['iqomah']) && is_array($data['iqomah'])) {
+        $iqomah = [];
+        foreach (['Subuh', 'Dzuhur', 'Ashar', 'Maghrib', 'Isya'] as $sholat) {
+            $menit = (int) ($data['iqomah'][$sholat] ?? 0);
+            if ($menit >= 0 && $menit <= 60) {
+                $iqomah[$sholat] = $menit;
+            }
+        }
+        $data['iqomah_settings'] = json_encode($iqomah);
+        unset($data['iqomah']);
+    }
+
     // Handle Username Change
     if (isset($data['username']) && $data['username'] !== $oldMasjid['username']) {
         // 1. Check uniqueness

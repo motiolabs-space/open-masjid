@@ -224,6 +224,34 @@
         </div>
     </div>
 
+    <!--
+        Layar Waktu Sholat — mengambil alih seluruh layar saat masuk waktu sholat.
+        Urutan: ADZAN -> hitung mundur IQOMAH -> layar gelap saat SHOLAT.
+        Disembunyikan secara bawaan; dikendalikan oleh mesin keadaan di bawah.
+    -->
+    <div id="prayer-overlay" class="fixed inset-0 z-[60] hidden items-center justify-center text-center">
+
+        <!-- Mode ADZAN & IQOMAH -->
+        <div id="overlay-adzan" class="hidden flex-col items-center justify-center w-full h-full bg-gradient-to-br from-[#04120d] via-[#062b1d] to-[#04120d]">
+            <p class="text-emerald-400 text-2xl font-black uppercase tracking-[0.4em] mb-6" id="overlay-label">Waktu Sholat</p>
+            <h1 class="text-[10rem] leading-none font-black tracking-tight mb-4" id="overlay-prayer">Maghrib</h1>
+            <h2 class="text-7xl font-black text-emerald-400 mb-12" id="overlay-time">17:52</h2>
+
+            <div id="overlay-countdown-wrap" class="hidden flex-col items-center">
+                <p class="text-white/50 text-xl font-bold uppercase tracking-[0.3em] mb-3">Iqomah Dalam</p>
+                <h2 class="text-9xl font-black tabular-nums" id="overlay-countdown">05:00</h2>
+            </div>
+
+            <p id="overlay-note" class="text-white/40 text-xl font-bold mt-10">Marilah menunaikan sholat berjamaah</p>
+        </div>
+
+        <!-- Mode SHOLAT — layar gelap, jam redup agar jamaah tahu display tetap hidup -->
+        <div id="overlay-sholat" class="hidden flex-col items-center justify-center w-full h-full bg-black">
+            <h2 class="text-white/20 text-8xl font-black tabular-nums" id="overlay-dim-clock">00:00</h2>
+            <p class="text-white/10 text-lg font-bold uppercase tracking-[0.4em] mt-6">Sedang Sholat Berjamaah</p>
+        </div>
+    </div>
+
     <!-- QR Code Overlay (Bottom Right) — diangkat agar tidak tertimpa teks berjalan -->
     <div class="fixed <?= !empty($runningText) ? 'bottom-24' : 'bottom-12' ?> right-12 z-50 bg-white p-4 rounded-3xl shadow-2xl flex flex-col items-center gap-3">
         <?php 
@@ -264,40 +292,144 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        // Refresh Page every 15 minutes to sync data
-        setTimeout(() => window.location.reload(), 15 * 60 * 1000);
+        // Muat ulang tiap 15 menit untuk menyegarkan data. Ditunda bila layar
+        // waktu sholat sedang aktif agar adzan/iqomah tidak terpotong reload.
+        setTimeout(function muatUlang() {
+            if (modeKini === 'NORMAL' || modeKini === null) {
+                window.location.reload();
+            } else {
+                setTimeout(muatUlang, 30 * 1000);
+            }
+        }, 15 * 60 * 1000);
 
-        // Next Prayer Logic
         const prayers = <?= json_encode($times ?? []) ?>;
+
+        // 'Terbit' (syuruq) bukan waktu sholat — tidak boleh dihitung sebagai
+        // sholat berikutnya maupun memicu layar adzan.
+        const WAKTU_SHOLAT = Object.fromEntries(
+            Object.entries(prayers).filter(([nama]) => nama !== 'Terbit')
+        );
+
+        // AlAdhan dapat mengembalikan "17:52" atau "17:52 (WIB)".
+        function jamKeMenit(jam) {
+            const [h, m] = String(jam).trim().split(' ')[0].split(':').map(Number);
+            return (h * 60) + m;
+        }
+        function jamBersih(jam) {
+            return String(jam).trim().split(' ')[0];
+        }
+
+        // ── Sholat berikutnya (navbar) ──────────────────────────────────────
         function updateNextPrayer() {
             const now = new Date();
-            const currentH = now.getHours();
-            const currentM = now.getMinutes();
-            const currentTime = (currentH * 60) + currentM;
+            const currentTime = (now.getHours() * 60) + now.getMinutes();
 
-            let nextP = { name: '-', time: '--:--' };
+            let nextP = null;
             let minDiff = 1440;
 
-            for (const [name, time] of Object.entries(prayers)) {
-                const [h, m] = time.split(':').map(Number);
-                const prayerTime = (h * 60) + m;
-                let diff = prayerTime - currentTime;
-                
+            for (const [name, time] of Object.entries(WAKTU_SHOLAT)) {
+                const diff = jamKeMenit(time) - currentTime;
                 if (diff > 0 && diff < minDiff) {
                     minDiff = diff;
                     nextP = { name, time };
                 }
             }
 
-            if (nextP.name === '-') {
-                // If all passed, first one is tomorrow (Subuh)
-                const first = Object.entries(prayers)[0];
+            // Semua sudah lewat → sholat pertama besok.
+            if (!nextP) {
+                const first = Object.entries(WAKTU_SHOLAT)[0];
+                if (!first) return;
                 nextP = { name: first[0], time: first[1] };
             }
 
             document.getElementById('next-prayer-name').textContent = nextP.name;
-            document.getElementById('next-prayer-time').textContent = nextP.time;
+            document.getElementById('next-prayer-time').textContent = jamBersih(nextP.time);
         }
+
+        // ── Layar Waktu Sholat ──────────────────────────────────────────────
+        // Alur: ADZAN → hitung mundur IQOMAH → layar gelap saat SHOLAT → NORMAL.
+        const IQOMAH_MENIT   = <?= json_encode($iqomahSettings ?? []) ?>;
+        const SHOLAT_MENIT   = <?= (int) ($sholatDuration ?? 10) ?>;
+        const ADZAN_MENIT    = 3; // lama layar adzan sebelum hitung mundur iqomah
+
+        function cariKeadaan(now) {
+            const detikKini = (now.getHours() * 3600) + (now.getMinutes() * 60) + now.getSeconds();
+
+            for (const [nama, jam] of Object.entries(WAKTU_SHOLAT)) {
+                const mulai = jamKeMenit(jam) * 60;
+                const lewat = detikKini - mulai; // detik sejak adzan
+                if (lewat < 0) continue;
+
+                const iqomah = (IQOMAH_MENIT[nama] ?? 10) * 60;
+                // Bila jeda iqomah lebih pendek dari layar adzan, layar adzan
+                // dipersingkat agar tidak menabrak hitung mundur.
+                const adzanSelesai  = Math.min(ADZAN_MENIT * 60, iqomah);
+                const sholatSelesai = iqomah + (SHOLAT_MENIT * 60);
+
+                if (lewat < adzanSelesai)  return { mode: 'ADZAN', nama, jam };
+                if (lewat < iqomah)        return { mode: 'IQOMAH', nama, jam, sisa: iqomah - lewat };
+                if (lewat < sholatSelesai) return { mode: 'SHOLAT' };
+            }
+            return { mode: 'NORMAL' };
+        }
+
+        const elOverlay   = document.getElementById('prayer-overlay');
+        const elAdzan     = document.getElementById('overlay-adzan');
+        const elSholat    = document.getElementById('overlay-sholat');
+        const elCountWrap = document.getElementById('overlay-countdown-wrap');
+        let modeKini = null;
+
+        function tampil(el, tampilkan) {
+            el.classList.toggle('hidden', !tampilkan);
+            el.classList.toggle('flex', tampilkan);
+        }
+
+        function terapkanKeadaan() {
+            const now = new Date();
+            const s = cariKeadaan(now);
+
+            if (s.mode === 'NORMAL') {
+                tampil(elOverlay, false);
+                if (modeKini !== 'NORMAL' && swiper.autoplay) swiper.autoplay.start();
+                modeKini = 'NORMAL';
+                return;
+            }
+
+            // Slideshow dihentikan selama layar sholat aktif.
+            if (modeKini === 'NORMAL' || modeKini === null) {
+                if (swiper.autoplay) swiper.autoplay.stop();
+            }
+            tampil(elOverlay, true);
+
+            if (s.mode === 'SHOLAT') {
+                tampil(elAdzan, false);
+                tampil(elSholat, true);
+                document.getElementById('overlay-dim-clock').textContent =
+                    now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false });
+            } else {
+                tampil(elSholat, false);
+                tampil(elAdzan, true);
+                document.getElementById('overlay-prayer').textContent = s.nama;
+                document.getElementById('overlay-time').textContent = jamBersih(s.jam);
+
+                if (s.mode === 'IQOMAH') {
+                    document.getElementById('overlay-label').textContent = 'Menunggu Iqomah';
+                    document.getElementById('overlay-note').textContent = 'Rapatkan dan luruskan shaf';
+                    tampil(elCountWrap, true);
+                    const mnt = String(Math.floor(s.sisa / 60)).padStart(2, '0');
+                    const dtk = String(Math.floor(s.sisa % 60)).padStart(2, '0');
+                    document.getElementById('overlay-countdown').textContent = mnt + ':' + dtk;
+                } else {
+                    document.getElementById('overlay-label').textContent = 'Waktu Sholat';
+                    document.getElementById('overlay-note').textContent = 'Marilah menunaikan sholat berjamaah';
+                    tampil(elCountWrap, false);
+                }
+            }
+            modeKini = s.mode;
+        }
+
+        setInterval(() => { terapkanKeadaan(); updateNextPrayer(); }, 1000);
+        terapkanKeadaan();
         updateNextPrayer();
     </script>
 </body>
