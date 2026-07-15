@@ -1448,7 +1448,10 @@ class Admin extends BaseController
         return view('dashboard/inventory/index', [
             'title'     => 'Inventaris Masjid - Masj.id',
             'inventory' => $query->orderBy('name', 'ASC')->findAll(),
-            'storage'   => new Storage()
+            'storage'   => new Storage(),
+            // View memakai $request untuk mengisi ulang kotak pencarian & filter.
+            // Tanpa ini halaman gagal dengan "Undefined variable $request".
+            'request'   => $this->request,
         ]);
     }
 
