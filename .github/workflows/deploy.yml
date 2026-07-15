@@ -30,7 +30,12 @@ jobs:
           REMOTE_USER: ${{ secrets.SITEGROUND_SSH_USERNAME }}
           REMOTE_PORT: ${{ secrets.SITEGROUND_SSH_PORT || '18765' }}
           TARGET: "${{ secrets.SITEGROUND_SSH_TARGET_PATH }}/app-core/"
-          EXCLUDE: "/node_modules/, /.git/, /.env, /writable/cache/, /writable/session/, /tests/"
+          # /vendor/ WAJIB dikecualikan: repositori tidak menyertakannya, dan
+          # ARGS memakai --delete. Tanpa pengecualian ini rsync menghapus
+          # vendor/ di server pada setiap deploy, sehingga 'php spark migrate'
+          # pada langkah Post-Deploy gagal bila composer install tidak berhasil
+          # membangunnya kembali.
+          EXCLUDE: "/node_modules/, /vendor/, /.git/, /.env, /writable/cache/, /writable/session/, /tests/"
 
       # 2. DEPLOY PUBLIC_HTML
       # Akan dikirim ke: {TARGET_PATH}/public_html/
@@ -54,7 +59,16 @@ jobs:
           username: ${{ secrets.SITEGROUND_SSH_USERNAME }}
           key: ${{ secrets.SITEGROUND_SSH_PRIVATE_KEY }}
           port: ${{ secrets.SITEGROUND_SSH_PORT || '18765' }}
+          # script_stop WAJIB true. Bawaannya false, sehingga perintah yang gagal
+          # di bawah TIDAK menggagalkan langkah ini — deploy tetap hijau meskipun
+          # migrasi tidak pernah diterapkan. Justru karena itu tabel `migrations`
+          # di produksi berhenti di 2026-02-01 sementara seluruh deploy dilaporkan
+          # "success", dan kolom-kolom baru tidak pernah terbentuk.
+          script_stop: true
           script: |
+            set -e
             cd ${{ secrets.SITEGROUND_SSH_TARGET_PATH }}/app-core
             composer install --no-dev --optimize-autoloader
             php spark migrate
+            # Tampilkan hasil akhir agar mudah diperiksa di log Actions.
+            php spark migrate:status
