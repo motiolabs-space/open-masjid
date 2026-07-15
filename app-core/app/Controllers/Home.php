@@ -520,7 +520,16 @@ class Home extends BaseController
             ->limit(8)
             ->get()->getResultArray();
 
-        // 7. Tanggal Hijriah — sudah tersedia gratis pada respons AlAdhan.
+        // 7. Koreksi menit dari pengurus diterapkan ke jadwal sebelum dipakai,
+        //    agar tampilan jadwal dan pemicu layar adzan memakai angka yang sama.
+        if ($prayerData) {
+            $prayerData['timings'] = $this->_terapkanKoreksi(
+                $prayerData['timings'],
+                json_decode($masjid['koreksi_menit'] ?? '', true) ?: []
+            );
+        }
+
+        // 8. Tanggal Hijriah — sudah tersedia gratis pada respons AlAdhan.
         $hijriDate = null;
         if (!empty($prayerData['date']['hijri'])) {
             $h = $prayerData['date']['hijri'];
@@ -545,8 +554,45 @@ class Home extends BaseController
             'runningText'      => $this->_buildRunningText($masjid, $programs, $news),
             'iqomahSettings'   => $this->_iqomahSettings($masjid),
             'sholatDuration'   => (int) ($masjid['sholat_duration'] ?? 10),
+            // Waktu diambil dari server, bukan jam TV — jam TV kerap salah atau
+            // zona waktunya keliru, yang membuat adzan tampil di saat yang salah.
+            'serverEpochMs'    => (int) round(microtime(true) * 1000),
+            'timezoneMasjid'   => $prayerData['meta']['timezone'] ?? 'Asia/Jakarta',
             'storage'          => new \App\Libraries\Storage()
         ]);
+    }
+
+    /**
+     * Menggeser jadwal sholat sesuai koreksi menit dari pengurus.
+     * Nilai boleh negatif (lebih awal) maupun positif (lebih lambat).
+     */
+    private function _terapkanKoreksi(array $timings, array $koreksi): array
+    {
+        // Nama pada AlAdhan -> nama yang dipakai pengurus.
+        $peta = [
+            'Fajr'    => 'Subuh',
+            'Dhuhr'   => 'Dzuhur',
+            'Asr'     => 'Ashar',
+            'Maghrib' => 'Maghrib',
+            'Isha'    => 'Isya',
+        ];
+
+        foreach ($peta as $kunciApi => $namaSholat) {
+            $menit = (int) ($koreksi[$namaSholat] ?? 0);
+            if ($menit === 0 || empty($timings[$kunciApi])) {
+                continue;
+            }
+
+            // AlAdhan dapat mengembalikan "17:52" atau "17:52 (WIB)".
+            $jam = explode(' ', trim($timings[$kunciApi]))[0];
+            [$j, $m] = array_map('intval', explode(':', $jam));
+
+            // Dijaga tetap dalam satu hari agar tidak melompat ke tanggal lain.
+            $total = (($j * 60) + $m + $menit + 1440) % 1440;
+            $timings[$kunciApi] = sprintf('%02d:%02d', intdiv($total, 60), $total % 60);
+        }
+
+        return $timings;
     }
 
     /**
