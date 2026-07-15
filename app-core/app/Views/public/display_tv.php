@@ -15,6 +15,21 @@
         @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         .animate-pulse-soft { animation: pulse-soft 3s infinite; }
 
+        /* Kedip lembut pada nama sholat saat waktunya tiba.
+           Sengaja memakai ease-in-out dengan opasitas yang tidak turun terlalu
+           dalam (1 -> 0.6) dan siklus lambat, agar menarik perhatian tanpa
+           mengganggu jamaah. Dinonaktifkan bila pengguna meminta pengurangan
+           gerak (prefers-reduced-motion). */
+        @keyframes kedip-lembut {
+            0%, 100% { opacity: 1; }
+            50%      { opacity: 0.6; }
+        }
+        .kedip-lembut { animation: kedip-lembut 2.6s ease-in-out infinite; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .kedip-lembut, .animate-pulse-soft, .running-text { animation: none; }
+        }
+
         /* Teks berjalan: mulai dari tepi kanan layar lalu bergerak ke kiri
            sampai habis, berapa pun panjang teksnya. */
         @keyframes running-text {
@@ -456,8 +471,13 @@
             } else {
                 tampil(elSholat, false);
                 tampil(elAdzan, true);
-                document.getElementById('overlay-prayer').textContent = s.nama;
+                const elNama = document.getElementById('overlay-prayer');
+                elNama.textContent = s.nama;
                 document.getElementById('overlay-time').textContent = jamBersih(s.jam);
+
+                // Nama sholat berkedip lembut hanya pada saat waktunya tiba —
+                // tidak saat menjelang adzan maupun menunggu iqomah.
+                elNama.classList.toggle('kedip-lembut', s.mode === 'ADZAN');
 
                 // Ketiga keadaan ini selalu menampilkan hitung mundur; yang
                 // berbeda hanya label & pesannya.
