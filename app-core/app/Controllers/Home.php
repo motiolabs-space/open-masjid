@@ -206,38 +206,13 @@ class Home extends BaseController
             ->where('prayer_type', 'jumat')
             ->first();
 
-        // Fetch Prayer Times from AlAdhan API (Coordinate Based)
-        $prayerData = null;
-        // Verify coordinates exist and are not default 0
-        if (!empty($masjid['latitude']) && !empty($masjid['longitude']) && ($masjid['latitude'] != 0 || $masjid['longitude'] != 0)) {
-            $lat = $masjid['latitude'];
-            $long = $masjid['longitude'];
-            $date = date('d-m-Y');
-            
-            $cacheKey = "prayer_aladhan_{$masjid['id']}_{$date}";
-            $prayerData = cache($cacheKey);
-
-            if (!$prayerData) {
-                try {
-                    $client = \Config\Services::curlrequest();
-                    // Method 20 is Ministry of Religious Affairs (Kemenag)
-                    // WAJIB https: AlAdhan membalas 301 ke HTTPS untuk permintaan http,
-                    // sehingga respons bukan JSON dan jadwal sholat gagal tampil.
-                    $apiUrl = "https://api.aladhan.com/v1/timings/$date?latitude=$lat&longitude=$long&method=20";
-                    
-                    $response = $client->request('GET', $apiUrl, [
-                        'timeout' => 5
-                    ]);
-                    
-                    $body = json_decode($response->getBody(), true);
-                    if (isset($body['code']) && $body['code'] == 200) {
-                        $prayerData = $body['data'];
-                        cache()->save($cacheKey, $prayerData, 86400); // 24 hours
-                    }
-                } catch (\Exception $e) {
-                    log_message('error', 'AlAdhan API Error: ' . $e->getMessage());
-                }
-            }
+        // Jadwal sholat (AlAdhan) — mengikuti koordinat & zona waktu masjid.
+        $prayerData = $this->_ambilJadwalSholat($masjid);
+        if ($prayerData) {
+            $prayerData['timings'] = $this->_terapkanKoreksi(
+                $prayerData['timings'],
+                json_decode($masjid['koreksi_menit'] ?? '', true) ?: []
+            );
         }
 
         $storage = new \App\Libraries\Storage();
@@ -472,31 +447,8 @@ class Home extends BaseController
             ->limit(5)
             ->findAll();
 
-        // 4. Prayer Times (Today)
-        $prayerData = null;
-        if (!empty($masjid['latitude']) && !empty($masjid['longitude'])) {
-            $lat = $masjid['latitude'];
-            $long = $masjid['longitude'];
-            $date = date('d-m-Y');
-            
-            $cacheKey = "prayer_aladhan_{$masjid['id']}_{$date}";
-            $prayerData = cache($cacheKey);
-
-            if (!$prayerData) {
-                try {
-                    $client = \Config\Services::curlrequest();
-                    // WAJIB https: AlAdhan membalas 301 ke HTTPS untuk permintaan http,
-                    // sehingga respons bukan JSON dan jadwal sholat gagal tampil.
-                    $apiUrl = "https://api.aladhan.com/v1/timings/$date?latitude=$lat&longitude=$long&method=20";
-                    $response = $client->request('GET', $apiUrl, ['timeout' => 5]);
-                    $body = json_decode($response->getBody(), true);
-                    if (isset($body['code']) && $body['code'] == 200) {
-                        $prayerData = $body['data'];
-                        cache()->save($cacheKey, $prayerData, 86400);
-                    }
-                } catch (\Exception $e) {}
-            }
-        }
+        // 4. Jadwal sholat hari ini — mengikuti koordinat & zona waktu masjid.
+        $prayerData = $this->_ambilJadwalSholat($masjid);
 
         // 5. Social Impact Highlights (Recent Pengeluaran with non-empty descriptions)
         $impactHighlights = $financeModel->select('masjid_finance_transactions.*, masjid_finance_categories.name as category_name')
@@ -557,7 +509,10 @@ class Home extends BaseController
             // Waktu diambil dari server, bukan jam TV — jam TV kerap salah atau
             // zona waktunya keliru, yang membuat adzan tampil di saat yang salah.
             'serverEpochMs'    => (int) round(microtime(true) * 1000),
-            'timezoneMasjid'   => $prayerData['meta']['timezone'] ?? 'Asia/Jakarta',
+            // Zona pilihan pengurus diutamakan; bila kosong pakai hasil deteksi
+            // AlAdhan dari koordinat. Harus sama dengan zona jadwal di atas.
+            'timezoneMasjid'   => $this->_timezoneMasjid($masjid)
+                                    ?? ($prayerData['meta']['timezone'] ?? 'Asia/Jakarta'),
             'storage'          => new \App\Libraries\Storage()
         ]);
     }
@@ -566,6 +521,74 @@ class Home extends BaseController
      * Menggeser jadwal sholat sesuai koreksi menit dari pengurus.
      * Nilai boleh negatif (lebih awal) maupun positif (lebih lambat).
      */
+    /**
+     * Zona waktu yang dipakai masjid: pilihan pengurus lebih diutamakan,
+     * bila kosong ditentukan otomatis oleh AlAdhan dari koordinat.
+     */
+    private function _timezoneMasjid(array $masjid): ?string
+    {
+        $tz = trim((string) ($masjid['timezone'] ?? ''));
+
+        return $tz !== '' ? $tz : null;
+    }
+
+    /**
+     * Mengambil jadwal sholat dari AlAdhan untuk sebuah masjid.
+     *
+     * Dipakai bersama oleh halaman profil dan Display TV — sebelumnya kode ini
+     * diduplikasi, sehingga perbaikan (mis. http -> https) harus dilakukan dua
+     * kali dan rawan terlewat.
+     *
+     * Bila pengurus memilih zona waktu, zona itu dikirim ke AlAdhan lewat
+     * 'timezonestring' agar jadwal yang kembali dinyatakan dalam zona tersebut
+     * — jadwal dan jam "sekarang" wajib memakai zona yang sama, kalau tidak
+     * pemicu adzan bisa meleset berjam-jam.
+     */
+    private function _ambilJadwalSholat(array $masjid): ?array
+    {
+        // Koordinat wajib; 0,0 dianggap belum diisi.
+        if (empty($masjid['latitude']) || empty($masjid['longitude'])
+            || ($masjid['latitude'] == 0 && $masjid['longitude'] == 0)) {
+            return null;
+        }
+
+        $lat  = $masjid['latitude'];
+        $long = $masjid['longitude'];
+        $tz   = $this->_timezoneMasjid($masjid);
+        $date = date('d-m-Y');
+
+        // Zona ikut dalam kunci cache: mengubah zona harus langsung terasa,
+        // tidak menunggu cache 24 jam kedaluwarsa.
+        $cacheKey = 'prayer_aladhan_' . $masjid['id'] . '_' . $date . '_' . md5((string) $tz);
+        $tersimpan = cache($cacheKey);
+        if ($tersimpan) {
+            return $tersimpan;
+        }
+
+        try {
+            $client = \Config\Services::curlrequest();
+            // Method 20 = Kementerian Agama RI.
+            // WAJIB https: AlAdhan membalas 301 ke HTTPS untuk permintaan http,
+            // sehingga respons bukan JSON dan jadwal sholat gagal tampil.
+            $apiUrl = "https://api.aladhan.com/v1/timings/$date?latitude=$lat&longitude=$long&method=20";
+            if ($tz !== null) {
+                $apiUrl .= '&timezonestring=' . rawurlencode($tz);
+            }
+
+            $response = $client->request('GET', $apiUrl, ['timeout' => 5]);
+            $body = json_decode($response->getBody(), true);
+
+            if (isset($body['code']) && $body['code'] == 200) {
+                cache()->save($cacheKey, $body['data'], 86400); // 24 jam
+                return $body['data'];
+            }
+        } catch (\Exception $e) {
+            log_message('error', 'AlAdhan API Error: ' . $e->getMessage());
+        }
+
+        return null;
+    }
+
     private function _terapkanKoreksi(array $timings, array $koreksi): array
     {
         // Nama pada AlAdhan -> nama yang dipakai pengurus.
