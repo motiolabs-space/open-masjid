@@ -1,6 +1,16 @@
 # Disable directory browsing
 Options -Indexes
 
+# Berkas unggahan disimpan ke root proyek dengan pola {username}/{tahun}/...,
+# sehingga sekali sebuah masjid mengunggah foto terbentuk direktori nyata
+# bernama sama dengan username-nya. Tanpa baris ini, mod_dir mengalihkan
+# /qamar -> /qamar/ (301) dan permintaan berakhir 403 karena Options -Indexes,
+# membuat halaman profil publik masjid tersebut rusak permanen.
+# Aman: penjelajahan direktori sudah dimatikan oleh Options -Indexes di atas.
+<IfModule mod_dir.c>
+    DirectorySlash Off
+</IfModule>
+
 # ----------------------------------------------------------------------
 # Blokir berkas sensitif & skrip pengembangan
 # ----------------------------------------------------------------------
@@ -63,8 +73,19 @@ Options -Indexes
 	# Checks to see if the user is attempting to access a valid file,
 	# such as an image or css document, if this isn't true it sends the
 	# request to the front controller, index.php
+	#
+	# PENTING: sengaja TIDAK memakai "RewriteCond %{REQUEST_FILENAME} !-d".
+	# Berkas unggahan disimpan ke FCPATH (root proyek) dengan pola
+	# {username}/{tahun}/{bulan}/..., sehingga sekali sebuah masjid mengunggah
+	# foto, terbentuk DIREKTORI NYATA bernama sama dengan username-nya di root.
+	# Dengan kondisi !-d, direktori itu menutupi rute profil publik '(:any)':
+	# permintaan /qamar tidak lagi diteruskan ke index.php, lalu mod_dir
+	# menambahkan trailing slash (301) dan berakhir 403 karena Options -Indexes.
+	# Akibatnya halaman profil masjid tersebut rusak permanen.
+	#
+	# Tanpa !-d, permintaan yang bukan BERKAS nyata selalu diteruskan ke router;
+	# berkas unggahan tetap tersaji langsung karena tertangkap oleh !-f.
 	RewriteCond %{REQUEST_FILENAME} !-f
-	RewriteCond %{REQUEST_FILENAME} !-d
 	RewriteRule ^([\s\S]*)$ index.php?/$1 [L,NC,QSA]
 
 	# Ensure Authorization header is passed along
