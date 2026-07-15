@@ -14,6 +14,17 @@
         .bg-glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); }
         @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         .animate-pulse-soft { animation: pulse-soft 3s infinite; }
+
+        /* Teks berjalan: mulai dari tepi kanan layar lalu bergerak ke kiri
+           sampai habis, berapa pun panjang teksnya. */
+        @keyframes running-text {
+            from { transform: translateX(100vw); }
+            to   { transform: translateX(-100%); }
+        }
+        .running-text {
+            animation: running-text 40s linear infinite;
+            will-change: transform;
+        }
     </style>
 </head>
 <body class="bg-[#061510] text-white">
@@ -32,6 +43,9 @@
         <div class="text-right">
             <h2 id="live-clock" class="text-5xl font-black">00:00:00</h2>
             <p id="live-date" class="text-emerald-400 font-bold">Minggu, 10 Mei 2026</p>
+            <?php if (!empty($hijriDate)): ?>
+                <p class="text-white/50 text-sm font-bold tracking-wide"><?= esc($hijriDate) ?></p>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -157,16 +171,61 @@
             </div>
             <?php endif; ?>
 
+            <!-- Slide 5: Donasi Masuk Terbaru (apresiasi donatur) -->
+            <?php if (!empty($recentDonations)): ?>
+            <div class="swiper-slide flex flex-col items-center justify-center pt-24 px-12">
+                <div class="text-center mb-12">
+                    <h2 class="text-emerald-400 text-xl font-black uppercase tracking-[0.3em] mb-4">Jazakumullahu Khairan</h2>
+                    <h3 class="text-6xl font-black">Donasi Terbaru</h3>
+                </div>
+                <div class="w-full max-w-5xl grid grid-cols-2 gap-4">
+                    <?php foreach ($recentDonations as $donasi): ?>
+                    <?php
+                        // Donatur boleh tidak mencantumkan nama.
+                        $namaDonatur = trim((string) ($donasi['donor_name'] ?? ''));
+                        if ($namaDonatur === '') $namaDonatur = 'Hamba Allah';
+                        $tanggal = $donasi['paid_at'] ?: $donasi['created_at'];
+                    ?>
+                    <div class="bg-glass border border-white/10 p-6 rounded-3xl flex justify-between items-center gap-4">
+                        <div class="flex items-center gap-4 min-w-0">
+                            <div class="size-14 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
+                                <span class="material-symbols-outlined text-2xl">favorite</span>
+                            </div>
+                            <div class="min-w-0">
+                                <h4 class="text-xl font-bold truncate"><?= esc($namaDonatur) ?></h4>
+                                <p class="text-gray-400 text-xs font-bold uppercase tracking-widest">
+                                    <?= $tanggal ? date('d M Y', strtotime($tanggal)) : '' ?>
+                                </p>
+                            </div>
+                        </div>
+                        <p class="text-emerald-400 text-2xl font-black whitespace-nowrap">
+                            Rp <?= number_format((float) $donasi['amount'], 0, ',', '.') ?>
+                        </p>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+
         </div>
-        
+
+        <!-- Teks Berjalan (running text) -->
+        <?php if (!empty($runningText)): ?>
+        <div class="fixed bottom-2 left-0 right-0 z-40 h-14 bg-black/70 backdrop-blur-md border-t border-white/10 flex items-center overflow-hidden">
+            <div class="running-text whitespace-nowrap text-2xl font-bold text-white/90">
+                <?= esc($runningText) ?>
+            </div>
+        </div>
+        <?php endif; ?>
+
         <!-- Progress Bar -->
         <div class="fixed bottom-0 left-0 right-0 h-2 bg-white/5 z-50">
             <div id="slide-progress" class="h-full bg-primary transition-all duration-100 ease-linear" style="width: 0%"></div>
         </div>
     </div>
 
-    <!-- QR Code Overlay (Bottom Right) -->
-    <div class="fixed bottom-12 right-12 z-50 bg-white p-4 rounded-3xl shadow-2xl flex flex-col items-center gap-3">
+    <!-- QR Code Overlay (Bottom Right) — diangkat agar tidak tertimpa teks berjalan -->
+    <div class="fixed <?= !empty($runningText) ? 'bottom-24' : 'bottom-12' ?> right-12 z-50 bg-white p-4 rounded-3xl shadow-2xl flex flex-col items-center gap-3">
         <?php 
             $publicUrl = base_url($masjid['username']);
             $qrUrl = "https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=" . urlencode($publicUrl) . "&choe=UTF-8";

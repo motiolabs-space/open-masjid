@@ -53,6 +53,19 @@
                     <input name="tagline" class="w-full rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary" type="text" value="<?= esc($masjid['tagline'] ?? '') ?>" placeholder="Contoh: Membangun Ummat, Memakmurkan Masjid"/>
                 </div>
                 <div>
+                    <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-1.5">
+                        Teks Berjalan (Display TV)
+                    </label>
+                    <textarea name="running_text" rows="2"
+                        class="w-full rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary"
+                        placeholder="Contoh: Kajian Rutin Ahad Pagi ba'da Subuh bersama Ustadz Ahmad. Info: 0812-3456-7890"><?= esc($masjid['running_text'] ?? '') ?></textarea>
+                    <p class="text-xs text-[#608a7e] mt-1.5">
+                        Tampil bergerak di bagian bawah layar TV masjid
+                        (<a href="<?= base_url(esc($masjid['username'] ?? '', 'url') . '/display') ?>" target="_blank" class="text-primary font-semibold hover:underline">lihat display</a>).
+                        Bila dikosongkan, teks diisi otomatis dari agenda &amp; berita terbaru.
+                    </p>
+                </div>
+                <div>
                     <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-1.5">Nama Resmi (Sesuai SK)</label>
                     <input name="nama_resmi" class="w-full rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary" placeholder="Masukkan nama resmi..." type="text" value="<?= esc($masjid['nama_resmi'] ?? '') ?>"/>
                 </div>
