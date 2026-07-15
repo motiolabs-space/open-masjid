@@ -418,7 +418,11 @@ class Home extends BaseController
         // Impact Analysis: Group expenses by category
         $expenditureByCat = $financeModel->select('masjid_finance_categories.name, SUM(amount) as total')
             ->join('masjid_finance_categories', 'masjid_finance_categories.id = masjid_finance_transactions.category_id')
-            ->where(['masjid_finance_transactions.masjid_id' => $masjid['id'], 'type' => 'pengeluaran'])
+            ->where([
+                'masjid_finance_transactions.masjid_id' => $masjid['id'],
+                // Wajib diberi prefix: kolom 'type' ada di kedua tabel yang di-join.
+                'masjid_finance_transactions.type'      => 'pengeluaran',
+            ])
             ->where('date >=', $start)
             ->where('date <=', $end)
             ->groupBy('category_id')
@@ -493,7 +497,11 @@ class Home extends BaseController
         // 5. Social Impact Highlights (Recent Pengeluaran with non-empty descriptions)
         $impactHighlights = $financeModel->select('masjid_finance_transactions.*, masjid_finance_categories.name as category_name')
             ->join('masjid_finance_categories', 'masjid_finance_categories.id = masjid_finance_transactions.category_id', 'left')
-            ->where(['masjid_finance_transactions.masjid_id' => $masjidId, 'type' => 'pengeluaran'])
+            ->where([
+                'masjid_finance_transactions.masjid_id' => $masjidId,
+                // Wajib diberi prefix: kolom 'type' ada di kedua tabel yang di-join.
+                'masjid_finance_transactions.type'      => 'pengeluaran',
+            ])
             ->orderBy('date', 'DESC')
             ->limit(5)
             ->findAll();
