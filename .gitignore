@@ -15,10 +15,14 @@ github_deploy_key.pub
 id_rsa
 id_rsa.pub
 
-# Dump/backup database — simpan di luar repo & di luar docroot,
-# karena berisi data pribadi jamaah (email/telepon donatur, data mustahik).
+# Dump/backup database — berisi data pribadi jamaah (NIK & KK warga/mustahik,
+# email & telepon donatur, kredensial gateway pembayaran). JANGAN pernah
+# di-commit: repositori ini PUBLIK. Idealnya simpan di luar repo & docroot.
 *dump*.sql
 *backup*.sql
+db*.sql
+/*.sql
+!database.sql
 
 # Writable/Cache
 writable/*
