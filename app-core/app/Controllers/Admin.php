@@ -1601,9 +1601,11 @@ class Admin extends BaseController
             'bank_account_number' => $this->request->getPost('bank_account_number'),
             'multipay_api_key'    => $this->request->getPost('multipay_api_key'),
             'multipay_secret_key' => $this->request->getPost('multipay_secret_key'),
-            'api_key'             => $this->request->getPost('multipay_api_key'), // Generic alias
-            'api_secret'          => $this->request->getPost('multipay_secret_key'), // Generic alias
-            'merchant_id'         => $this->request->getPost('merchant_id'),
+            // Kolom api_key/api_secret/merchant_id sengaja TIDAK ditulis:
+            // ketiganya tidak ada di basis data dan tidak pernah dibaca kode mana
+            // pun — gateway membaca multipay_api_key & multipay_secret_key
+            // (lihat Donation::store). Menuliskannya membuat seluruh penyimpanan
+            // Pengaturan Pembayaran gagal: "Unknown column 'api_key'".
         ];
 
         // Handle QRIS Image
