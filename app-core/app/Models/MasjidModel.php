@@ -13,7 +13,7 @@ class MasjidModel extends Model
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
-        'name', 'tagline', 'running_text', 'iqomah_settings', 'sholat_duration',
+        'name', 'tagline', 'running_text', 'iqomah_settings', 'sholat_duration', 'koreksi_menit',
         'nama_resmi', 'username', 'status', 'tahun_berdiri', 'jenis_masjid',
         'no_sk', 'address', 'provinsi', 'kabupaten', 'kecamatan', 'kelurahan', 'provinsi_id', 'regency_id', 'district_id', 'village_id', 
         'visi', 'misi', 'foto_utama', 'logo', 'about_us', 'phone', 'whatsapp', 'email', 'telegram_bot_token',

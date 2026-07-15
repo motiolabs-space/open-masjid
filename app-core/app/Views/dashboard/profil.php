@@ -96,6 +96,34 @@
 
                 <div>
                     <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-1.5">
+                        Koreksi Jadwal Sholat (Display TV)
+                    </label>
+                    <p class="text-xs text-[#608a7e] mb-3">
+                        Menggeser jadwal hasil perhitungan agar sesuai kebiasaan masjid.
+                        Isi <strong>minus</strong> untuk lebih awal (mis. <code>-2</code>) dan
+                        <strong>plus</strong> untuk lebih lambat (mis. <code>2</code>).
+                        Biarkan <strong>0</strong> bila tidak perlu digeser.
+                    </p>
+                    <?php
+                        $koreksiTersimpan = json_decode($masjid['koreksi_menit'] ?? '', true) ?: [];
+                    ?>
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                        <?php foreach (['Subuh', 'Dzuhur', 'Ashar', 'Maghrib', 'Isya'] as $sholat): ?>
+                        <div>
+                            <label class="block text-xs font-bold text-[#608a7e] mb-1"><?= $sholat ?></label>
+                            <div class="relative">
+                                <input name="koreksi[<?= $sholat ?>]" type="number" min="-30" max="30" step="1"
+                                    value="<?= esc($koreksiTersimpan[$sholat] ?? 0) ?>"
+                                    class="w-full rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary pr-12"/>
+                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#608a7e] pointer-events-none">mnt</span>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-1.5">
                         Lama Layar Gelap Saat Sholat
                     </label>
                     <div class="relative max-w-[200px]">

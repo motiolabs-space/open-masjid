@@ -307,14 +307,34 @@
             }
         });
 
+        // ── Sumber waktu: SERVER, bukan jam TV ──────────────────────────────
+        // Jam TV kerap salah atau zona waktunya keliru, yang membuat adzan
+        // tampil pada saat yang salah. Server mengirim waktunya saat halaman
+        // dirender; browser hanya dipakai sebagai stopwatch lewat
+        // performance.now() yang monotonik — kebal terhadap jam TV yang meleset
+        // maupun berubah saat berjalan.
+        const SERVER_EPOCH_MS = <?= (int) ($serverEpochMs ?? 0) ?>;
+        const TZ_MASJID       = <?= json_encode($timezoneMasjid ?? 'Asia/Jakarta') ?>;
+        const T0_KLIEN        = performance.now();
+
+        function waktuServer() {
+            return new Date(SERVER_EPOCH_MS + (performance.now() - T0_KLIEN));
+        }
+
+        // Detik sejak tengah malam menurut zona waktu masjid (bukan zona TV).
+        function detikSejakTengahMalam(d) {
+            const jam = d.toLocaleTimeString('en-GB', { timeZone: TZ_MASJID, hour12: false });
+            const [h, m, s] = jam.split(':').map(Number);
+            return (h * 3600) + (m * 60) + s;
+        }
+
         // Live Clock
         function updateClock() {
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString('id-ID', { hour12: false });
-            const dateStr = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-            
-            document.getElementById('live-clock').textContent = timeStr;
-            document.getElementById('live-date').textContent = dateStr;
+            const now = waktuServer();
+            document.getElementById('live-clock').textContent =
+                now.toLocaleTimeString('id-ID', { timeZone: TZ_MASJID, hour12: false });
+            document.getElementById('live-date').textContent =
+                now.toLocaleDateString('id-ID', { timeZone: TZ_MASJID, weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
         }
         setInterval(updateClock, 1000);
         updateClock();
@@ -348,8 +368,9 @@
 
         // ── Sholat berikutnya (navbar) ──────────────────────────────────────
         function updateNextPrayer() {
-            const now = new Date();
-            const currentTime = (now.getHours() * 60) + now.getMinutes();
+            const now = waktuServer();
+            const detikKini = detikSejakTengahMalam(now);
+            const currentTime = Math.floor(detikKini / 60);
 
             let nextP = null;
             let minDiff = 1440;
@@ -375,7 +396,6 @@
             document.getElementById('next-prayer-time').textContent = jamBersih(nextP.time);
 
             // Sisa waktu menuju adzan berikutnya (melewati tengah malam bila perlu).
-            const detikKini = (now.getHours() * 3600) + (now.getMinutes() * 60) + now.getSeconds();
             let sisa = (jamKeMenit(nextP.time) * 60) - detikKini;
             if (besok || sisa < 0) sisa += 24 * 3600;
 
@@ -404,7 +424,7 @@
         const PRA_ADZAN_MENIT = 5; // layar penuh hitung mundur menjelang adzan
 
         function cariKeadaan(now) {
-            const detikKini = (now.getHours() * 3600) + (now.getMinutes() * 60) + now.getSeconds();
+            const detikKini = detikSejakTengahMalam(now);
 
             for (const [nama, jam] of Object.entries(WAKTU_SHOLAT)) {
                 const mulai = jamKeMenit(jam) * 60;
@@ -447,7 +467,7 @@
         }
 
         function terapkanKeadaan() {
-            const now = new Date();
+            const now = waktuServer();
             const s = cariKeadaan(now);
 
             if (s.mode === 'NORMAL') {
@@ -467,7 +487,7 @@
                 tampil(elAdzan, false);
                 tampil(elSholat, true);
                 document.getElementById('overlay-dim-clock').textContent =
-                    now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false });
+                    now.toLocaleTimeString('id-ID', { timeZone: TZ_MASJID, hour: '2-digit', minute: '2-digit', hour12: false });
             } else {
                 tampil(elSholat, false);
                 tampil(elAdzan, true);

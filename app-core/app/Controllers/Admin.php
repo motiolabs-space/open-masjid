@@ -335,6 +335,20 @@ class Admin extends BaseController
         unset($data['iqomah']);
     }
 
+    // Koreksi menit jadwal sholat — boleh negatif (lebih awal) atau positif
+    // (lebih lambat). Dibatasi -30..+30 menit agar tidak mengubah jadwal terlalu jauh.
+    if (isset($data['koreksi']) && is_array($data['koreksi'])) {
+        $koreksi = [];
+        foreach (['Subuh', 'Dzuhur', 'Ashar', 'Maghrib', 'Isya'] as $sholat) {
+            $menit = (int) ($data['koreksi'][$sholat] ?? 0);
+            if ($menit >= -30 && $menit <= 30) {
+                $koreksi[$sholat] = $menit;
+            }
+        }
+        $data['koreksi_menit'] = json_encode($koreksi);
+        unset($data['koreksi']);
+    }
+
     // Handle Username Change
     if (isset($data['username']) && $data['username'] !== $oldMasjid['username']) {
         // 1. Check uniqueness
