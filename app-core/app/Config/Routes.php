@@ -196,6 +196,8 @@ $routes->get('auth/set-masjid/(:num)', 'Auth::setMasjidContext/$1');
 $routes->get('donation/(:segment)/form', 'Donation::create/$1');
 $routes->get('donation/(:segment)/form/(:segment)', 'Donation::create/$1/$2'); // With Program Slug
 $routes->post('donation/process', 'Donation::store');
+// Nomor invoice wajib tanpa garis miring (lihat Donation::store) agar utuh
+// dalam satu segmen di sini.
 $routes->get('donation/manual/(:segment)', 'Donation::manual/$1'); // Manual Payment Instruction
 
 // Payment Simulation (Dummy)

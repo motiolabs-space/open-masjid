@@ -1,4 +1,7 @@
-<?= $this->extend('layout/public') ?>
+<?php // 'layout/public' tidak pernah ada — halaman ini selalu gagal karenanya.
+      // Layout yang benar adalah masjid_public, sama seperti halaman publik
+      // masjid lainnya (profil, berita, program, laporan). ?>
+<?= $this->extend('layout/masjid_public') ?>
 
 <?= $this->section('content') ?>
 <div class="py-12 bg-neutral-50 min-h-screen">

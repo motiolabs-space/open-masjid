@@ -46,7 +46,11 @@ class Donation extends BaseController
         return view('public/donation/form', [
             'masjid'  => $masjid,
             'program' => $program,
-            'title'   => 'Donasi - ' . $masjid['name']
+            'title'   => 'Donasi - ' . $masjid['name'],
+            // Dibutuhkan layout/masjid_public dan layout/navbar_masjid untuk
+            // menampilkan logo serta og:image. Tanpa ini halaman gagal dengan
+            // "Undefined variable $storage" pada masjid yang punya logo/foto.
+            'storage' => new \App\Libraries\Storage(),
         ]);
     }
 
@@ -58,8 +62,14 @@ class Donation extends BaseController
         $masjidId = $this->request->getPost('masjid_id');
         $programId = $this->request->getPost('program_id');
         
-        // Generate Invoice Number: INV/YYYYMMDD/RANDOM
-        $invoice = 'INV/' . date('Ymd') . '/' . strtoupper(substr(md5(uniqid()), 0, 6));
+        // Nomor invoice: INV-YYYYMMDD-RANDOM
+        //
+        // Pemisahnya WAJIB '-' , bukan '/'. Nomor ini masuk ke URL
+        // (donation/manual/{invoice}, payment/success/{invoice}). Garis miring
+        // memecahnya menjadi beberapa segmen, sehingga CI4 mengirim 3 argumen ke
+        // method yang hanya menerima 1 lalu menolaknya sebagai 404 — halaman
+        // instruksi pembayaran tidak pernah bisa dibuka.
+        $invoice = 'INV-' . date('Ymd') . '-' . strtoupper(substr(md5(uniqid()), 0, 6));
         
         // 1. Get Payment Settings
         $payModel = new \App\Models\MasjidPaymentModel();
