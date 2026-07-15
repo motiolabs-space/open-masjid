@@ -221,7 +221,9 @@ class Home extends BaseController
                 try {
                     $client = \Config\Services::curlrequest();
                     // Method 20 is Ministry of Religious Affairs (Kemenag)
-                    $apiUrl = "http://api.aladhan.com/v1/timings/$date?latitude=$lat&longitude=$long&method=20";
+                    // WAJIB https: AlAdhan membalas 301 ke HTTPS untuk permintaan http,
+                    // sehingga respons bukan JSON dan jadwal sholat gagal tampil.
+                    $apiUrl = "https://api.aladhan.com/v1/timings/$date?latitude=$lat&longitude=$long&method=20";
                     
                     $response = $client->request('GET', $apiUrl, [
                         'timeout' => 5
@@ -483,7 +485,9 @@ class Home extends BaseController
             if (!$prayerData) {
                 try {
                     $client = \Config\Services::curlrequest();
-                    $apiUrl = "http://api.aladhan.com/v1/timings/$date?latitude=$lat&longitude=$long&method=20";
+                    // WAJIB https: AlAdhan membalas 301 ke HTTPS untuk permintaan http,
+                    // sehingga respons bukan JSON dan jadwal sholat gagal tampil.
+                    $apiUrl = "https://api.aladhan.com/v1/timings/$date?latitude=$lat&longitude=$long&method=20";
                     $response = $client->request('GET', $apiUrl, ['timeout' => 5]);
                     $body = json_decode($response->getBody(), true);
                     if (isset($body['code']) && $body['code'] == 200) {
@@ -506,6 +510,28 @@ class Home extends BaseController
             ->limit(5)
             ->findAll();
 
+        // 6. Donasi terbaru yang berhasil — ditampilkan sebagai apresiasi donatur.
+        $db = \Config\Database::connect();
+        $recentDonations = $db->table('masjid_donations')
+            ->select('donor_name, amount, paid_at, created_at')
+            ->where('masjid_id', $masjidId)
+            ->where('status', 'success')
+            ->orderBy('paid_at', 'DESC')
+            ->limit(8)
+            ->get()->getResultArray();
+
+        // 7. Tanggal Hijriah — sudah tersedia gratis pada respons AlAdhan.
+        $hijriDate = null;
+        if (!empty($prayerData['date']['hijri'])) {
+            $h = $prayerData['date']['hijri'];
+            $hijriDate = trim(sprintf(
+                '%s %s %s H',
+                $h['day'] ?? '',
+                $h['month']['en'] ?? '',
+                $h['year'] ?? ''
+            ));
+        }
+
         return view('public/display_tv', [
             'title'            => 'Display TV - ' . esc($masjid['name']),
             'masjid'           => $masjid,
@@ -513,9 +539,38 @@ class Home extends BaseController
             'programs'         => $programs,
             'news'             => $news,
             'impactHighlights' => $impactHighlights,
+            'recentDonations'  => $recentDonations,
             'prayerData'       => $prayerData,
+            'hijriDate'        => $hijriDate,
+            'runningText'      => $this->_buildRunningText($masjid, $programs, $news),
             'storage'          => new \App\Libraries\Storage()
         ]);
+    }
+
+    /**
+     * Teks berjalan untuk Display TV.
+     *
+     * Memakai teks yang diisi pengurus. Bila kosong, dirangkai otomatis dari
+     * agenda & berita terbaru agar layar tidak pernah tampil hampa.
+     */
+    private function _buildRunningText(array $masjid, array $programs, array $news): string
+    {
+        $manual = trim((string) ($masjid['running_text'] ?? ''));
+        if ($manual !== '') {
+            return $manual;
+        }
+
+        $bagian = [];
+        foreach (array_slice($programs, 0, 3) as $p) {
+            $bagian[] = 'Program: ' . $p['title'];
+        }
+        foreach (array_slice($news, 0, 3) as $n) {
+            $bagian[] = 'Kabar: ' . $n['title'];
+        }
+
+        return empty($bagian)
+            ? 'Selamat datang di ' . $masjid['name'] . '. Semoga Allah menerima amal ibadah kita.'
+            : implode('   •   ', $bagian);
     }
 
     public function subscribe()
