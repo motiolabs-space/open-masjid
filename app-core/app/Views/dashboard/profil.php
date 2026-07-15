@@ -96,6 +96,32 @@
 
                 <div>
                     <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-1.5">
+                        Zona Waktu Masjid
+                    </label>
+                    <?php
+                        $tzMasjid = $masjid['timezone'] ?? '';
+                        $pilihanTz = [
+                            ''              => 'Otomatis dari titik koordinat (disarankan)',
+                            'Asia/Jakarta'  => 'WIB — Waktu Indonesia Barat (Jakarta, Sumatra, Jawa)',
+                            'Asia/Makassar' => 'WITA — Waktu Indonesia Tengah (Bali, Kalimantan, Sulawesi, NTB, NTT)',
+                            'Asia/Jayapura' => 'WIT — Waktu Indonesia Timur (Maluku, Papua)',
+                        ];
+                    ?>
+                    <select name="timezone" class="w-full rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary">
+                        <?php foreach ($pilihanTz as $nilai => $label): ?>
+                            <option value="<?= esc($nilai) ?>" <?= $tzMasjid === $nilai ? 'selected' : '' ?>>
+                                <?= esc($label) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <p class="text-xs text-[#608a7e] mt-1.5">
+                        Menentukan jam yang dipakai jadwal sholat dan Display TV. Waktu diambil dari
+                        server, bukan dari jam TV — jadi jam TV yang meleset tidak mengganggu.
+                    </p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-1.5">
                         Koreksi Jadwal Sholat (Display TV)
                     </label>
                     <p class="text-xs text-[#608a7e] mb-3">
