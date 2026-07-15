@@ -410,7 +410,10 @@
                 const adzanSelesai  = Math.min(ADZAN_MENIT * 60, iqomah);
                 const sholatSelesai = iqomah + (SHOLAT_MENIT * 60);
 
-                if (lewat < adzanSelesai)  return { mode: 'ADZAN', nama, jam };
+                // Sejak adzan berkumandang, hitung mundur iqomah langsung tampil.
+                // Bedanya hanya label: 3 menit pertama menegaskan "Waktu Sholat"
+                // (adzan sedang dikumandangkan), setelah itu "Menunggu Iqomah".
+                if (lewat < adzanSelesai)  return { mode: 'ADZAN', nama, jam, sisa: iqomah - lewat };
                 if (lewat < iqomah)        return { mode: 'IQOMAH', nama, jam, sisa: iqomah - lewat };
                 if (lewat < sholatSelesai) return { mode: 'SHOLAT' };
             }
@@ -456,22 +459,25 @@
                 document.getElementById('overlay-prayer').textContent = s.nama;
                 document.getElementById('overlay-time').textContent = jamBersih(s.jam);
 
-                if (s.mode === 'IQOMAH' || s.mode === 'PRA_ADZAN') {
-                    const menujuAdzan = (s.mode === 'PRA_ADZAN');
-                    document.getElementById('overlay-label').textContent =
-                        menujuAdzan ? 'Menjelang Adzan' : 'Menunggu Iqomah';
-                    document.getElementById('overlay-note').textContent =
-                        menujuAdzan ? 'Bersiap menyambut waktu sholat' : 'Rapatkan dan luruskan shaf';
-                    document.getElementById('overlay-countdown-label').textContent =
-                        menujuAdzan ? 'Adzan Dalam' : 'Iqomah Dalam';
-                    tampil(elCountWrap, true);
+                // Ketiga keadaan ini selalu menampilkan hitung mundur; yang
+                // berbeda hanya label & pesannya.
+                const teks = {
+                    PRA_ADZAN: ['Menjelang Adzan', 'Bersiap menyambut waktu sholat', 'Adzan Dalam'],
+                    ADZAN:     ['Waktu Sholat', 'Marilah menunaikan sholat berjamaah', 'Iqomah Dalam'],
+                    IQOMAH:    ['Menunggu Iqomah', 'Rapatkan dan luruskan shaf', 'Iqomah Dalam'],
+                }[s.mode];
+
+                document.getElementById('overlay-label').textContent = teks[0];
+                document.getElementById('overlay-note').textContent = teks[1];
+                document.getElementById('overlay-countdown-label').textContent = teks[2];
+
+                // Jeda iqomah 0 menit → tak ada yang perlu dihitung mundur.
+                const adaCountdown = (s.sisa ?? 0) > 0;
+                tampil(elCountWrap, adaCountdown);
+                if (adaCountdown) {
                     const mnt = String(Math.floor(s.sisa / 60)).padStart(2, '0');
                     const dtk = String(Math.floor(s.sisa % 60)).padStart(2, '0');
                     document.getElementById('overlay-countdown').textContent = mnt + ':' + dtk;
-                } else {
-                    document.getElementById('overlay-label').textContent = 'Waktu Sholat';
-                    document.getElementById('overlay-note').textContent = 'Marilah menunaikan sholat berjamaah';
-                    tampil(elCountWrap, false);
                 }
             }
             modeKini = s.mode;
