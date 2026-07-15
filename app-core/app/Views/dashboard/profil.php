@@ -813,11 +813,15 @@
                     </datalist>
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-2">Role Akses</label>
+                    <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-2">Jabatan</label>
+                    <?php // Nilai WAJIB cocok dengan enum('admin','staff') pada masjid_pengurus.role. ?>
                     <select id="pengurusRole" class="w-full rounded-xl border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary">
-                        <option value="pengurus">Pengurus (Hanya Lihat)</option>
-                        <option value="admin">Admin (Bisa Edit Profil)</option>
+                        <option value="staff">Pengurus</option>
+                        <option value="admin">Admin</option>
                     </select>
+                    <p class="text-xs text-[#608a7e] mt-1.5">
+                        Saat ini hanya penanda jabatan yang tampil di profil &mdash; belum membatasi hak akses.
+                    </p>
                 </div>
             </div>
         </div>
