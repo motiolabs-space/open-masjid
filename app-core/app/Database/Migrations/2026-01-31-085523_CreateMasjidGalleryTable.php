@@ -38,7 +38,7 @@ class CreateMasjidGalleryTable extends Migration
         ]);
         $this->forge->addKey('id', true);
         $this->forge->addKey('masjid_id');
-        $this->forge->createTable('masjid_gallery');
+        $this->forge->createTable('masjid_gallery', true);
     }
 
     public function down()
