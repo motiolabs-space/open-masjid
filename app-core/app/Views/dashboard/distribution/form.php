@@ -4,7 +4,7 @@
 <div class="px-8 py-8">
     <div class="max-w-3xl mx-auto">
         <div class="mb-8 flex items-center gap-4">
-            <a href="<?= base_url('dashboard/distribution') ?>" class="size-10 flex items-center justify-center bg-white dark:bg-white/5 rounded-xl border border-gray-200 dark:border-white/10 hover:bg-gray-50 text-gray-500 transition-colors">
+            <a href="<?= base_url('dashboard/warga') ?>" class="size-10 flex items-center justify-center bg-white dark:bg-white/5 rounded-xl border border-gray-200 dark:border-white/10 hover:bg-gray-50 text-gray-500 transition-colors">
                 <span class="material-symbols-outlined">arrow_back</span>
             </a>
             <div>
@@ -13,7 +13,7 @@
             </div>
         </div>
 
-        <form action="<?= base_url('dashboard/distribution/save') ?>" method="POST" enctype="multipart/form-data" class="space-y-6">
+        <form action="<?= base_url('dashboard/bantuan-warga/save') ?>" method="POST" enctype="multipart/form-data" class="space-y-6">
             <?= csrf_field() ?>
             <?php if (isset($item)): ?>
                 <input type="hidden" name="id" value="<?= $item['id'] ?>">

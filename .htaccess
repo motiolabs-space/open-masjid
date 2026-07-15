@@ -2,6 +2,40 @@
 Options -Indexes
 
 # ----------------------------------------------------------------------
+# Blokir berkas sensitif & skrip pengembangan
+# ----------------------------------------------------------------------
+# PENTING: docroot proyek ini adalah root (index.php ada di sini), dan aturan
+# "RewriteCond %{REQUEST_FILENAME} !-f" di bawah menyajikan berkas yang ADA
+# secara apa adanya tanpa lewat router. Tanpa blok ini, berkas seperti
+# github_deploy_key, *.sql, atau .env bisa diunduh siapa saja.
+
+# Kunci, rahasia, dump database, log
+<FilesMatch "(?i)(^\.env|^\.env\.|_key$|_key\.pub$|\.pem$|\.ppk$|\.sql$|\.log$|^composer\.(json|lock)$)">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Skrip debug/uji/seeder (mis. public/check_db.php, public/seed_regencies_smart.php).
+# Semuanya bergaya CLI dan tetap bisa dijalankan lewat terminal:
+#   php public/check_db.php
+# Yang diblokir hanya akses lewat HTTP, karena seeder dapat menulis ke database
+# tanpa autentikasi bila dipanggil dari browser.
+<FilesMatch "(?i)^(analyze|check|debug|fetch|seed|test)_.*\.php$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# ----------------------------------------------------------------------
 # Rewrite engine
 # ----------------------------------------------------------------------
 
