@@ -101,12 +101,33 @@
 #--------------------------------------------------------------------
 # STORAGE_DRIVER = 'local'   # 'local' atau 's3'
 #
-# Driver 'local' — berkas disimpan ke STORAGE_PATH (bawaan: FCPATH = root
-# proyek, tempat index.php berada). Berhati-hatilah: pola penyimpanannya
-# {username}/{tahun}/{bulan}/..., sehingga terbentuk direktori nyata bernama
-# username masjid di root. Direktori itu dapat menutupi rute profil publik
+# STORAGE_PATH — folder tempat berkas ditulis ke disk. Dipakai oleh driver
+# 'local', DAN sebagai cadangan bila unggahan ke S3 gagal (lihat di bawah).
+# Bawaan: FCPATH, yaitu root proyek tempat index.php berada.
+# Berhati-hatilah: pola penyimpanannya {username}/{tahun}/{bulan}/...,
+# sehingga terbentuk direktori nyata bernama username masjid. Bila STORAGE_PATH
+# menunjuk ke root web, direktori itu dapat menutupi rute profil publik
 # '(:any)' — sudah ditangani oleh 'DirectorySlash Off' pada .htaccess root.
 # STORAGE_PATH = ''
+#
+# STORAGE_URL — alamat web yang memetakan STORAGE_PATH. Isi bila STORAGE_PATH
+# BUKAN root web. Bila dikosongkan, dipakai base_url(), yang sudah tepat untuk
+# STORAGE_PATH = root web.
+# Catatan: asset_url() sengaja TIDAK dipakai untuk berkas unggahan, karena
+# helper itu menambahkan awalan 'public/' yang hanya benar untuk aset statis.
+# STORAGE_URL = ''
+#
+# CADANGAN OTOMATIS
+# Bila STORAGE_DRIVER = 's3' dan unggahan ke S3 gagal (mis. S3 sedang padam),
+# berkas TIDAK dibuang: ia disimpan ke STORAGE_PATH lalu dicatat ke log sebagai
+# peringatan. Storage::url() mengutamakan berkas yang ada di disk, sehingga
+# gambarnya tetap tampil. Setelah S3 pulih, berkas cadangan itu tersalin
+# otomatis pada deploy berikutnya lewat migrasi MigrateFilesToS3.
+#
+# Karena url() mengutamakan berkas di disk, selama salinan lama masih ada di
+# STORAGE_PATH, gambar disajikan dari server sendiri — bukan dari S3. Hapus
+# salinan lokal itu setelah yakin semuanya sudah tersalin ke S3 bila ingin
+# seluruh gambar dilayani S3.
 #
 #--------------------------------------------------------------------
 # S3 / DigitalOcean Spaces  (dipakai bila STORAGE_DRIVER = 's3')

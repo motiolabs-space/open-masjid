@@ -137,7 +137,7 @@ class Storage
 
         if ($this->driver === 's3') {
             try {
-                $result = $this->s3Client->putObject([
+                $this->s3Client->putObject([
                     'Bucket' => $this->bucket,
                     'Key'    => $path . '/' . $newName,
                     'Body'   => fopen($file->getTempName(), 'r'),
@@ -145,23 +145,58 @@ class Storage
                     'ContentType' => $mime
                 ]);
                 return $path . '/' . $newName;
-            } catch (AwsException $e) {
-                log_message('error', 'S3 Upload Error: ' . $e->getMessage());
+            } catch (\Throwable $e) {
+                // Jangan buang berkas pengurus hanya karena S3 sedang bermasalah.
+                // Simpan ke disk sebagai cadangan; url() akan mengutamakan berkas
+                // lokal bila ada, sehingga gambarnya tetap tampil. Setelah S3 pulih,
+                // berkas ini dapat disalin dengan migrasi MigrateFilesToS3.
+                log_message('error', 'S3 Upload Error: ' . $e->getMessage() . ' — beralih menyimpan ke disk.');
+
+                if ($this->simpanLokal($file, $path, $newName)) {
+                    log_message('warning', "Storage: {$path}/{$newName} tersimpan di disk sebagai cadangan, BELUM ada di S3.");
+                    return $path . '/' . $newName;
+                }
+
+                log_message('error', 'Storage: cadangan ke disk juga gagal untuk ' . $path);
                 return null;
-            }
-        } else {
-            // Local
-            // Use configured uploadPath instead of FCPATH directly
-            $targetDir = rtrim($this->uploadPath . $path, '/\\');
-            if (!is_dir($targetDir)) {
-                mkdir($targetDir, 0777, true);
-            }
-            if ($file->move($targetDir, $newName)) {
-                return $path . '/' . $newName;
             }
         }
 
-        return null;
+        return $this->simpanLokal($file, $path, $newName) ? $path . '/' . $newName : null;
+    }
+
+    /**
+     * Menyimpan berkas ke disk pada uploadPath (STORAGE_PATH).
+     */
+    private function simpanLokal($file, string $path, string $newName): bool
+    {
+        $targetDir = rtrim($this->uploadPath . $path, '/\\');
+
+        if (!is_dir($targetDir) && !mkdir($targetDir, 0777, true) && !is_dir($targetDir)) {
+            log_message('error', "Storage: gagal membuat folder {$targetDir}");
+            return false;
+        }
+
+        return (bool) $file->move($targetDir, $newName);
+    }
+
+    /**
+     * URL untuk berkas yang tersimpan di disk.
+     *
+     * asset_url() TIDAK dipakai di sini: helper itu menambahkan awalan 'public/'
+     * karena ditujukan untuk aset statis di dalam folder public/, sedangkan
+     * berkas unggahan berada di STORAGE_PATH. Pada pemasangan ini STORAGE_PATH
+     * menunjuk langsung ke root web, sehingga awalan itu justru membuat URL
+     * meleset (404).
+     */
+    private function urlLokal(string $path): string
+    {
+        $storageUrl = env('STORAGE_URL');
+        if (!empty($storageUrl)) {
+            return rtrim($storageUrl, '/') . '/' . ltrim($path, '/');
+        }
+
+        return base_url(ltrim($path, '/'));
     }
 
     /**
@@ -206,6 +241,15 @@ class Storage
         if (empty($path)) return '';
 
         if ($this->driver === 's3') {
+            // Berkas yang tersimpan di disk diutamakan. Dua keadaan membutuhkan ini:
+            //  1. Cadangan saat S3 gagal (lihat upload()).
+            //  2. Berkas lama dari era penyimpanan lokal yang belum tersalin ke S3.
+            // Tanpa pengecekan ini, url() menunjuk ke S3 untuk berkas yang tidak
+            // ada di sana, dan gambarnya rusak tanpa penjelasan.
+            if (is_file($this->uploadPath . ltrim($path, '/'))) {
+                return $this->urlLokal($path);
+            }
+
             $publicUrl = env('S3_PUBLIC_URL');
             if (!empty($publicUrl)) {
                 return rtrim($publicUrl, '/') . '/' . ltrim($path, '/');
@@ -213,6 +257,6 @@ class Storage
             return $this->s3Client->getObjectUrl($this->bucket, $path);
         }
 
-        return asset_url($path);
+        return $this->urlLokal($path);
     }
 }
