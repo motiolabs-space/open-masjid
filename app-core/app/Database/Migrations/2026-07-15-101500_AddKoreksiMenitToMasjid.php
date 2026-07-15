@@ -8,6 +8,11 @@ class AddKoreksiMenitToMasjid extends Migration
 {
     public function up()
     {
+        // Idempoten: kolom mungkin sudah ditambahkan manual di luar migrasi.
+        if ($this->db->fieldExists('koreksi_menit', 'masjid')) {
+            return;
+        }
+
         $this->forge->addColumn('masjid', [
             // Koreksi waktu sholat dalam menit, per waktu sholat. Boleh negatif
             // (lebih awal) atau positif (lebih lambat), mengikuti kebiasaan
@@ -23,6 +28,8 @@ class AddKoreksiMenitToMasjid extends Migration
 
     public function down()
     {
-        $this->forge->dropColumn('masjid', 'koreksi_menit');
+        if ($this->db->fieldExists('koreksi_menit', 'masjid')) {
+            $this->forge->dropColumn('masjid', 'koreksi_menit');
+        }
     }
 }

@@ -48,7 +48,7 @@ class CreateMasjidFinanceTables extends Migration
         ]);
         $this->forge->addKey('id', true);
         $this->forge->addForeignKey('masjid_id', 'masjid', 'id', 'CASCADE', 'CASCADE');
-        $this->forge->createTable('masjid_finance_categories');
+        $this->forge->createTable('masjid_finance_categories', true);
         */
 
         // 2. Finance Transactions Table
@@ -123,7 +123,7 @@ class CreateMasjidFinanceTables extends Migration
         $this->forge->addForeignKey('masjid_id', 'masjid', 'id', 'CASCADE', 'CASCADE');
         $this->forge->addForeignKey('category_id', 'masjid_finance_categories', 'id', 'SET NULL', 'CASCADE');
         $this->forge->addForeignKey('program_id', 'masjid_programs', 'id', 'SET NULL', 'CASCADE');
-        $this->forge->createTable('masjid_finance_transactions');
+        $this->forge->createTable('masjid_finance_transactions', true);
         */
     }
 

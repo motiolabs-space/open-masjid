@@ -51,7 +51,7 @@ class CreateMasjidSubscribersTable extends Migration
 
         $this->forge->addKey('id', true);
         $this->forge->addForeignKey('masjid_id', 'masjid', 'id', 'CASCADE', 'CASCADE');
-        $this->forge->createTable('masjid_subscribers');
+        $this->forge->createTable('masjid_subscribers', true);
     }
 
     public function down()

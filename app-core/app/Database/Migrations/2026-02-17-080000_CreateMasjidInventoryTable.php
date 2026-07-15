@@ -73,7 +73,7 @@ class CreateMasjidInventoryTable extends Migration
         ]);
         $this->forge->addKey('id', true);
         $this->forge->addForeignKey('masjid_id', 'masjid', 'id', 'CASCADE', 'CASCADE');
-        $this->forge->createTable('masjid_inventory');
+        $this->forge->createTable('masjid_inventory', true);
     }
 
     public function down()

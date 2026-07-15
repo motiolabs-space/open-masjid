@@ -32,7 +32,7 @@ class CreateMasjidWilayahTable extends Migration
         ]);
         $this->forge->addKey('id', true);
         $this->forge->addForeignKey('masjid_id', 'masjid', 'id', 'CASCADE', 'CASCADE');
-        $this->forge->createTable('masjid_wilayah');
+        $this->forge->createTable('masjid_wilayah', true);
 
         // Add column to masjid table
         $this->forge->addColumn('masjid', [

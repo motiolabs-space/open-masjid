@@ -40,7 +40,7 @@ class CreateMasjidNewsTables extends Migration
         // ]);
         // $this->forge->addKey('id', true);
         // $this->forge->addForeignKey('masjid_id', 'masjid', 'id', 'CASCADE', 'CASCADE');
-        // $this->forge->createTable('masjid_news_categories');
+        // $this->forge->createTable('masjid_news_categories', true);
 
         // // 2. News Table
         // $this->forge->addField([
@@ -99,7 +99,7 @@ class CreateMasjidNewsTables extends Migration
         // $this->forge->addKey('id', true);
         // $this->forge->addForeignKey('masjid_id', 'masjid', 'id', 'CASCADE', 'CASCADE');
         // $this->forge->addForeignKey('category_id', 'masjid_news_categories', 'id', 'SET NULL', 'CASCADE');
-        // $this->forge->createTable('masjid_news');
+        // $this->forge->createTable('masjid_news', true);
     }
 
     public function down()

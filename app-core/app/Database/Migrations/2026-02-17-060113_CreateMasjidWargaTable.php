@@ -68,7 +68,7 @@ class CreateMasjidWargaTable extends Migration
         ]);
         $this->forge->addKey('id', true);
         $this->forge->addForeignKey('masjid_id', 'masjid', 'id', 'CASCADE', 'CASCADE');
-        $this->forge->createTable('masjid_warga');
+        $this->forge->createTable('masjid_warga', true);
     }
 
     public function down()

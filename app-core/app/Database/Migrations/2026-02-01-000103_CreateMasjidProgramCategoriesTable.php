@@ -40,7 +40,7 @@ class CreateMasjidProgramCategoriesTable extends Migration
         ]);
         $this->forge->addKey('id', true);
         $this->forge->addForeignKey('masjid_id', 'masjid', 'id', 'CASCADE', 'CASCADE');
-        $this->forge->createTable('masjid_program_categories');
+        $this->forge->createTable('masjid_program_categories', true);
 
         // 2. Add category_id to masjid_programs
         $this->forge->addColumn('masjid_programs', [

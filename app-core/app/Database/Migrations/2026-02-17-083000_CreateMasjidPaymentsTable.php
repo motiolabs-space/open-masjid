@@ -71,7 +71,7 @@ class CreateMasjidPaymentsTable extends Migration
         ]);
         $this->forge->addKey('id', true);
         $this->forge->addForeignKey('masjid_id', 'masjid', 'id', 'CASCADE', 'CASCADE');
-        $this->forge->createTable('masjid_payments');
+        $this->forge->createTable('masjid_payments', true);
         */
     }
 

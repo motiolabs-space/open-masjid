@@ -41,7 +41,7 @@ class CreateMasjidFollowersTable extends Migration
         $this->forge->addForeignKey('masjid_id', 'masjid', 'id', 'CASCADE', 'CASCADE');
         $this->forge->addForeignKey('user_id', 'users', 'id', 'CASCADE', 'CASCADE');
         
-        $this->forge->createTable('masjid_followers');
+        $this->forge->createTable('masjid_followers', true);
     }
 
     public function down()

@@ -8,6 +8,11 @@ class AddStatusToMasjid extends Migration
 {
     public function up()
     {
+        // Idempoten: kolom mungkin sudah ditambahkan manual di luar migrasi.
+        if ($this->db->fieldExists('status', 'masjid')) {
+            return;
+        }
+
         $this->forge->addColumn('masjid', [
             'status' => [
                 'type'       => 'ENUM',
@@ -20,6 +25,8 @@ class AddStatusToMasjid extends Migration
 
     public function down()
     {
-        $this->forge->dropColumn('masjid', 'status');
+        if ($this->db->fieldExists('status', 'masjid')) {
+            $this->forge->dropColumn('masjid', 'status');
+        }
     }
 }
