@@ -40,6 +40,17 @@
                 <p class="text-emerald-400 text-sm font-bold uppercase tracking-widest"><?= esc($masjid['kabupaten']) ?>, <?= esc($masjid['provinsi']) ?></p>
             </div>
         </div>
+        <!-- Hitung mundur menuju sholat berikutnya — selalu terlihat, tidak
+             ikut bergantian seperti slide. -->
+        <?php if ($prayerData): ?>
+        <div id="navbar-countdown" class="hidden flex-col items-center px-8 py-3 rounded-2xl bg-white/5 border border-white/10">
+            <p class="text-white/50 text-[11px] font-black uppercase tracking-[0.25em] mb-1">
+                Menuju <span id="navbar-next-name">-</span>
+            </p>
+            <h2 id="navbar-next-countdown" class="text-4xl font-black tabular-nums text-emerald-400">--:--:--</h2>
+        </div>
+        <?php endif; ?>
+
         <div class="text-right">
             <h2 id="live-clock" class="text-5xl font-black">00:00:00</h2>
             <p id="live-date" class="text-emerald-400 font-bold">Minggu, 10 Mei 2026</p>
@@ -78,6 +89,7 @@
                         <p class="text-emerald-200 text-sm font-black uppercase tracking-[0.2em] mb-4">Sholat Berikutnya</p>
                         <h3 id="next-prayer-name" class="text-2xl font-bold mb-1">-</h3>
                         <h3 id="next-prayer-time" class="text-5xl font-black">--:--</h3>
+                        <p id="next-prayer-countdown" class="text-emerald-200/70 text-xl font-black tabular-nums mt-3">--:--:--</p>
                     </div>
                 </div>
             </div>
@@ -238,7 +250,7 @@
             <h2 class="text-7xl font-black text-emerald-400 mb-12" id="overlay-time">17:52</h2>
 
             <div id="overlay-countdown-wrap" class="hidden flex-col items-center">
-                <p class="text-white/50 text-xl font-bold uppercase tracking-[0.3em] mb-3">Iqomah Dalam</p>
+                <p id="overlay-countdown-label" class="text-white/50 text-xl font-bold uppercase tracking-[0.3em] mb-3">Iqomah Dalam</p>
                 <h2 class="text-9xl font-black tabular-nums" id="overlay-countdown">05:00</h2>
             </div>
 
@@ -336,21 +348,45 @@
             }
 
             // Semua sudah lewat → sholat pertama besok.
+            let besok = false;
             if (!nextP) {
                 const first = Object.entries(WAKTU_SHOLAT)[0];
                 if (!first) return;
                 nextP = { name: first[0], time: first[1] };
+                besok = true;
             }
 
             document.getElementById('next-prayer-name').textContent = nextP.name;
             document.getElementById('next-prayer-time').textContent = jamBersih(nextP.time);
+
+            // Sisa waktu menuju adzan berikutnya (melewati tengah malam bila perlu).
+            const detikKini = (now.getHours() * 3600) + (now.getMinutes() * 60) + now.getSeconds();
+            let sisa = (jamKeMenit(nextP.time) * 60) - detikKini;
+            if (besok || sisa < 0) sisa += 24 * 3600;
+
+            const jj = String(Math.floor(sisa / 3600)).padStart(2, '0');
+            const mm = String(Math.floor((sisa % 3600) / 60)).padStart(2, '0');
+            const dd = String(Math.floor(sisa % 60)).padStart(2, '0');
+            const teks = jj + ':' + mm + ':' + dd;
+
+            const elSlide = document.getElementById('next-prayer-countdown');
+            if (elSlide) elSlide.textContent = teks;
+
+            const elNav = document.getElementById('navbar-countdown');
+            if (elNav) {
+                document.getElementById('navbar-next-name').textContent = nextP.name;
+                document.getElementById('navbar-next-countdown').textContent = teks;
+                // Disembunyikan saat layar sholat aktif agar tidak mengganggu.
+                tampil(elNav, modeKini === 'NORMAL' || modeKini === null);
+            }
         }
 
         // ── Layar Waktu Sholat ──────────────────────────────────────────────
         // Alur: ADZAN → hitung mundur IQOMAH → layar gelap saat SHOLAT → NORMAL.
-        const IQOMAH_MENIT   = <?= json_encode($iqomahSettings ?? []) ?>;
-        const SHOLAT_MENIT   = <?= (int) ($sholatDuration ?? 10) ?>;
-        const ADZAN_MENIT    = 3; // lama layar adzan sebelum hitung mundur iqomah
+        const IQOMAH_MENIT    = <?= json_encode($iqomahSettings ?? []) ?>;
+        const SHOLAT_MENIT    = <?= (int) ($sholatDuration ?? 10) ?>;
+        const ADZAN_MENIT     = 3; // lama layar adzan sebelum hitung mundur iqomah
+        const PRA_ADZAN_MENIT = 5; // layar penuh hitung mundur menjelang adzan
 
         function cariKeadaan(now) {
             const detikKini = (now.getHours() * 3600) + (now.getMinutes() * 60) + now.getSeconds();
@@ -358,7 +394,15 @@
             for (const [nama, jam] of Object.entries(WAKTU_SHOLAT)) {
                 const mulai = jamKeMenit(jam) * 60;
                 const lewat = detikKini - mulai; // detik sejak adzan
-                if (lewat < 0) continue;
+
+                // Menjelang adzan: layar penuh berisi hitung mundur.
+                if (lewat < 0) {
+                    const menuju = -lewat;
+                    if (menuju <= PRA_ADZAN_MENIT * 60) {
+                        return { mode: 'PRA_ADZAN', nama, jam, sisa: menuju };
+                    }
+                    continue;
+                }
 
                 const iqomah = (IQOMAH_MENIT[nama] ?? 10) * 60;
                 // Bila jeda iqomah lebih pendek dari layar adzan, layar adzan
@@ -412,9 +456,14 @@
                 document.getElementById('overlay-prayer').textContent = s.nama;
                 document.getElementById('overlay-time').textContent = jamBersih(s.jam);
 
-                if (s.mode === 'IQOMAH') {
-                    document.getElementById('overlay-label').textContent = 'Menunggu Iqomah';
-                    document.getElementById('overlay-note').textContent = 'Rapatkan dan luruskan shaf';
+                if (s.mode === 'IQOMAH' || s.mode === 'PRA_ADZAN') {
+                    const menujuAdzan = (s.mode === 'PRA_ADZAN');
+                    document.getElementById('overlay-label').textContent =
+                        menujuAdzan ? 'Menjelang Adzan' : 'Menunggu Iqomah';
+                    document.getElementById('overlay-note').textContent =
+                        menujuAdzan ? 'Bersiap menyambut waktu sholat' : 'Rapatkan dan luruskan shaf';
+                    document.getElementById('overlay-countdown-label').textContent =
+                        menujuAdzan ? 'Adzan Dalam' : 'Iqomah Dalam';
                     tampil(elCountWrap, true);
                     const mnt = String(Math.floor(s.sisa / 60)).padStart(2, '0');
                     const dtk = String(Math.floor(s.sisa % 60)).padStart(2, '0');
