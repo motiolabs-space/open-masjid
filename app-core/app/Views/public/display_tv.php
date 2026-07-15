@@ -110,6 +110,42 @@
             </div>
             <?php endif; ?>
 
+            <!--
+                Slide pengganti bila jadwal sholat tidak tersedia. Tanpa ini
+                bagian jadwal hilang begitu saja tanpa penjelasan, sehingga
+                pengurus tidak pernah tahu ada yang perlu dibereskan.
+            -->
+            <?php if (!empty($jadwalKosong)): ?>
+            <div class="swiper-slide flex flex-col items-center justify-center pt-24 px-12">
+                <div class="max-w-3xl w-full text-center">
+                    <div class="inline-flex items-center justify-center size-24 rounded-3xl bg-amber-500/15 border border-amber-500/30 text-amber-400 mb-8">
+                        <span class="material-symbols-outlined text-5xl">schedule</span>
+                    </div>
+                    <h2 class="text-amber-400 text-lg font-black uppercase tracking-[0.3em] mb-4">Jadwal Sholat Belum Tampil</h2>
+
+                    <?php if ($jadwalKosong === 'koordinat'): ?>
+                        <h3 class="text-5xl font-black mb-6 leading-tight">Konfigurasi masjid belum lengkap</h3>
+                        <p class="text-white/60 text-2xl leading-relaxed mb-10">
+                            Titik koordinat masjid belum diatur, sehingga jadwal sholat,
+                            hitung mundur, dan layar adzan belum dapat ditampilkan.
+                        </p>
+                        <div class="inline-block bg-white/5 border border-white/10 rounded-2xl px-8 py-6">
+                            <p class="text-white/40 text-sm font-bold uppercase tracking-[0.2em] mb-2">Untuk Pengurus</p>
+                            <p class="text-white/80 text-xl font-bold">
+                                Lengkapi di <span class="text-emerald-400">Profil Masjid</span> → Titik Koordinat
+                            </p>
+                        </div>
+                    <?php else: ?>
+                        <h3 class="text-5xl font-black mb-6 leading-tight">Jadwal sedang tidak dapat dimuat</h3>
+                        <p class="text-white/60 text-2xl leading-relaxed">
+                            Sambungan ke layanan jadwal sholat sedang terganggu.
+                            Layar akan mencoba lagi secara otomatis.
+                        </p>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+
             <!-- Slide 2: Financial Transparency -->
             <div class="swiper-slide flex items-center justify-center pt-24 px-12">
                 <div class="max-w-6xl w-full">

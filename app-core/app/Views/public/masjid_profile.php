@@ -243,6 +243,32 @@
                         </div>
                      </div>
                 </div>
+                <?php elseif (!empty($jadwalKosong)): ?>
+                <!-- Jadwal tidak tersedia: beri penjelasan, jangan hilang diam-diam. -->
+                <div class="bg-background-light dark:bg-[#1a2e25] border border-dashed border-[#dbe6e1] dark:border-[#1e3a2f] p-8 rounded-[2rem]">
+                    <div class="flex items-start gap-4">
+                        <div class="size-11 rounded-xl bg-amber-100 dark:bg-amber-900/20 text-amber-600 flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined">schedule</span>
+                        </div>
+                        <div class="min-w-0">
+                            <h4 class="font-bold text-[#111816] dark:text-white mb-1">Jadwal Sholat Belum Tersedia</h4>
+                            <?php if ($jadwalKosong === 'koordinat'): ?>
+                                <p class="text-sm text-[#608a7e] leading-relaxed">
+                                    Titik koordinat masjid belum diatur, sehingga jadwal sholat belum dapat dihitung.
+                                    <br>
+                                    <span class="text-[#3d5a4d] dark:text-gray-400 font-semibold">
+                                        Pengurus masjid dapat melengkapinya di Profil Masjid.
+                                    </span>
+                                </p>
+                            <?php else: ?>
+                                <p class="text-sm text-[#608a7e] leading-relaxed">
+                                    Sambungan ke layanan jadwal sholat sedang terganggu.
+                                    Silakan muat ulang halaman beberapa saat lagi.
+                                </p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
                 <?php endif; ?>
 
                 <!-- Visi & Misi logic -->

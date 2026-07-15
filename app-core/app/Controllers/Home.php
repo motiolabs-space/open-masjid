@@ -229,6 +229,7 @@ class Home extends BaseController
             'todaySchedules' => $todaySchedules,
             'fridaySchedule' => $fridaySchedule,
             'prayerData'     => $prayerData,
+            'jadwalKosong'   => $this->_alasanJadwalKosong($masjid, $prayerData),
             'storage'        => $storage
         ]);
     }
@@ -502,6 +503,7 @@ class Home extends BaseController
             'impactHighlights' => $impactHighlights,
             'recentDonations'  => $recentDonations,
             'prayerData'       => $prayerData,
+            'jadwalKosong'     => $this->_alasanJadwalKosong($masjid, $prayerData),
             'hijriDate'        => $hijriDate,
             'runningText'      => $this->_buildRunningText($masjid, $programs, $news),
             'iqomahSettings'   => $this->_iqomahSettings($masjid),
@@ -521,6 +523,27 @@ class Home extends BaseController
      * Menggeser jadwal sholat sesuai koreksi menit dari pengurus.
      * Nilai boleh negatif (lebih awal) maupun positif (lebih lambat).
      */
+    /**
+     * Sebab jadwal sholat tidak tersedia — dipakai untuk menampilkan pesan yang
+     * tepat, bukan sekadar menghilangkan bagian jadwal tanpa penjelasan.
+     *
+     * Membedakan dua hal yang butuh tindakan berbeda:
+     *   'koordinat' → pengurus belum mengisi titik koordinat (perlu tindakan)
+     *   'api'       → koordinat sudah ada tetapi AlAdhan gagal dihubungi
+     *                 (sementara, bukan salah pengurus)
+     */
+    private function _alasanJadwalKosong(array $masjid, ?array $prayerData): ?string
+    {
+        if ($prayerData) {
+            return null;
+        }
+
+        $adaKoordinat = !empty($masjid['latitude']) && !empty($masjid['longitude'])
+            && ($masjid['latitude'] != 0 || $masjid['longitude'] != 0);
+
+        return $adaKoordinat ? 'api' : 'koordinat';
+    }
+
     /**
      * Zona waktu yang dipakai masjid: pilihan pengurus lebih diutamakan,
      * bila kosong ditentukan otomatis oleh AlAdhan dari koordinat.
