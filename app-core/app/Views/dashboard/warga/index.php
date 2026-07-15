@@ -155,7 +155,7 @@
                                 <td class="p-6 text-right">
                                     <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <?php if ($isMustahik): ?>
-                                            <a href="<?= base_url('dashboard/distribution/new?warga_id=' . $w['id']) ?>" class="px-4 py-2 flex items-center gap-2 rounded-xl bg-primary text-white hover:bg-primary/90 transition-all text-xs font-bold" title="Beri Bantuan">
+                                            <a href="<?= base_url('dashboard/bantuan-warga/new?warga_id=' . $w['id']) ?>" class="px-4 py-2 flex items-center gap-2 rounded-xl bg-primary text-white hover:bg-primary/90 transition-all text-xs font-bold" title="Beri Bantuan">
                                                 <span class="material-symbols-outlined text-sm">volunteer_activism</span>
                                                 Beri Bantuan
                                             </a>

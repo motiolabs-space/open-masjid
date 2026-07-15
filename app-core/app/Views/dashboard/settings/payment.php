@@ -27,7 +27,7 @@
             </div>
         <?php endif; ?>
 
-        <form action="<?= base_url('dashboard/settings/payment/save') ?>" method="POST" enctype="multipart/form-data" class="space-y-8">
+        <form action="<?= base_url('dashboard/pembayaran/save') ?>" method="POST" enctype="multipart/form-data" class="space-y-8">
             <?= csrf_field() ?>
             
             <div class="grid md:grid-cols-3 gap-8">

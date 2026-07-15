@@ -1,0 +1,13 @@
+# Folder ini berisi kode aplikasi & berkas rahasia (.env, *.sql, composer, spark).
+# Tidak ada satu pun yang boleh diakses lewat HTTP — CodeIgniter memuatnya dari
+# filesystem, bukan lewat web. Docroot proyek ini adalah root (index.php ada di
+# root), sehingga tanpa aturan ini berkas seperti app-core/.env akan tersaji
+# sebagai teks biasa oleh aturan "RewriteCond %{REQUEST_FILENAME} !-f" di root.
+
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+</IfModule>

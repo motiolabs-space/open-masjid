@@ -129,14 +129,30 @@ class FinanceAI extends BaseController
 
         $transactionModel = new MasjidFinanceTransactionModel();
         $categoryModel = new MasjidFinanceCategoryModel();
-        
+
+        // Kumpulan ID kategori milik masjid ini — untuk memvalidasi category_id
+        // dari input agar tidak memakai kategori milik masjid lain (IDOR).
+        $ownCategoryIds = array_map(
+            'strval',
+            array_column($categoryModel->where('masjid_id', $masjidId)->findAll(), 'id')
+        );
+
         $insertData = [];
         foreach ($data as $t) {
             if (!empty($t['date']) && !empty($t['amount'])) {
+                // Normalisasi tipe agar cocok dengan enum kolom ('pemasukan'/'pengeluaran').
+                $type = in_array($t['type'] ?? '', ['pemasukan', 'pengeluaran'], true)
+                    ? $t['type'] : 'pemasukan';
+
+                // Terima category_id hanya bila kategori itu milik masjid ini.
+                $catId = $t['category_id'] ?? null;
+                if (!empty($catId) && !in_array((string) $catId, $ownCategoryIds, true)) {
+                    $catId = null;
+                }
+
                 // If AI suggested a new category or missing category
-                $catId = $t['category_id'];
                 if (empty($catId) && !empty($t['suggested_category_name'])) {
-                    $catType = $t['type'];
+                    $catType = $type;
                     $slug = url_title($t['suggested_category_name'], '-', true);
                     
                     // Check if exists
@@ -168,7 +184,7 @@ class FinanceAI extends BaseController
                     'category_id' => $catId,
                     'date' => $dateRaw,
                     'amount' => $t['amount'],
-                    'type' => $t['type'],
+                    'type' => $type,
                     'description' => $t['description']
                 ];
             }

@@ -20,6 +20,13 @@ class Admin extends BaseController
         $name = session()->get('masjid_name') ?? session()->get('user_name') ?? 'User';
         $masjidId = session()->get('masjid_id');
 
+        // Jamaah tidak terikat satu masjid — tampilkan dashboard khusus jamaah
+        // dengan data pribadi (donasi, masjid diikuti), bukan data manajemen.
+        $role = session()->get('role');
+        if ($role !== 'pengurus' && $role !== 'superadmin') {
+            return $this->jamaahDashboard();
+        }
+
         // Models
         $wargaModel = new \App\Models\MasjidWargaModel();
         $inventoryModel = new \App\Models\MasjidInventoryModel();
@@ -110,13 +117,131 @@ class Admin extends BaseController
             'community_wa_link' => $communityWaLink
         ];
         
-        if (session()->get('role') !== 'pengurus' && session()->get('role') !== 'superadmin') {
-            // Jamaah Dashboard View
-            return view('dashboard/index_jamaah', $data);
-        }
-
         return view('dashboard/index', $data);
     }
+
+    /** Dashboard khusus jamaah: data pribadi lintas-masjid (donasi, follow, program). */
+    private function jamaahDashboard(): string
+    {
+        $userId = session()->get('user_id');
+        $email  = session()->get('user_email');
+        $db = \Config\Database::connect();
+
+        $followerModel = new \App\Models\MasjidFollowerModel();
+        $followedIds = array_map(
+            'intval',
+            array_column($followerModel->where('user_id', $userId)->findAll(), 'masjid_id')
+        );
+
+        // Total donasi berhasil (dicocokkan lewat email pendonor).
+        $totalDonasi = 0;
+        if ($email) {
+            $row = $db->table('masjid_donations')
+                ->selectSum('amount')
+                ->where('donor_email', $email)
+                ->where('status', 'success')
+                ->get()->getRowArray();
+            $totalDonasi = $row['amount'] ?? 0;
+        }
+
+        // Program aktif & berita dari masjid yang diikuti.
+        $jumlahProgram = 0;
+        $recentNews = [];
+        if (!empty($followedIds)) {
+            $jumlahProgram = $db->table('masjid_programs')
+                ->whereIn('masjid_id', $followedIds)
+                ->where('status', 'published')
+                ->countAllResults();
+
+            $recentNews = $db->table('masjid_news n')
+                ->select('n.*, masjid.name as masjid_name, masjid.username as masjid_username')
+                ->join('masjid', 'masjid.id = n.masjid_id')
+                ->whereIn('n.masjid_id', $followedIds)
+                ->where('n.status', 'published')
+                ->orderBy('n.created_at', 'DESC')
+                ->limit(5)
+                ->get()->getResultArray();
+        }
+
+        // Jadwal ibadah terdekat dari masjid yang diikuti.
+        $agenda = [];
+        if (!empty($followedIds)) {
+            $agenda = $db->table('masjid_schedules s')
+                ->select('s.*, masjid.name as masjid_name')
+                ->join('masjid', 'masjid.id = s.masjid_id')
+                ->whereIn('s.masjid_id', $followedIds)
+                ->where('s.date >=', date('Y-m-d'))
+                ->orderBy('s.date', 'ASC')
+                ->limit(3)
+                ->get()->getResultArray();
+        }
+
+        // Modul LMS yang sedang dipelajari (sudah mulai, belum selesai).
+        $lmsModule = $this->lmsInProgress($userId);
+
+        return view('dashboard/index_jamaah', [
+            'title'         => 'Dashboard Jamaah - Masj.id',
+            'totalDonasi'   => $totalDonasi,
+            'jumlahDiikuti' => count($followedIds),
+            'jumlahProgram' => $jumlahProgram,
+            'recentNews'    => $recentNews,
+            'agenda'        => $agenda,
+            'lmsModule'     => $lmsModule,
+        ]);
+    }
+
+    /**
+     * Modul LMS pertama yang sedang dikerjakan user (ada materi selesai tapi
+     * belum semua). Mengembalikan null bila belum ada modul yang dimulai.
+     */
+    private function lmsInProgress($userId): ?array
+    {
+        $progressModel = new \App\Models\LmsProgressModel();
+        $completedIds = array_column(
+            $progressModel->where('user_id', $userId)->findAll(),
+            'material_id'
+        );
+        if (empty($completedIds)) {
+            return null;
+        }
+
+        $moduleModel   = new \App\Models\LmsModuleModel();
+        $materialModel = new \App\Models\LmsMaterialModel();
+        $masjidModel   = new \App\Models\MasjidModel();
+
+        foreach ($moduleModel->where('status', 'published')->findAll() as $mod) {
+            $materialIds = array_column(
+                $materialModel->where('module_id', $mod['id'])->findAll(),
+                'id'
+            );
+            $total = count($materialIds);
+            if ($total === 0) {
+                continue;
+            }
+
+            $done = count(array_intersect($materialIds, $completedIds));
+            if ($done > 0 && $done < $total) {
+                // lembaga_pemateri bisa berisi id masjid atau nama bebas.
+                $lembaga = $mod['lembaga_pemateri'];
+                if (is_numeric($lembaga)) {
+                    $m = $masjidModel->find($lembaga);
+                    $lembaga = $m['name'] ?? $lembaga;
+                }
+
+                return [
+                    'title'   => $mod['title'],
+                    'slug'    => $mod['slug'],
+                    'lembaga' => $lembaga,
+                    'done'    => $done,
+                    'total'   => $total,
+                    'pct'     => (int) round($done / $total * 100),
+                ];
+            }
+        }
+
+        return null;
+    }
+
     public function profil(): string
     {
         $masjidModel = new \App\Models\MasjidModel();
@@ -1399,7 +1524,7 @@ class Admin extends BaseController
             $payModel->insert($data);
         }
 
-        return redirect()->to('dashboard/settings/payment')->with('success', 'Pengaturan pembayaran berhasil disimpan.');
+        return redirect()->to('dashboard/pembayaran')->with('success', 'Pengaturan pembayaran berhasil disimpan.');
     }
 
     // --------------------------------------------------------------------
@@ -1685,7 +1810,7 @@ class Admin extends BaseController
         $programModel = new \App\Models\MasjidProgramModel();
 
         $item = $distModel->where(['id' => $id, 'masjid_id' => $masjidId])->first();
-        if (!$item) return redirect()->to('dashboard/distribution')->with('error', 'Data tidak ditemukan.');
+        if (!$item) return redirect()->to('dashboard/warga')->with('error', 'Data tidak ditemukan.');
 
         $warga = $wargaModel->where('masjid_id', $masjidId)->findAll();
         $programs = $programModel->where('masjid_id', $masjidId)->orderBy('date_start', 'DESC')->findAll();
@@ -1751,7 +1876,7 @@ class Admin extends BaseController
                 $financeModel = new \App\Models\MasjidFinanceTransactionModel();
                 $financeModel->insert([
                     'masjid_id' => $masjidId,
-                    'type'      => 'expense',
+                    'type'      => 'pengeluaran',
                     'category_id' => null, // Or a default "Penyaluran" category if exists
                     'amount'    => $data['amount'],
                     'date'      => $data['date'],
@@ -1761,7 +1886,7 @@ class Admin extends BaseController
             }
         }
 
-        return redirect()->to('dashboard/distribution')->with('success', $message);
+        return redirect()->to('dashboard/warga')->with('success', $message);
     }
 
     public function deleteDistribution($id)

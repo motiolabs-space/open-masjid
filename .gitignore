@@ -6,6 +6,20 @@ app-core/vendor/
 .env
 app-core/.env
 
+# Kunci & rahasia — JANGAN pernah di-commit (repo ini publik)
+github_deploy_key
+github_deploy_key.pub
+*.pem
+*.ppk
+*.key
+id_rsa
+id_rsa.pub
+
+# Dump/backup database — simpan di luar repo & di luar docroot,
+# karena berisi data pribadi jamaah (email/telepon donatur, data mustahik).
+*dump*.sql
+*backup*.sql
+
 # Writable/Cache
 writable/*
 !writable/index.html
