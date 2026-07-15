@@ -814,9 +814,14 @@
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-2">Jabatan</label>
-                    <?php // Nilai WAJIB cocok dengan enum('admin','staff') pada masjid_pengurus.role. ?>
+                    <?php
+                        // Nilai harus cocok dengan data pada masjid_pengurus.role, yang di
+                        // produksi bertipe varchar(50) DEFAULT 'pengurus' dan hanya berisi
+                        // 'admin' atau 'pengurus'. Jangan mengacu database.sql — berkas itu
+                        // sudah usang dan menyebut enum('admin','staff') yang tidak dipakai.
+                    ?>
                     <select id="pengurusRole" class="w-full rounded-xl border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary">
-                        <option value="staff">Pengurus</option>
+                        <option value="pengurus">Pengurus</option>
                         <option value="admin">Admin</option>
                     </select>
                     <p class="text-xs text-[#608a7e] mt-1.5">

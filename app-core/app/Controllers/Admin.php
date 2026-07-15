@@ -846,10 +846,10 @@ class Admin extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => 'Data tidak lengkap.']);
         }
 
-        // Kolom role adalah enum('admin','staff'). Nilai di luar itu ditolak MySQL:
-        // pada mode strict gagal dengan "Data truncated", pada mode longgar tersimpan
-        // sebagai string kosong. Keduanya sama-sama tidak diinginkan.
-        if (!in_array($role, ['admin', 'staff'], true)) {
+        // masjid_pengurus.role di produksi bertipe varchar(50) DEFAULT 'pengurus'
+        // dan hanya berisi 'admin' atau 'pengurus'. Karena varchar menerima nilai
+        // apa pun, pembatasan dilakukan di sini agar tidak muncul jabatan asing.
+        if (!in_array($role, ['admin', 'pengurus'], true)) {
             return $this->response->setJSON(['status' => 'error', 'message' => 'Jabatan tidak valid.']);
         }
 
@@ -889,8 +889,8 @@ class Admin extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => 'Data tidak lengkap.']);
         }
 
-        // Sama seperti addPengurus: role harus cocok dengan enum('admin','staff').
-        if (!in_array($role, ['admin', 'staff'], true)) {
+        // Sama seperti addPengurus: hanya 'admin' atau 'pengurus' (lihat catatan di sana).
+        if (!in_array($role, ['admin', 'pengurus'], true)) {
             return $this->response->setJSON(['status' => 'error', 'message' => 'Jabatan tidak valid.']);
         }
 
