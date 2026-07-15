@@ -181,6 +181,9 @@ class Payment extends BaseController
 
     public function success($invoice)
     {
-        return view('payment/success', ['invoice' => $invoice]);
+        return view('payment/success', [
+            'invoice' => $invoice,
+            'title'   => 'Donasi Berhasil',
+        ]);
     }
 }

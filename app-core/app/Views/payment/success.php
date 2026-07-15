@@ -1,4 +1,6 @@
-<?= $this->extend('layout/public') ?>
+<?php // 'layout/public' tidak pernah ada. Dipakai layout/landing, sama seperti
+      // payment/manual.php — halaman sesudah bayar, di luar profil masjid. ?>
+<?= $this->extend('layout/landing') ?>
 
 <?= $this->section('content') ?>
 <div class="min-h-screen bg-neutral-50 py-12">
