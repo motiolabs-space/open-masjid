@@ -108,6 +108,12 @@ class Filters extends BaseFilters
      * @var array<string, array<string, list<string>>>
      */
     public array $filters = [
-        'dashboardGuard' => ['before' => ['dashboard/*', 'superadmin/*']]
+        // Pola 'dashboard/*' TIDAK mencakup URI 'dashboard' polos, sehingga
+        // halaman dashboard utama sempat dapat dibuka tanpa login. Kedua bentuk
+        // wajib didaftarkan — jangan hapus salah satunya.
+        'dashboardGuard' => ['before' => [
+            'dashboard', 'dashboard/*',
+            'superadmin', 'superadmin/*',
+        ]],
     ];
 }
