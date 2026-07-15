@@ -114,10 +114,70 @@ class Admin extends BaseController
             'recentPrograms' => $recentPrograms,
             'recentNews' => $recentNews,
             'upcomingSchedules' => $upcomingSchedules,
-            'community_wa_link' => $communityWaLink
+            'community_wa_link' => $communityWaLink,
+            'statusSetup' => $this->_statusSetup(
+                (new \App\Models\MasjidModel())->find($masjidId),
+                $masjidId
+            ),
         ];
-        
+
         return view('dashboard/index', $data);
+    }
+
+    /**
+     * Status kelengkapan data masjid untuk kartu notifikasi di dashboard.
+     *
+     * Hanya memuat hal yang benar-benar menghambat fitur bila kosong — bukan
+     * sekadar kolom yang belum diisi. Koordinat ditandai penting karena tanpa
+     * itu jadwal sholat dan Display TV mati tanpa pesan error apa pun.
+     */
+    private function _statusSetup(?array $masjid, $masjidId): array
+    {
+        if (!$masjid) {
+            return [];
+        }
+
+        $adaKoordinat = !empty($masjid['latitude']) && !empty($masjid['longitude'])
+            && ($masjid['latitude'] != 0 || $masjid['longitude'] != 0);
+
+        // Donasi dianggap siap bila ada rekening bank atau QRIS.
+        $bayar = (new \App\Models\MasjidPaymentModel())->where('masjid_id', $masjidId)->first();
+        $adaPembayaran = $bayar && (!empty($bayar['bank_account_number']) || !empty($bayar['qris_image']));
+
+        return [
+            [
+                'label'   => 'Titik koordinat masjid',
+                'alasan'  => 'Tanpa ini jadwal sholat dan Display TV tidak akan tampil sama sekali.',
+                'selesai' => $adaKoordinat,
+                'penting' => true,
+                'url'     => base_url('dashboard/profil'),
+                'aksi'    => 'Atur Koordinat',
+            ],
+            [
+                'label'   => 'Logo masjid',
+                'alasan'  => 'Tampil di halaman profil publik dan Display TV.',
+                'selesai' => !empty($masjid['logo']),
+                'penting' => false,
+                'url'     => base_url('dashboard/profil'),
+                'aksi'    => 'Unggah Logo',
+            ],
+            [
+                'label'   => 'Alamat masjid',
+                'alasan'  => 'Membantu jamaah menemukan lokasi masjid.',
+                'selesai' => !empty($masjid['address']),
+                'penting' => false,
+                'url'     => base_url('dashboard/profil'),
+                'aksi'    => 'Isi Alamat',
+            ],
+            [
+                'label'   => 'Rekening atau QRIS',
+                'alasan'  => 'Diperlukan agar jamaah dapat berdonasi secara online.',
+                'selesai' => $adaPembayaran,
+                'penting' => false,
+                'url'     => base_url('dashboard/pembayaran'),
+                'aksi'    => 'Atur Pembayaran',
+            ],
+        ];
     }
 
     /** Dashboard khusus jamaah: data pribadi lintas-masjid (donasi, follow, program). */

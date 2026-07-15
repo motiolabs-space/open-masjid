@@ -1,6 +1,67 @@
 <?= $this->extend('layout/dashboard') ?>
 
 <?= $this->section('content') ?>
+
+<?php
+    // Kartu ini hanya muncul bila ada data yang belum lengkap, lalu hilang
+    // sendiri setelah semuanya beres — agar tidak jadi gangguan permanen.
+    $belum = array_values(array_filter($statusSetup ?? [], fn($i) => !$i['selesai']));
+    $total = count($statusSetup ?? []);
+    $selesai = $total - count($belum);
+    $adaPenting = (bool) array_filter($belum, fn($i) => $i['penting']);
+?>
+<?php if (!empty($belum)): ?>
+<div class="mb-8 rounded-2xl border <?= $adaPenting ? 'border-amber-300 bg-amber-50 dark:bg-amber-900/10 dark:border-amber-900/40' : 'border-slate-200 bg-white dark:bg-slate-900 dark:border-slate-800' ?> p-6 shadow-sm">
+    <div class="flex flex-wrap items-start justify-between gap-4 mb-5">
+        <div class="flex items-start gap-4">
+            <div class="size-11 rounded-xl <?= $adaPenting ? 'bg-amber-100 text-amber-600 dark:bg-amber-900/30' : 'bg-slate-100 text-slate-500 dark:bg-slate-800' ?> flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined"><?= $adaPenting ? 'warning' : 'checklist' ?></span>
+            </div>
+            <div>
+                <h3 class="font-bold text-slate-800 dark:text-white">Lengkapi Data Masjid</h3>
+                <p class="text-sm text-slate-500 mt-0.5">
+                    <?= $selesai ?> dari <?= $total ?> selesai.
+                    <?= $adaPenting
+                        ? 'Ada data penting yang belum diisi sehingga sebagian fitur belum berjalan.'
+                        : 'Tinggal sedikit lagi agar profil masjid tampil maksimal.' ?>
+                </p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+            <div class="w-28 h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                <div class="h-full rounded-full <?= $adaPenting ? 'bg-amber-500' : 'bg-primary' ?>"
+                     style="width: <?= $total ? round($selesai / $total * 100) : 0 ?>%"></div>
+            </div>
+            <span class="text-xs font-black text-slate-500 tabular-nums"><?= $total ? round($selesai / $total * 100) : 0 ?>%</span>
+        </div>
+    </div>
+
+    <div class="space-y-2">
+        <?php foreach ($belum as $item): ?>
+        <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 px-4 py-3">
+            <div class="flex items-start gap-3 min-w-0">
+                <span class="material-symbols-outlined text-base mt-0.5 <?= $item['penting'] ? 'text-amber-500' : 'text-slate-300' ?>">
+                    <?= $item['penting'] ? 'error' : 'radio_button_unchecked' ?>
+                </span>
+                <div class="min-w-0">
+                    <p class="text-sm font-bold text-slate-800 dark:text-white">
+                        <?= esc($item['label']) ?>
+                        <?php if ($item['penting']): ?>
+                            <span class="ml-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-black uppercase tracking-wider align-middle">Penting</span>
+                        <?php endif; ?>
+                    </p>
+                    <p class="text-xs text-slate-500 mt-0.5"><?= esc($item['alasan']) ?></p>
+                </div>
+            </div>
+            <a href="<?= $item['url'] ?>" class="shrink-0 px-4 py-2 rounded-lg <?= $item['penting'] ? 'bg-amber-500 hover:bg-amber-600' : 'bg-primary hover:bg-primary/90' ?> text-white text-xs font-bold transition-colors">
+                <?= esc($item['aksi']) ?>
+            </a>
+        </div>
+        <?php endforeach; ?>
+    </div>
+</div>
+<?php endif; ?>
+
 <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-1">
     <div>
         <h2 class="text-2xl font-black text-slate-900 dark:text-white">Assalamu'alaikum, Pengurus!</h2>
