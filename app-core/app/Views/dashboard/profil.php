@@ -65,6 +65,49 @@
                         Bila dikosongkan, teks diisi otomatis dari agenda &amp; berita terbaru.
                     </p>
                 </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-1.5">
+                        Jeda Iqomah (Display TV)
+                    </label>
+                    <p class="text-xs text-[#608a7e] mb-3">
+                        Berapa menit setelah adzan iqomah dikumandangkan. Saat waktu sholat tiba,
+                        layar TV otomatis menampilkan waktu sholat, lalu hitung mundur iqomah,
+                        lalu menggelap selama sholat berlangsung.
+                    </p>
+                    <?php
+                        $iqomahTersimpan = json_decode($masjid['iqomah_settings'] ?? '', true) ?: [];
+                        $iqomahBawaan = ['Subuh' => 20, 'Dzuhur' => 10, 'Ashar' => 10, 'Maghrib' => 7, 'Isya' => 10];
+                    ?>
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                        <?php foreach ($iqomahBawaan as $sholat => $bawaan): ?>
+                        <div>
+                            <label class="block text-xs font-bold text-[#608a7e] mb-1"><?= $sholat ?></label>
+                            <div class="relative">
+                                <input name="iqomah[<?= $sholat ?>]" type="number" min="0" max="60"
+                                    value="<?= esc($iqomahTersimpan[$sholat] ?? $bawaan) ?>"
+                                    class="w-full rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary pr-12"/>
+                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#608a7e] pointer-events-none">mnt</span>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-1.5">
+                        Lama Layar Gelap Saat Sholat
+                    </label>
+                    <div class="relative max-w-[200px]">
+                        <input name="sholat_duration" type="number" min="0" max="60"
+                            value="<?= esc($masjid['sholat_duration'] ?? 10) ?>"
+                            class="w-full rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary pr-12"/>
+                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#608a7e] pointer-events-none">mnt</span>
+                    </div>
+                    <p class="text-xs text-[#608a7e] mt-1.5">
+                        Dihitung sejak iqomah. Isi <strong>0</strong> bila layar tidak perlu digelapkan.
+                    </p>
+                </div>
                 <div>
                     <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-1.5">Nama Resmi (Sesuai SK)</label>
                     <input name="nama_resmi" class="w-full rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary" placeholder="Masukkan nama resmi..." type="text" value="<?= esc($masjid['nama_resmi'] ?? '') ?>"/>

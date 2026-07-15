@@ -543,8 +543,22 @@ class Home extends BaseController
             'prayerData'       => $prayerData,
             'hijriDate'        => $hijriDate,
             'runningText'      => $this->_buildRunningText($masjid, $programs, $news),
+            'iqomahSettings'   => $this->_iqomahSettings($masjid),
+            'sholatDuration'   => (int) ($masjid['sholat_duration'] ?? 10),
             'storage'          => new \App\Libraries\Storage()
         ]);
+    }
+
+    /**
+     * Jeda adzan->iqomah per waktu sholat (menit), dengan nilai bawaan yang
+     * lazim di masjid Indonesia bila pengurus belum mengaturnya.
+     */
+    private function _iqomahSettings(array $masjid): array
+    {
+        $bawaan = ['Subuh' => 20, 'Dzuhur' => 10, 'Ashar' => 10, 'Maghrib' => 7, 'Isya' => 10];
+        $tersimpan = json_decode($masjid['iqomah_settings'] ?? '', true);
+
+        return is_array($tersimpan) ? array_merge($bawaan, $tersimpan) : $bawaan;
     }
 
     /**
