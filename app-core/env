@@ -95,3 +95,54 @@
 # SEO_META_KEYWORDS = 'masjid, donasi'
 # SEO_OG_IMAGE = ''
 # SEO_TWITTER_HANDLE = ''
+
+#--------------------------------------------------------------------
+# PENYIMPANAN BERKAS (foto galeri, logo, QRIS, bukti transaksi)
+#--------------------------------------------------------------------
+# STORAGE_DRIVER = 'local'   # 'local' atau 's3'
+#
+# Driver 'local' — berkas disimpan ke STORAGE_PATH (bawaan: FCPATH = root
+# proyek, tempat index.php berada). Berhati-hatilah: pola penyimpanannya
+# {username}/{tahun}/{bulan}/..., sehingga terbentuk direktori nyata bernama
+# username masjid di root. Direktori itu dapat menutupi rute profil publik
+# '(:any)' — sudah ditangani oleh 'DirectorySlash Off' pada .htaccess root.
+# STORAGE_PATH = ''
+#
+#--------------------------------------------------------------------
+# S3 / DigitalOcean Spaces  (dipakai bila STORAGE_DRIVER = 's3')
+#--------------------------------------------------------------------
+# PENTING — S3_ENDPOINT harus endpoint REGION, BUKAN endpoint bucket.
+# AWS SDK menambahkan nama bucket di depan host endpoint (virtual-host style),
+# sehingga endpoint bucket membuat nama bucket tertulis DUA KALI:
+#
+#   SALAH : S3_ENDPOINT = 'https://cdn-masjid.sgp1.digitaloceanspaces.com'
+#           -> URL jadi https://cdn-masjid.cdn-masjid.sgp1.digitaloceanspaces.com/...
+#           -> host bertingkat dua TIDAK tercakup sertifikat wildcard DO
+#              (*.sgp1.digitaloceanspaces.com hanya cocok satu tingkat),
+#              sehingga TLS gagal: gambar diblokir browser DAN upload gagal.
+#
+#   BENAR : S3_ENDPOINT = 'https://sgp1.digitaloceanspaces.com'
+#           -> URL jadi https://cdn-masjid.sgp1.digitaloceanspaces.com/...
+#
+# S3_REGION sebaiknya memakai kode region DigitalOcean (sgp1, nyc3, ...) agar
+# jelas, meskipun DigitalOcean tidak memvalidasinya saat menandatangani
+# permintaan — nilai seperti 'ap-southeast-1' pun tetap diterima. Yang WAJIB
+# benar adalah S3_ENDPOINT di atas.
+#
+# Contoh untuk DigitalOcean Spaces (Singapura):
+# STORAGE_DRIVER = 's3'
+# S3_REGION      = 'sgp1'
+# S3_BUCKET      = 'cdn-masjid'
+# S3_ENDPOINT    = 'https://sgp1.digitaloceanspaces.com'
+# S3_KEY         = ''
+# S3_SECRET      = ''
+#
+# Opsional. Bila diisi, URL publik dibentuk langsung dari nilai ini dan
+# getObjectUrl() dilewati — berguna bila memakai CDN atau domain sendiri.
+# S3_PUBLIC_URL = 'https://cdn-masjid.sgp1.digitaloceanspaces.com'
+# atau lewat CDN DigitalOcean:
+# S3_PUBLIC_URL = 'https://cdn-masjid.sgp1.cdn.digitaloceanspaces.com'
+#
+# Setel 'true' hanya untuk S3-compatible yang memerlukan path-style
+# (mis. MinIO). DigitalOcean Spaces tidak memerlukannya.
+# S3_USE_PATH_STYLE = false

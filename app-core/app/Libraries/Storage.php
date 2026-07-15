@@ -23,6 +23,29 @@ class Storage
                 log_message('error', 'AWS SDK not found. Please run composer require aws/aws-sdk-php. Falling back to local storage.');
                 $this->driver = 'local';
             } else {
+                $endpoint = (string) env('S3_ENDPOINT');
+                $this->bucket = env('S3_BUCKET');
+
+                // S3_ENDPOINT harus endpoint REGION, bukan endpoint bucket.
+                // AWS SDK menambahkan nama bucket di depan host endpoint, sehingga
+                // endpoint bucket membuat namanya tertulis dua kali:
+                //   cdn-masjid + cdn-masjid.sgp1.digitaloceanspaces.com
+                //   = cdn-masjid.cdn-masjid.sgp1.digitaloceanspaces.com
+                // Host bertingkat dua itu tidak tercakup sertifikat wildcard DO,
+                // sehingga TLS gagal: gambar diblokir browser dan upload gagal —
+                // tanpa pesan yang jelas. Peringatan ini memunculkannya di log.
+                if ($this->bucket && $endpoint && !env('S3_USE_PATH_STYLE', false)) {
+                    $host = parse_url($endpoint, PHP_URL_HOST) ?: '';
+                    if (str_starts_with($host, $this->bucket . '.')) {
+                        log_message('error', sprintf(
+                            'Konfigurasi S3 keliru: S3_ENDPOINT (%s) sudah memuat nama bucket "%s", '
+                            . 'sehingga URL yang terbentuk menjadi %s.%s dan TLS akan gagal. '
+                            . 'Pakai endpoint region, mis. https://sgp1.digitaloceanspaces.com',
+                            $endpoint, $this->bucket, $this->bucket, $host
+                        ));
+                    }
+                }
+
                 $this->s3Client = new S3Client([
                     'version' => 'latest',
                     'region'  => env('S3_REGION'),
@@ -30,10 +53,9 @@ class Storage
                         'key'    => env('S3_KEY'),
                         'secret' => env('S3_SECRET'),
                     ],
-                    'endpoint' => env('S3_ENDPOINT'), // For Minio or other S3 compatibles
+                    'endpoint' => $endpoint, // For Minio or other S3 compatibles
                     'use_path_style_endpoint' => env('S3_USE_PATH_STYLE', false),
                 ]);
-                $this->bucket = env('S3_BUCKET');
             }
         }
     }
