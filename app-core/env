@@ -104,10 +104,24 @@
 # STORAGE_PATH — folder tempat berkas ditulis ke disk. Dipakai oleh driver
 # 'local', DAN sebagai cadangan bila unggahan ke S3 gagal (lihat di bawah).
 # Bawaan: FCPATH, yaitu root proyek tempat index.php berada.
-# Berhati-hatilah: pola penyimpanannya {username}/{tahun}/{bulan}/...,
-# sehingga terbentuk direktori nyata bernama username masjid. Bila STORAGE_PATH
-# menunjuk ke root web, direktori itu dapat menutupi rute profil publik
-# '(:any)' — sudah ditangani oleh 'DirectorySlash Off' pada .htaccess root.
+#
+# DISARANKAN: arahkan ke SUBFOLDER di dalam root web, bukan ke root web itu
+# sendiri. Pola penyimpanannya {username}/{tahun}/{bulan}/..., sehingga bila
+# STORAGE_PATH = root web, akan terbentuk direktori nyata bernama username
+# masjid tepat di root. Direktori itu menutupi rute profil publik '(:any)':
+# permintaan /qamar tidak lagi sampai ke router, mod_dir menambah trailing
+# slash (301), dan berakhir 403 karena Options -Indexes — halaman profil masjid
+# tersebut rusak. Ini pernah benar-benar terjadi. 'DirectorySlash Off' pada
+# .htaccess root sudah menambalnya, tetapi memakai subfolder menutup akarnya.
+#
+#   STORAGE_PATH = '/home/customer/www/masj.id/public_html/uploads'
+#   STORAGE_URL  = 'https://masj.id/uploads'
+#
+# Jangan mengarahkannya ke LUAR root web kecuali menyiapkan route penyaji
+# berkas: berkas cadangan tidak akan dapat diakses dan gambarnya rusak.
+#
+# Mengubah nilai ini tidak memengaruhi berkas lama — path pada basis data tetap
+# apa adanya, dan S3 tetap sumber utamanya.
 # STORAGE_PATH = ''
 #
 # STORAGE_URL — alamat web yang memetakan STORAGE_PATH. Isi bila STORAGE_PATH
