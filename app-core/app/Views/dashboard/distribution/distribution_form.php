@@ -12,8 +12,16 @@
     </a>
 </div>
 
+<?php if (session()->getFlashdata('error')): ?>
+<div class="bg-rose-50 text-rose-600 p-4 rounded-xl mb-6 flex items-center gap-3 max-w-2xl">
+    <span class="material-symbols-outlined">error</span>
+    <p class="text-sm font-medium"><?= esc(session()->getFlashdata('error')) ?></p>
+</div>
+<?php endif; ?>
+
 <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden max-w-2xl">
     <form action="<?= base_url('dashboard/distribution/save') ?>" method="POST" class="p-6">
+        <?= csrf_field() ?>
         
         <div class="mb-6">
             <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Pilih Mustahik *</label>

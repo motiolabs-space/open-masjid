@@ -12,8 +12,21 @@
     </a>
 </div>
 
+<?php // Kegagalan simpan mengembalikan pengurus ke formulir ini. Tanpa blok
+      // berikut pesannya hilang tanpa jejak: layarnya tampak seperti tidak
+      // terjadi apa-apa, padahal datanya tidak tersimpan. ?>
+<?php if (session()->getFlashdata('error')): ?>
+<div class="bg-rose-50 text-rose-600 p-4 rounded-xl mb-6 flex items-center gap-3 max-w-3xl">
+    <span class="material-symbols-outlined">error</span>
+    <p class="text-sm font-medium"><?= esc(session()->getFlashdata('error')) ?></p>
+</div>
+<?php endif; ?>
+
 <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden max-w-3xl">
     <form action="<?= base_url('dashboard/distribution/mustahik/save') ?>" method="POST" class="p-6">
+        <?php // Tanpa ini penyaringan CSRF menolak setiap pengiriman dengan 403:
+              // mustahik tidak pernah bisa didaftarkan sama sekali. ?>
+        <?= csrf_field() ?>
         <input type="hidden" name="id" value="<?= isset($mustahik) ? $mustahik['id'] : '' ?>">
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">

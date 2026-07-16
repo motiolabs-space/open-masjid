@@ -64,15 +64,35 @@ class Distribution extends BaseController
     public function saveMustahik()
     {
         $mustahikModel = new MustahikModel();
+        $masjidId = session()->get('masjid_id');
         $id = $this->request->getPost('id');
-        
+
+        // 'id' datang dari POST dan tidak boleh dipercaya. Tanpa pemeriksaan
+        // ini, mengirim id milik masjid lain akan menimpa datanya SEKALIGUS
+        // memindahkan kepemilikannya — karena masjid_id di bawah ikut ditulis
+        // ulang dengan masjid pengirim. Masjid asal kehilangan data mustahiknya
+        // tanpa jejak.
+        if ($id) {
+            $milik = $mustahikModel->where(['id' => $id, 'masjid_id' => $masjidId])->first();
+
+            if (!$milik) {
+                return redirect()->to('dashboard/distribution')
+                    ->with('error', 'Data mustahik tidak ditemukan.');
+            }
+        }
+
         $data = [
-            'masjid_id'        => session()->get('masjid_id'),
+            'masjid_id'        => $masjidId,
             'name'             => $this->request->getPost('name'),
             'nik'              => $this->request->getPost('nik'),
             'phone'            => $this->request->getPost('phone'),
             'address'          => $this->request->getPost('address'),
-            'income_per_month' => $this->request->getPost('income_per_month') ?: 0,
+            // parse_rupiah, bukan nilai POST mentah. Formulir memakai
+            // <input type="number"> sehingga biasanya sudah berupa angka polos,
+            // tetapi nilai apa pun di luar itu membuat scoreMustahik() di bawah
+            // memanggil number_format() dengan teks dan seluruh halaman mati
+            // dengan TypeError — AI dipanggil sebelum validasi model berjalan.
+            'income_per_month' => abs(parse_rupiah($this->request->getPost('income_per_month'))),
             'dependents_count' => $this->request->getPost('dependents_count') ?: 0,
             'house_ownership'  => $this->request->getPost('house_ownership') ?: 'lainnya',
             'status'           => $this->request->getPost('status') ?: 'active'
@@ -93,13 +113,22 @@ class Distribution extends BaseController
             }
         }
 
-        if ($id) {
-            $mustahikModel->update($id, $data);
-            $msg = 'Data Mustahik berhasil diperbarui.';
-        } else {
-            $mustahikModel->insert($data);
-            $msg = 'Data Mustahik baru berhasil ditambahkan.';
+        // Hasil simpan diperiksa. Model ini punya aturan validasi (nama minimal
+        // 3 huruf, dsb.); tanpa pemeriksaan ini kegagalannya dijawab 'berhasil
+        // ditambahkan' sementara tidak ada satu baris pun yang masuk.
+        $tersimpan = $id
+            ? $mustahikModel->update($id, $data)
+            : $mustahikModel->insert($data);
+
+        if (!$tersimpan) {
+            return redirect()->back()->withInput()
+                ->with('error', 'Gagal menyimpan data mustahik: '
+                    . implode(' ', $mustahikModel->errors()));
         }
+
+        $msg = $id
+            ? 'Data Mustahik berhasil diperbarui.'
+            : 'Data Mustahik baru berhasil ditambahkan.';
 
         if ($aiResult) {
             $msg .= ' AI telah memberikan penilaian skoring terbaru.';
@@ -181,15 +210,38 @@ class Distribution extends BaseController
     public function saveDistribution()
     {
         $distModel = new MustahikDistributionModel();
+        $masjidId = session()->get('masjid_id');
+        $mustahikId = $this->request->getPost('mustahik_id');
+
+        // mustahik_id dari POST: pastikan mustahiknya milik masjid ini. Tanpa
+        // itu, penyaluran bisa dicatat atas nama mustahik masjid lain — dan
+        // karena histori menggabungkan tabel mustahik, nama warga masjid lain
+        // ikut tampil di layar masjid ini.
+        $mustahik = (new MustahikModel())
+            ->where(['id' => $mustahikId, 'masjid_id' => $masjidId])
+            ->first();
+
+        if (!$mustahik) {
+            return redirect()->back()->withInput()
+                ->with('error', 'Mustahik tidak ditemukan.');
+        }
+
         $data = [
-            'masjid_id'   => session()->get('masjid_id'),
-            'mustahik_id' => $this->request->getPost('mustahik_id'),
+            'masjid_id'   => $masjidId,
+            'mustahik_id' => $mustahikId,
             'date'        => $this->request->getPost('date'),
             'amount'      => $this->request->getPost('amount'),
             'description' => $this->request->getPost('description')
         ];
 
-        $distModel->insert($data);
+        // Hasil insert diperiksa: sebelumnya kegagalan validasi model dijawab
+        // 'Penyaluran berhasil dicatat.' padahal tidak ada yang tersimpan.
+        if (!$distModel->insert($data)) {
+            return redirect()->back()->withInput()
+                ->with('error', 'Gagal mencatat penyaluran: '
+                    . implode(' ', $distModel->errors()));
+        }
+
         return redirect()->to('dashboard/distribution/history')->with('success', 'Penyaluran berhasil dicatat.');
     }
 }

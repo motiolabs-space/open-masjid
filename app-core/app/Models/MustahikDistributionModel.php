@@ -22,11 +22,20 @@ class MustahikDistributionModel extends Model
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
 
-    // Validation
+    // Validation — lihat catatan pada MustahikModel soal bentuk label/rules.
     protected $validationRules      = [
         'masjid_id'   => 'required|is_natural_no_zero',
-        'mustahik_id' => 'required|is_natural_no_zero',
-        'date'        => 'required|valid_date',
-        'amount'      => 'required|numeric'
+        'mustahik_id' => [
+            'label' => 'Mustahik Penerima',
+            'rules' => 'required|is_natural_no_zero',
+        ],
+        'date' => [
+            'label' => 'Tanggal Penyaluran',
+            'rules' => 'required|valid_date',
+        ],
+        'amount' => [
+            'label' => 'Nominal',
+            'rules' => 'required|numeric',
+        ],
     ];
 }
