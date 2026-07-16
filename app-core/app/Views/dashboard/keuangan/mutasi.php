@@ -99,6 +99,9 @@
                                             <input type="hidden" name="date[<?= $idx ?>]" value="<?= $mut['date'] ?>">
                                             <input type="hidden" name="description[<?= $idx ?>]" value="<?= esc($mut['description']) ?>">
                                             <input type="hidden" name="amount[<?= $idx ?>]" value="<?= $mut['amount'] ?>">
+                                            <?php // Tanpa ini penyimpanan tidak tahu arah uangnya, dan
+                                                  // pengeluaran ikut tercatat sebagai pemasukan. ?>
+                                            <input type="hidden" name="type[<?= $idx ?>]" value="<?= esc($mut['type']) ?>">
                                         </td>
                                         <td class="px-6 py-4">
                                             <p class="text-xs font-bold text-slate-900 dark:text-white"><?= date('d M Y', strtotime($mut['date'])) ?></p>

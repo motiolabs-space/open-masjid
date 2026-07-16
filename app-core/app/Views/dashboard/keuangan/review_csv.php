@@ -2,6 +2,13 @@
 
 <?= $this->section('content') ?>
 <div class="px-8 py-8">
+    <?php if (session()->getFlashdata('error')): ?>
+        <div class="bg-amber-50 text-amber-800 px-4 py-3 rounded-xl mb-6 flex items-center gap-2 font-bold border border-amber-100">
+            <span class="material-symbols-outlined">info</span>
+            <?= session()->getFlashdata('error') ?>
+        </div>
+    <?php endif; ?>
+
     <div class="mb-8 flex items-center justify-between">
         <div>
             <h1 class="text-3xl font-black text-[#111816] dark:text-white tracking-tight">Review Hasil AI</h1>
