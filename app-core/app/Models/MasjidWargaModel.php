@@ -24,14 +24,35 @@ class MasjidWargaModel extends Model
     protected $updatedField  = 'updated_at';
 
     // Validation
+    // Label disisipkan ke dalam aturan agar pesan kesalahan menyebut nama yang
+    // dikenal pengurus, bukan nama kolom basis data ("Kolom nik ...").
+    // Kalimat pesannya ada di app/Language/en/Validation.php.
     protected $validationRules      = [
         'masjid_id' => 'required',
-        'name'      => 'required|min_length[3]|max_length[100]',
-        'nik'       => 'permit_empty|numeric|min_length[16]|max_length[16]',
-        'kk'        => 'permit_empty|numeric|min_length[16]|max_length[16]',
-        'phone'     => 'permit_empty|numeric|min_length[10]|max_length[15]',
-        'status'    => 'required|in_list[active,inactive,moved,deceased]',
-        'economic_status' => 'required|in_list[mampu,cukup,kurang_mampu,fakir,miskin,yatim]',
+        'name'      => [
+            'label' => 'Nama Lengkap',
+            'rules' => 'required|min_length[3]|max_length[100]',
+        ],
+        'nik' => [
+            'label' => 'NIK',
+            'rules' => 'permit_empty|numeric|min_length[16]|max_length[16]',
+        ],
+        'kk' => [
+            'label' => 'Nomor Kartu Keluarga',
+            'rules' => 'permit_empty|numeric|min_length[16]|max_length[16]',
+        ],
+        'phone' => [
+            'label' => 'Nomor HP',
+            'rules' => 'permit_empty|numeric|min_length[10]|max_length[15]',
+        ],
+        'status' => [
+            'label' => 'Status Warga',
+            'rules' => 'required|in_list[active,inactive,moved,deceased]',
+        ],
+        'economic_status' => [
+            'label' => 'Kondisi Ekonomi',
+            'rules' => 'required|in_list[mampu,cukup,kurang_mampu,fakir,miskin,yatim]',
+        ],
     ];
     protected $validationMessages   = [];
     protected $skipValidation       = false;

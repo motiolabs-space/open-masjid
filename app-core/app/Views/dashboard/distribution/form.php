@@ -13,6 +13,16 @@
             </div>
         </div>
 
+        <?php // Kegagalan simpan mengembalikan pengurus ke formulir ini. Tanpa
+              // blok berikut pesannya hilang: layar tampak seperti tidak terjadi
+              // apa-apa, padahal datanya tidak tersimpan. ?>
+        <?php if (session()->getFlashdata('error')): ?>
+            <div class="bg-rose-50 text-rose-600 p-4 rounded-xl mb-6 flex items-center gap-3">
+                <span class="material-symbols-outlined">error</span>
+                <p class="text-sm font-medium"><?= esc(session()->getFlashdata('error')) ?></p>
+            </div>
+        <?php endif; ?>
+
         <form action="<?= base_url('dashboard/bantuan-warga/save') ?>" method="POST" enctype="multipart/form-data" class="space-y-6">
             <?= csrf_field() ?>
             <?php if (isset($item)): ?>
