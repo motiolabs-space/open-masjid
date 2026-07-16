@@ -82,6 +82,7 @@
                         <?php else: ?>
                             <span class="text-xs text-slate-400 italic">Belum dinilai</span>
                             <form action="<?= base_url('dashboard/distribution/mustahik/rescore/' . $m['id']) ?>" method="POST" class="mt-1">
+                                <?= csrf_field() ?>
                                 <button type="submit" class="text-[10px] font-bold text-primary hover:underline">Generate</button>
                             </form>
                         <?php endif; ?>
