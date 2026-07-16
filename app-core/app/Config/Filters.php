@@ -35,6 +35,7 @@ class Filters extends BaseFilters
         'pagecache'     => PageCache::class,
         'performance'   => PerformanceMetrics::class,
         'dashboardGuard' => \App\Filters\DashboardGuard::class,
+        'masjidAdmin'    => \App\Filters\MasjidAdmin::class,
     ];
 
     /**

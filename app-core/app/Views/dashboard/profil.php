@@ -1,6 +1,12 @@
 <?= $this->extend('layout/dashboard') ?>
 
 <?= $this->section('content') ?>
+<?php
+    // Jabatan di masjid yang sedang dibuka. Superadmin platform tidak punya
+    // baris di masjid_pengurus, jadi tidak akan pernah punya masjid_role.
+    $isAdminMasjid = session()->get('masjid_role') === 'admin'
+        || session()->get('role') === 'superadmin';
+?>
 <div class="max-w-5xl mx-auto">
     <!-- Page Heading & Progress -->
     <div class="mb-8">
@@ -513,10 +519,16 @@
     <div class="bg-white dark:bg-white/5 rounded-xl border border-[#e5e7eb] dark:border-white/10 overflow-hidden mb-8">
         <div class="p-6 border-b border-[#e5e7eb] dark:border-white/10 flex justify-between items-center">
             <h2 class="text-xl font-bold text-[#111816] dark:text-white">Pengurus Masjid</h2>
+            <?php // Tombol disembunyikan agar pengurus tidak menabrak penolakan
+                  // di tengah jalan. Penegakan sebenarnya ada pada filter
+                  // 'masjidAdmin' di Routes.php — menyembunyikan tombol saja
+                  // bukan pengamanan. ?>
+            <?php if ($isAdminMasjid): ?>
             <button type="button" onclick="openAddPengurusModal()" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all">
                 <span class="material-symbols-outlined text-lg">person_add</span>
                 Tambah Pengurus
             </button>
+            <?php endif; ?>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-left">
@@ -583,7 +595,7 @@
                             </div>
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <?php if (($p['is_creator'] ?? 0) == 0): ?>
+                            <?php if (($p['is_creator'] ?? 0) == 0 && $isAdminMasjid): ?>
                             <div class="flex justify-end gap-2">
                                 <button type="button" 
                                     onclick='openEditPengurusModal(<?= json_encode([
@@ -703,12 +715,19 @@
             </a>
         </div>
         <div class="flex items-center gap-4">
-            <button type="button" class="px-6 py-2.5 text-[#608a7e] font-bold text-sm hover:bg-[#f0f5f3] dark:hover:bg-white/5 rounded-lg transition-colors">
-                Batalkan
-            </button>
-            <button type="submit" class="px-8 py-2.5 bg-primary hover:bg-primary/90 text-white font-bold text-sm rounded-lg shadow-lg shadow-primary/20 transition-all">
-                Simpan Perubahan
-            </button>
+            <?php if ($isAdminMasjid): ?>
+                <button type="button" class="px-6 py-2.5 text-[#608a7e] font-bold text-sm hover:bg-[#f0f5f3] dark:hover:bg-white/5 rounded-lg transition-colors">
+                    Batalkan
+                </button>
+                <button type="submit" class="px-8 py-2.5 bg-primary hover:bg-primary/90 text-white font-bold text-sm rounded-lg shadow-lg shadow-primary/20 transition-all">
+                    Simpan Perubahan
+                </button>
+            <?php else: ?>
+                <p class="text-sm text-[#608a7e] flex items-center gap-2">
+                    <span class="material-symbols-outlined text-base">lock</span>
+                    Hanya Admin Masjid yang dapat mengubah data masjid.
+                </p>
+            <?php endif; ?>
         </div>
     </div>
 </footer>
@@ -821,12 +840,13 @@
                         // sudah usang dan menyebut enum('admin','staff') yang tidak dipakai.
                     ?>
                     <select id="pengurusRole" class="w-full rounded-xl border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary">
-                        <option value="pengurus">Pengurus</option>
-                        <option value="admin">Admin</option>
+                        <option value="pengurus">Pengurus &mdash; mengisi &amp; mengelola isi masjid</option>
+                        <option value="admin">Admin Masjid &mdash; akses penuh</option>
                     </select>
-                    <p class="text-xs text-[#608a7e] mt-1.5">
-                        Saat ini hanya penanda jabatan yang tampil di profil &mdash; belum membatasi hak akses.
-                    </p>
+                    <div class="text-xs text-[#608a7e] mt-1.5 space-y-1">
+                        <p><strong>Pengurus</strong> bisa menambah dan mengubah berita, program, jadwal, kegiatan, serta mencatat keuangan.</p>
+                        <p><strong>Hanya Admin Masjid</strong> yang bisa menghapus data, mengubah pengaturan masjid &amp; pembayaran, dan mengangkat pengurus.</p>
+                    </div>
                 </div>
             </div>
         </div>

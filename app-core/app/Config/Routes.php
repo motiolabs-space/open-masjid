@@ -27,16 +27,16 @@ $routes->post('/register/jamaah', 'Auth::registerJamaah');
 $routes->get('dashboard', 'Admin::index');
 $routes->post('subscribe', 'Home::subscribe');
 $routes->get('dashboard/followers', 'Admin::followers');
-$routes->post('dashboard/followers/promote', 'Admin::promoteFollower');
+$routes->post('dashboard/followers/promote', 'Admin::promoteFollower', ['filter' => 'masjidAdmin']);
 $routes->get('dashboard/profil', 'Admin::profil');
-$routes->post('dashboard/profil', 'Admin::updateProfile');
+$routes->post('dashboard/profil', 'Admin::updateProfile', ['filter' => 'masjidAdmin']);
 $routes->get('dashboard/regencies/(:num)', 'Admin::getRegencies/$1');
 $routes->get('dashboard/users/search', 'Admin::searchUsers');
-$routes->post('dashboard/pengurus/add', 'Admin::addPengurus');
-$routes->post('dashboard/pengurus/update', 'Admin::updatePengurus');
-$routes->post('dashboard/pengurus/delete', 'Admin::deletePengurus');
+$routes->post('dashboard/pengurus/add', 'Admin::addPengurus', ['filter' => 'masjidAdmin']);
+$routes->post('dashboard/pengurus/update', 'Admin::updatePengurus', ['filter' => 'masjidAdmin']);
+$routes->post('dashboard/pengurus/delete', 'Admin::deletePengurus', ['filter' => 'masjidAdmin']);
 $routes->post('dashboard/gallery/upload', 'Admin::uploadGallery');
-$routes->post('dashboard/gallery/delete', 'Admin::deleteGallery');
+$routes->post('dashboard/gallery/delete', 'Admin::deleteGallery', ['filter' => 'masjidAdmin']);
 $routes->get('dashboard/program', 'Admin::program');
     // DKM LMS Routes
     $routes->get('dashboard/lms', 'Lms::index');
@@ -61,7 +61,7 @@ $routes->get('dashboard/program', 'Admin::program');
     $routes->get('dashboard/distribution/mustahik/create', 'Distribution::createMustahik');
     $routes->get('dashboard/distribution/mustahik/edit/(:num)', 'Distribution::editMustahik/$1');
     $routes->post('dashboard/distribution/mustahik/save', 'Distribution::saveMustahik');
-    $routes->post('dashboard/distribution/mustahik/delete/(:num)', 'Distribution::deleteMustahik/$1');
+    $routes->post('dashboard/distribution/mustahik/delete/(:num)', 'Distribution::deleteMustahik/$1', ['filter' => 'masjidAdmin']);
     $routes->post('dashboard/distribution/mustahik/rescore/(:num)', 'Distribution::generateScore/$1');
 
     $routes->get('dashboard/distribution/history', 'Distribution::history');
@@ -72,25 +72,25 @@ $routes->get('dashboard/berita', 'Admin::berita');
 $routes->get('dashboard/berita/create', 'Admin::createBerita');
 $routes->get('dashboard/berita/edit/(:num)', 'Admin::editBerita/$1');
 $routes->post('dashboard/berita/save', 'Admin::saveBerita');
-$routes->post('dashboard/berita/delete', 'Admin::deleteBerita');
+$routes->post('dashboard/berita/delete', 'Admin::deleteBerita', ['filter' => 'masjidAdmin']);
 $routes->post('dashboard/berita/category/save', 'Admin::saveNewsCategory');
-$routes->post('dashboard/berita/category/delete', 'Admin::deleteNewsCategory');
+$routes->post('dashboard/berita/category/delete', 'Admin::deleteNewsCategory', ['filter' => 'masjidAdmin']);
 $routes->get('dashboard/program', 'Admin::program');
 $routes->get('dashboard/program/create', 'Admin::createProgram');
 $routes->get('dashboard/program/edit/(:num)', 'Admin::editProgram/$1');
 $routes->post('dashboard/program/save', 'Admin::saveProgram');
-$routes->get('dashboard/program/delete/(:num)', 'Admin::deleteProgram/$1');
+$routes->get('dashboard/program/delete/(:num)', 'Admin::deleteProgram/$1', ['filter' => 'masjidAdmin']);
 $routes->post('dashboard/program/category/save', 'Admin::saveProgramCategory');
-$routes->post('dashboard/program/category/delete', 'Admin::deleteProgramCategory');
+$routes->post('dashboard/program/category/delete', 'Admin::deleteProgramCategory', ['filter' => 'masjidAdmin']);
 
 $routes->get('dashboard/keuangan', 'Admin::keuangan');
 $routes->get('dashboard/keuangan/mutasi', 'Admin::mutasi');
 $routes->post('dashboard/keuangan/mutasi/upload', 'Admin::uploadMutasi');
 $routes->post('dashboard/keuangan/mutasi/map', 'Admin::mapMutasi');
 $routes->post('dashboard/keuangan/save', 'Admin::saveFinanceTransaction');
-$routes->post('dashboard/keuangan/delete', 'Admin::deleteFinanceTransaction');
+$routes->post('dashboard/keuangan/delete', 'Admin::deleteFinanceTransaction', ['filter' => 'masjidAdmin']);
 $routes->post('dashboard/keuangan/category/save', 'Admin::saveFinanceCategory');
-$routes->post('dashboard/keuangan/category/delete', 'Admin::deleteFinanceCategory');
+$routes->post('dashboard/keuangan/category/delete', 'Admin::deleteFinanceCategory', ['filter' => 'masjidAdmin']);
 
 // Finance AI Features
 $routes->get('dashboard/keuangan/import-csv', 'FinanceAI::importCSV');
@@ -104,12 +104,12 @@ $routes->get('dashboard/warga', 'Admin::warga');
 $routes->get('dashboard/warga/new', 'Admin::createWarga');
 $routes->get('dashboard/warga/edit/(:num)', 'Admin::editWarga/$1');
 $routes->post('dashboard/warga/save', 'Admin::saveWarga');
-$routes->get('dashboard/warga/delete/(:num)', 'Admin::deleteWarga/$1');
+$routes->get('dashboard/warga/delete/(:num)', 'Admin::deleteWarga/$1', ['filter' => 'masjidAdmin']);
 $routes->get('dashboard/volunteers', 'Admin::volunteers');
 
 // Broadcast Newsletter
 $routes->get('dashboard/subscribers', 'Admin::subscribers');
-$routes->get('dashboard/subscribers/delete/(:num)', 'Admin::deleteSubscriber/$1');
+$routes->get('dashboard/subscribers/delete/(:num)', 'Admin::deleteSubscriber/$1', ['filter' => 'masjidAdmin']);
 $routes->get('dashboard/broadcast', 'Admin::broadcasts');
 $routes->get('dashboard/broadcast/new', 'Admin::createBroadcast');
 $routes->post('dashboard/broadcast/send', 'Admin::sendBroadcast');
@@ -120,7 +120,7 @@ $routes->post('dashboard/broadcast/send', 'Admin::sendBroadcast');
 $routes->get('dashboard/bantuan-warga/new', 'Admin::createDistribution');
 $routes->get('dashboard/bantuan-warga/edit/(:num)', 'Admin::editDistribution/$1');
 $routes->post('dashboard/bantuan-warga/save', 'Admin::saveDistribution');
-$routes->get('dashboard/bantuan-warga/delete/(:num)', 'Admin::deleteDistribution/$1');
+$routes->get('dashboard/bantuan-warga/delete/(:num)', 'Admin::deleteDistribution/$1', ['filter' => 'masjidAdmin']);
 
 // Reporting (Laporan)
 $routes->get('dashboard/reports', 'Admin::reports');
@@ -136,18 +136,18 @@ $routes->get('dashboard/inventory', 'Admin::inventory');
 $routes->get('dashboard/inventory/new', 'Admin::createInventory');
 $routes->get('dashboard/inventory/edit/(:num)', 'Admin::editInventory/$1');
 $routes->post('dashboard/inventory/save', 'Admin::saveInventory');
-$routes->get('dashboard/inventory/delete/(:num)', 'Admin::deleteInventory/$1');
+$routes->get('dashboard/inventory/delete/(:num)', 'Admin::deleteInventory/$1', ['filter' => 'masjidAdmin']);
 
 // Payment Settings
-$routes->get('dashboard/pembayaran', 'Admin::paymentSettings');
-$routes->post('dashboard/pembayaran/save', 'Admin::savePaymentSettings');
+$routes->get('dashboard/pembayaran', 'Admin::paymentSettings', ['filter' => 'masjidAdmin']);
+$routes->post('dashboard/pembayaran/save', 'Admin::savePaymentSettings', ['filter' => 'masjidAdmin']);
 
 // Schedule Management
 $routes->get('dashboard/schedules', 'Admin::schedules');
 $routes->get('dashboard/schedules/new', 'Admin::createSchedule');
 $routes->get('dashboard/schedules/edit/(:num)', 'Admin::editSchedule/$1');
 $routes->post('dashboard/schedules/save', 'Admin::saveSchedule');
-$routes->get('dashboard/schedules/delete/(:num)', 'Admin::deleteSchedule/$1');
+$routes->get('dashboard/schedules/delete/(:num)', 'Admin::deleteSchedule/$1', ['filter' => 'masjidAdmin']);
 
 // Super Admin Dashboard
 $routes->group('superadmin', ['filter' => 'dashboardGuard'], function($routes) {
