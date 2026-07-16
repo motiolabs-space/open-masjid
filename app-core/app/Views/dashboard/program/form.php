@@ -3,6 +3,12 @@
 <?= $this->section('content') ?>
 <div class="px-8 py-8">
     <div class="max-w-4xl mx-auto">
+        <?php if (session()->getFlashdata('error')): ?>
+            <div class="bg-rose-50 text-rose-600 p-4 rounded-xl mb-6 flex items-center gap-3">
+                <span class="material-symbols-outlined">error</span>
+                <p class="text-sm font-medium"><?= esc(session()->getFlashdata('error')) ?></p>
+            </div>
+        <?php endif; ?>
         <div class="mb-8 flex items-center gap-4">
             <a href="<?= base_url('dashboard/program') ?>" class="size-10 bg-white dark:bg-white/5 border border-[#dbe6e3] dark:border-white/10 rounded-xl flex items-center justify-center text-[#608a7e] hover:text-primary transition-all">
                 <span class="material-symbols-outlined">arrow_back</span>

@@ -25,12 +25,22 @@ class MasjidProgramModel extends Model
     protected $updatedField  = 'updated_at';
 
     // Validation
+    // Lihat catatan pada MasjidNewsModel soal label.
     protected $validationRules      = [
         'masjid_id' => 'required|numeric',
-        'title'     => 'required|min_length[3]|max_length[255]',
-        'slug'      => 'required|max_length[255]',
-        'description' => 'required',
-        'date_start' => 'required|valid_date'
+        'title'     => [
+            'label' => 'Nama Program',
+            'rules' => 'required|min_length[3]|max_length[255]',
+        ],
+        'slug'        => 'required|max_length[255]',
+        'description' => [
+            'label' => 'Deskripsi Program',
+            'rules' => 'required',
+        ],
+        'date_start' => [
+            'label' => 'Tanggal Mulai',
+            'rules' => 'required|valid_date',
+        ],
     ];
     protected $validationMessages   = [];
     protected $skipValidation       = false;
