@@ -66,21 +66,37 @@ class BankMutationParser
                 break;
 
             default:
-                $mapped['amount'] = $this->cleanAmount($mapped['raw_amount']);
+                // Tanpa kolom penanda CR/DB, satu-satunya petunjuk arah uang
+                // adalah tanda minus pada nominalnya.
+                helper('custom');
+                $nominal          = parse_rupiah($mapped['raw_amount']);
+                $mapped['amount'] = abs($nominal);
+                $mapped['type']   = $nominal < 0 ? 'DB' : 'CR';
                 break;
         }
 
-        // Basic validation: must have amount and date
-        if (empty($mapped['date']) || $mapped['amount'] <= 0) {
+        // Tanggal dibakukan ke 'Y-m-d' di sini, sekali saja, supaya tampilan dan
+        // penyimpanan tidak perlu lagi menebak urutan hari/bulan. Baris yang
+        // tanggalnya tak terbaca DIBUANG: menyimpannya berarti transaksi
+        // bertanggal ngawur menyelinap ke buku kas masjid.
+        helper('custom');
+        $mapped['date'] = parse_tanggal($mapped['date']);
+
+        if ($mapped['date'] === null || $mapped['amount'] <= 0) {
             return null;
         }
 
         return $mapped;
     }
 
+    /**
+     * Nominal selalu dikembalikan positif; arah uang (CR/DB) ditentukan kolom
+     * lain, kecuali pada mode generic yang memakai tanda minus (lihat mapRow).
+     */
     private function cleanAmount($val)
     {
-        $clean = preg_replace('/[^0-9.]/', '', str_replace(',', '.', $val));
-        return (float) $clean;
+        helper('custom');
+
+        return abs(parse_rupiah($val));
     }
 }

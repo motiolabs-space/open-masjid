@@ -2201,6 +2201,7 @@ class Admin extends BaseController
         $dates = $this->request->getPost('date');
         $descs = $this->request->getPost('description');
         $amounts = $this->request->getPost('amount');
+        $types = $this->request->getPost('type');
         $programIds = $this->request->getPost('program_id');
         $selected = $this->request->getPost('selected');
 
@@ -2208,36 +2209,68 @@ class Admin extends BaseController
             return redirect()->back()->with('error', 'Pilih setidaknya satu transaksi untuk dipetakan.');
         }
 
-        // Ensure 'Donasi Terikat' category exists
-        $category = $catModel->where(['masjid_id' => $masjidId, 'slug' => 'donasi-terikat'])->first();
-        if (!$category) {
-            $catId = $catModel->insert([
+        // program_id datang dari POST, jadi tidak boleh dipercaya: tanpa
+        // penyaringan ini pengurus bisa menempelkan transaksi ke program milik
+        // masjid lain. Hanya program masjid sendiri yang boleh dipakai.
+        // intval() wajib: basis data mengembalikan id sebagai string, sehingga
+        // perbandingan ketat di bawah tidak akan pernah cocok tanpa ini.
+        $programSah = array_map('intval', array_column(
+            (new \App\Models\MasjidProgramModel())->select('id')->where('masjid_id', $masjidId)->findAll(),
+            'id'
+        ));
+
+        // Mutasi bank berisi uang masuk DAN uang keluar, sehingga dua kategori
+        // dibutuhkan — kategori pemasukan tidak sah menampung pengeluaran.
+        $kategori = function (string $slug, string $nama, string $tipe) use ($catModel, $masjidId) {
+            $ada = $catModel->where(['masjid_id' => $masjidId, 'slug' => $slug])->first();
+
+            return $ada ? $ada['id'] : $catModel->insert([
                 'masjid_id' => $masjidId,
-                'name' => 'Donasi Terikat Program',
-                'type' => 'pemasukan',
-                'slug' => 'donasi-terikat'
+                'name'      => $nama,
+                'type'      => $tipe,
+                'slug'      => $slug,
             ]);
-        } else {
-            $catId = $category['id'];
-        }
+        };
+        $catMasuk  = $kategori('donasi-terikat', 'Donasi Terikat Program', 'pemasukan');
+        $catKeluar = $kategori('pengeluaran-program', 'Pengeluaran Program', 'pengeluaran');
 
         $successCount = 0;
+        $dilewati = 0;
         foreach ($selected as $index) {
-            if (empty($programIds[$index])) continue;
+            if (empty($programIds[$index]) || !in_array((int) $programIds[$index], $programSah, true)) {
+                $dilewati++;
+                continue;
+            }
+
+            // Tanggal sudah dibakukan ke 'Y-m-d' oleh BankMutationParser.
+            $tanggal = parse_tanggal($dates[$index] ?? '');
+            if ($tanggal === null) {
+                $dilewati++;
+                continue;
+            }
+
+            $keluar = ($types[$index] ?? 'CR') === 'DB';
 
             $financeModel->insert([
                 'masjid_id'   => $masjidId,
-                'category_id' => $catId,
+                'category_id' => $keluar ? $catKeluar : $catMasuk,
                 'program_id'  => $programIds[$index],
-                'date'        => date('Y-m-d', strtotime($dates[$index])),
+                'date'        => $tanggal,
                 'amount'      => $amounts[$index],
-                'type'        => 'pemasukan',
+                'type'        => $keluar ? 'pengeluaran' : 'pemasukan',
                 'description' => 'Mutasi Bank: ' . $descs[$index]
             ]);
             $successCount++;
         }
 
-        return redirect()->to(base_url('dashboard/keuangan'))->with('success', $successCount . ' transaksi berhasil dipetakan ke laporan keuangan.');
+        $pesan = $successCount . ' transaksi berhasil dipetakan ke laporan keuangan.';
+        if ($dilewati > 0) {
+            // Sebelumnya baris tanpa program dibuang tanpa sepatah kata pun,
+            // sehingga pengurus mengira semuanya tersimpan.
+            $pesan .= ' ' . $dilewati . ' transaksi dilewati karena belum dipilih programnya.';
+        }
+
+        return redirect()->to(base_url('dashboard/keuangan'))->with('success', $pesan);
     }
 
     // --------------------------------------------------------------------

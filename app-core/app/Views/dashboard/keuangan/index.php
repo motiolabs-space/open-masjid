@@ -2,6 +2,23 @@
 
 <?= $this->section('content') ?>
 <div class="px-8 py-8">
+    <?php // Enam aksi keuangan mengirim pesan ke halaman ini (simpan/hapus
+          // transaksi, pemetaan mutasi bank, simpan impor CSV). Tanpa blok ini
+          // semuanya berjalan tanpa konfirmasi apa pun ke pengurus. ?>
+    <?php if (session()->getFlashdata('success')): ?>
+        <div class="bg-emerald-50 text-emerald-800 px-4 py-3 rounded-xl mb-6 flex items-center gap-2 font-bold border border-emerald-100">
+            <span class="material-symbols-outlined">check_circle</span>
+            <?= session()->getFlashdata('success') ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if (session()->getFlashdata('error')): ?>
+        <div class="bg-red-50 text-red-800 px-4 py-3 rounded-xl mb-6 flex items-center gap-2 font-bold border border-red-100">
+            <span class="material-symbols-outlined">error</span>
+            <?= session()->getFlashdata('error') ?>
+        </div>
+    <?php endif; ?>
+
     <!-- Header Area -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>

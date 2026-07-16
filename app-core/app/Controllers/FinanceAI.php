@@ -42,7 +42,7 @@ class FinanceAI extends BaseController
                     'id' => $idx,
                     'date' => trim($row[0]),
                     'description' => trim($row[1]),
-                    'amount' => (float) str_replace(['Rp', '.', ','], '', trim($row[2])),
+                    'amount' => abs(parse_rupiah($row[2])),
                     'type' => strtolower(trim($row[3])) === 'keluar' ? 'pengeluaran' : 'pemasukan'
                 ];
             }
@@ -86,9 +86,15 @@ class FinanceAI extends BaseController
         // Merge AI Results with Transactions
         $mergedTransactions = [];
         foreach ($transactions as $t) {
-            $aiMatch = array_filter($aiResults, fn($r) => $r['id'] === $t['id']);
+            // Padanan id dilonggarkan lewat (int): AI kerap mengembalikan id
+            // sebagai teks ("0"), dan perbandingan ketat membuat seluruh
+            // usulannya terbuang diam-diam.
+            $aiMatch = array_filter(
+                $aiResults,
+                fn($r) => isset($r['id']) && (int) $r['id'] === (int) $t['id']
+            );
             $aiMatch = reset($aiMatch);
-            
+
             $t['category_id'] = $aiMatch['category_id'] ?? null;
             $t['suggested_category_name'] = $aiMatch['suggested_category_name'] ?? 'Lainnya';
             $mergedTransactions[] = $t;
@@ -96,6 +102,15 @@ class FinanceAI extends BaseController
 
         // Store temporarily in session for review page
         session()->set('temp_csv_transactions', $mergedTransactions);
+
+        // Impor tetap berjalan tanpa AI, tetapi diamnya menyesatkan: pengurus
+        // melihat semua kategori berisi 'Lainnya' tanpa tahu sebabnya dan
+        // mengira fiturnya rusak. Katakan apa adanya.
+        if (empty($aiResults)) {
+            return redirect()->to('/dashboard/keuangan/review-csv')
+                ->with('error', 'Kategori otomatis dari AI sedang tidak tersedia. '
+                    . 'Data tetap terbaca — silakan pilih kategorinya sendiri di bawah ini.');
+        }
 
         return redirect()->to('/dashboard/keuangan/review-csv');
     }
@@ -138,6 +153,7 @@ class FinanceAI extends BaseController
         );
 
         $insertData = [];
+        $dilewati = 0;
         foreach ($data as $t) {
             if (!empty($t['date']) && !empty($t['amount'])) {
                 // Normalisasi tipe agar cocok dengan enum kolom ('pemasukan'/'pengeluaran').
@@ -170,19 +186,20 @@ class FinanceAI extends BaseController
                     }
                 }
 
-                // Format date from dd/mm/yyyy or yyyy-mm-dd to yyyy-mm-dd
-                $dateRaw = $t['date'];
-                if (strpos($dateRaw, '/') !== false) {
-                    $parts = explode('/', $dateRaw);
-                    if (count($parts) === 3) {
-                        $dateRaw = $parts[2] . '-' . $parts[1] . '-' . $parts[0];
-                    }
+                // Tanggal dibaca oleh parse_tanggal: bentuk selain 'dd/mm/yyyy'
+                // (mis. '15-07-2026') dulu diteruskan apa adanya ke basis data.
+                // Baris yang tanggalnya tak terbaca dilewati, bukan disimpan
+                // dengan tanggal ngawur.
+                $tanggal = parse_tanggal($t['date']);
+                if ($tanggal === null) {
+                    $dilewati++;
+                    continue;
                 }
-                
+
                 $insertData[] = [
                     'masjid_id' => $masjidId,
                     'category_id' => $catId,
-                    'date' => $dateRaw,
+                    'date' => $tanggal,
                     'amount' => $t['amount'],
                     'type' => $type,
                     'description' => $t['description']
@@ -193,7 +210,13 @@ class FinanceAI extends BaseController
         if (!empty($insertData)) {
             $transactionModel->insertBatch($insertData);
             session()->remove('temp_csv_transactions');
-            return redirect()->to('/dashboard/keuangan')->with('success', count($insertData) . ' Transaksi berhasil disimpan.');
+
+            $pesan = count($insertData) . ' Transaksi berhasil disimpan.';
+            if ($dilewati > 0) {
+                $pesan .= ' ' . $dilewati . ' baris dilewati karena tanggalnya tidak terbaca.';
+            }
+
+            return redirect()->to('/dashboard/keuangan')->with('success', $pesan);
         }
 
         return redirect()->back()->with('error', 'Gagal menyimpan transaksi.');
@@ -239,6 +262,16 @@ class FinanceAI extends BaseController
                 'temperature' => 0.7,
                 'max_tokens' => 800
             ]);
+
+            // chatCompletion() mengembalikan null bila AI tak terjangkau. Dulu
+            // itu tetap dijawab 'success' dengan data null, sehingga pengurus
+            // menunggu lalu mendapat kotak kosong tanpa penjelasan apa pun.
+            if (empty($response)) {
+                return $this->response->setStatusCode(503)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Layanan AI sedang tidak dapat dihubungi. Silakan coba lagi beberapa saat lagi.',
+                ]);
+            }
 
             return $this->response->setJSON(['status' => 'success', 'data' => $response]);
         }
