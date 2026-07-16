@@ -23,10 +23,19 @@ class MasjidNewsModel extends Model
     protected $updatedField  = 'updated_at';
 
     // Validation
+    // Label disisipkan ke dalam aturan agar pesan kesalahan menyebut nama yang
+    // dikenal pengurus, bukan nama kolom basis data ("Kolom title ...").
+    // Kalimat pesannya ada di app/Language/en/Validation.php.
     protected $validationRules      = [
-        'title'     => 'required|min_length[5]|max_length[255]',
-        'slug'      => 'required|max_length[255]',
-        'content'   => 'required',
-        'masjid_id' => 'required|numeric'
+        'title' => [
+            'label' => 'Judul Berita',
+            'rules' => 'required|min_length[5]|max_length[255]',
+        ],
+        'slug'    => 'required|max_length[255]',
+        'content' => [
+            'label' => 'Isi Berita',
+            'rules' => 'required',
+        ],
+        'masjid_id' => 'required|numeric',
     ];
 }

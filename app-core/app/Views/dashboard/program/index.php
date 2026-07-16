@@ -2,6 +2,12 @@
 
 <?= $this->section('content') ?>
 <div class="px-8 py-8">
+    <?php if (session()->getFlashdata('error')): ?>
+        <div class="bg-rose-50 text-rose-600 p-4 rounded-xl mb-6 flex items-center gap-3">
+            <span class="material-symbols-outlined">error</span>
+            <p class="text-sm font-medium"><?= esc(session()->getFlashdata('error')) ?></p>
+        </div>
+    <?php endif; ?>
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
         <div>

@@ -673,9 +673,21 @@ class Admin extends BaseController
             $slug = $oldNews['slug'] ?? ($slugPrefix . '-' . substr(md5(uniqid()), 0, 6));
         }
 
+        // category_id dari POST: pastikan kategorinya milik masjid ini, bukan
+        // milik masjid lain.
+        $categoryId = $this->request->getPost('category_id') ?: null;
+        if ($categoryId !== null) {
+            $kategori = (new \App\Models\MasjidNewsCategoryModel())
+                ->where(['id' => $categoryId, 'masjid_id' => $masjidId])->first();
+
+            if (!$kategori) {
+                return redirect()->back()->withInput()->with('error', 'Kategori berita tidak ditemukan.');
+            }
+        }
+
         $data = [
             'masjid_id'   => $masjidId,
-            'category_id' => $this->request->getPost('category_id') ?: null,
+            'category_id' => $categoryId,
             'title'       => $this->request->getPost('title'),
             'slug'        => $slug,
             'content'     => $this->request->getPost('content'),
@@ -701,13 +713,19 @@ class Admin extends BaseController
             }
         }
 
-        if ($newsId) {
-            $newsModel->update($newsId, $data);
-            $msg = 'Berita berhasil diperbarui.';
-        } else {
-            $newsModel->insert($data);
-            $msg = 'Berita berhasil diterbitkan.';
+        // Hasil simpan diperiksa. Model mensyaratkan judul minimal 5 huruf dan
+        // isi tidak kosong; tanpa ini kegagalannya dijawab 'Berita berhasil
+        // diterbitkan.' sementara tulisan pengurus hilang begitu saja.
+        $tersimpan = $newsId
+            ? $newsModel->update($newsId, $data)
+            : $newsModel->insert($data);
+
+        if (!$tersimpan) {
+            return redirect()->back()->withInput()
+                ->with('error', 'Gagal menyimpan berita: ' . implode(' ', $newsModel->errors()));
         }
+
+        $msg = $newsId ? 'Berita berhasil diperbarui.' : 'Berita berhasil diterbitkan.';
 
         return redirect()->to('/dashboard/berita')->with('success', $msg);
     }
@@ -964,11 +982,20 @@ class Admin extends BaseController
             if ($file->isValid() && !$file->hasMoved()) {
                 $path = $storage->upload($file, 'galeri');
                 if ($path) {
-                    $galleryModel->insert([
+                    // Dulu $successCount naik tanpa melihat hasil insert, jadi
+                    // foto yang gagal masuk basis data tetap dihitung 'berhasil
+                    // diunggah' — berkasnya ada di penyimpanan tetapi tidak
+                    // pernah muncul di galeri, tanpa satu pun pesan.
+                    if (!$galleryModel->insert([
                         'masjid_id'  => $masjidId,
                         'image_path' => $path,
                         'category'   => $category
-                    ]);
+                    ])) {
+                        return $this->response->setJSON([
+                            'status'  => 'error',
+                            'message' => 'Gagal menyimpan foto: ' . implode(' ', $galleryModel->errors()),
+                        ]);
+                    }
                     $successCount++;
                 } else {
                     return $this->response->setJSON(['status' => 'error', 'message' => 'Salah satu file foto tidak didukung atau berbahaya.']);
@@ -1074,9 +1101,20 @@ class Admin extends BaseController
             $slug = $oldProgram['slug'] ?? ($slugPrefix . '-' . substr(md5(uniqid()), 0, 6));
         }
 
+        // category_id dari POST: pastikan kategorinya milik masjid ini.
+        $categoryId = $this->request->getPost('category_id') ?: null;
+        if ($categoryId !== null) {
+            $kategori = (new \App\Models\MasjidProgramCategoryModel())
+                ->where(['id' => $categoryId, 'masjid_id' => $masjidId])->first();
+
+            if (!$kategori) {
+                return redirect()->back()->withInput()->with('error', 'Kategori program tidak ditemukan.');
+            }
+        }
+
         $data = [
             'masjid_id'         => $masjidId,
-            'category_id'       => $this->request->getPost('category_id') ?: null,
+            'category_id'       => $categoryId,
             'title'             => $this->request->getPost('title'),
             'slug'              => $slug,
             'description'       => $this->request->getPost('description'),
@@ -1102,16 +1140,25 @@ class Admin extends BaseController
             $uploadPath = $storage->upload($file, 'program');
             if ($uploadPath) {
                 $data['thumbnail'] = $uploadPath;
+            } else {
+                // Sebelumnya kegagalan unggah dilewati diam-diam: programnya
+                // tersimpan tanpa gambar dan pengurus mengira fotonya masuk.
+                return redirect()->back()->withInput()
+                    ->with('error', 'Format gambar tidak didukung atau file berbahaya.');
             }
         }
 
-        if ($programId) {
-            $programModel->update($programId, $data);
-            $message = 'Program berhasil diperbarui.';
-        } else {
-            $programModel->insert($data);
-            $message = 'Program baru berhasil ditambahkan.';
+        // Lihat catatan pada saveBerita: hasil simpan wajib diperiksa.
+        $tersimpan = $programId
+            ? $programModel->update($programId, $data)
+            : $programModel->insert($data);
+
+        if (!$tersimpan) {
+            return redirect()->back()->withInput()
+                ->with('error', 'Gagal menyimpan program: ' . implode(' ', $programModel->errors()));
         }
+
+        $message = $programId ? 'Program berhasil diperbarui.' : 'Program baru berhasil ditambahkan.';
 
         return redirect()->to('dashboard/program')->with('success', $message);
     }
