@@ -21,9 +21,18 @@ class MasjidDistributionModel extends Model
     protected $updatedField  = 'updated_at';
 
     // Validation
+    // Label disisipkan ke dalam aturan agar pesan kesalahan menyebut nama yang
+    // dikenal pengurus, bukan nama kolom basis data ("Kolom date wajib diisi").
+    // Kalimat pesannya ada di app/Language/en/Validation.php.
     protected $validationRules      = [
-        'date' => 'required',
-        'type' => 'required',
+        'date' => [
+            'label' => 'Tanggal Penyaluran',
+            'rules' => 'required',
+        ],
+        'type' => [
+            'label' => 'Jenis Bantuan',
+            'rules' => 'required',
+        ],
     ];
     protected $validationMessages   = [];
     protected $skipValidation       = false;

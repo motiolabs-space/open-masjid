@@ -1387,13 +1387,17 @@ class Admin extends BaseController
                 return redirect()->to('dashboard/warga')->with('error', 'Data tidak ditemukan atau bukan milik Anda.');
             }
             
+            // Alasannya ikut disebut: 'Periksa inputan Anda' memaksa pengurus
+            // menebak kolom mana yang salah dari tujuh kolom yang ada.
             if (!$wargaModel->update($id, $data)) {
-                return redirect()->back()->withInput()->with('error', 'Gagal memperbarui data. Periksa inputan Anda.');
+                return redirect()->back()->withInput()
+                    ->with('error', 'Gagal memperbarui data warga: ' . implode(' ', $wargaModel->errors()));
             }
             $message = 'Data warga berhasil diperbarui.';
         } else {
             if (!$wargaModel->insert($data)) {
-                return redirect()->back()->withInput()->with('error', 'Gagal menyimpan data. Periksa inputan Anda.');
+                return redirect()->back()->withInput()
+                    ->with('error', 'Gagal menyimpan data warga: ' . implode(' ', $wargaModel->errors()));
             }
             $message = 'Data warga berhasil ditambahkan.';
         }
@@ -1934,10 +1938,35 @@ class Admin extends BaseController
         $distModel = new \App\Models\MasjidDistributionModel();
         
         $id = $this->request->getPost('id');
+
+        // warga_id dan program_id datang dari POST. Tanpa pemeriksaan ini,
+        // bantuan bisa ditempelkan ke warga atau program milik masjid lain —
+        // dan karena daftar penyaluran menggabungkan tabel warga, nama warga
+        // masjid lain ikut tampil di layar masjid ini.
+        $wargaId = $this->request->getPost('warga_id') ?: null;
+        if ($wargaId !== null) {
+            $warga = (new \App\Models\MasjidWargaModel())
+                ->where(['id' => $wargaId, 'masjid_id' => $masjidId])->first();
+
+            if (!$warga) {
+                return redirect()->back()->withInput()->with('error', 'Data warga tidak ditemukan.');
+            }
+        }
+
+        $programId = $this->request->getPost('program_id') ?: null;
+        if ($programId !== null) {
+            $program = (new \App\Models\MasjidProgramModel())
+                ->where(['id' => $programId, 'masjid_id' => $masjidId])->first();
+
+            if (!$program) {
+                return redirect()->back()->withInput()->with('error', 'Program tidak ditemukan.');
+            }
+        }
+
         $data = [
             'masjid_id'   => $masjidId,
-            'warga_id'    => $this->request->getPost('warga_id') ?: null,
-            'program_id'  => $this->request->getPost('program_id') ?: null,
+            'warga_id'    => $wargaId,
+            'program_id'  => $programId,
             'date'        => $this->request->getPost('date'),
             'type'        => $this->request->getPost('type'),
             'amount'      => str_replace('.', '', $this->request->getPost('amount') ?? '0'),
@@ -1970,24 +1999,55 @@ class Admin extends BaseController
             $exists = $distModel->where(['id' => $id, 'masjid_id' => $masjidId])->first();
             if (!$exists) return redirect()->back()->with('error', 'Akses ditolak.');
 
-            $distModel->update($id, $data);
+            if (!$distModel->update($id, $data)) {
+                return redirect()->back()->withInput()
+                    ->with('error', 'Gagal memperbarui penyaluran: ' . implode(' ', $distModel->errors()));
+            }
             $message = 'Data penyaluran diperbarui.';
         } else {
-            $distModel->insert($data);
+            if (!$distModel->insert($data)) {
+                return redirect()->back()->withInput()
+                    ->with('error', 'Gagal menyimpan penyaluran: ' . implode(' ', $distModel->errors()));
+            }
             $message = 'Data penyaluran berhasil disimpan.';
 
             // OPTIONAL: Auto-create Expense Transaction
             if ($this->request->getPost('create_expense') == 1 && $data['type'] == 'money') {
                 $financeModel = new \App\Models\MasjidFinanceTransactionModel();
-                $financeModel->insert([
+
+                // Kategori WAJIB ada: MasjidFinanceTransactionModel mensyaratkan
+                // category_id, sehingga mengirim null membuat insert selalu
+                // ditolak validasi. Karena hasilnya dulu tidak diperiksa,
+                // pengurus tetap dibalas '(Transaksi pengeluaran otomatis
+                // dibuat)' padahal kas masjid tidak pernah mencatat apa pun —
+                // uang bantuan keluar tanpa jejak di pembukuan.
+                $catModel = new \App\Models\MasjidFinanceCategoryModel();
+                $kategori = $catModel->where([
                     'masjid_id' => $masjidId,
+                    'slug'      => 'penyaluran-bantuan',
+                ])->first();
+
+                $catId = $kategori['id'] ?? $catModel->insert([
+                    'masjid_id' => $masjidId,
+                    'name'      => 'Penyaluran Bantuan Warga',
                     'type'      => 'pengeluaran',
-                    'category_id' => null, // Or a default "Penyaluran" category if exists
-                    'amount'    => $data['amount'],
-                    'date'      => $data['date'],
-                    'description' => 'Penyaluran via Modul: ' . ($data['description'] ?? '-'),
+                    'slug'      => 'penyaluran-bantuan',
                 ]);
-                $message .= ' (Transaksi pengeluaran otomatis dibuat).';
+
+                $tercatat = $catId && $financeModel->insert([
+                    'masjid_id'   => $masjidId,
+                    'type'        => 'pengeluaran',
+                    'category_id' => $catId,
+                    'amount'      => $data['amount'],
+                    'date'        => $data['date'],
+                    'description' => 'Penyaluran bantuan: ' . ($data['description'] ?: '-'),
+                ]);
+
+                // Penyalurannya sendiri sudah tersimpan, jadi kegagalan di sini
+                // dilaporkan apa adanya — bukan diam-diam diakui berhasil.
+                $message .= $tercatat
+                    ? ' Pengeluaran otomatis dicatat di Keuangan.'
+                    : ' Namun pencatatan otomatis ke Keuangan gagal — silakan catat manual.';
             }
         }
 

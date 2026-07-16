@@ -39,10 +39,12 @@ return [
     'required_with'    => 'Kolom {field} wajib diisi bila {param} diisi.',
     'required_without' => 'Kolom {field} wajib diisi bila {param} dikosongkan.',
 
-    // Panjang isian
-    'min_length'   => 'Kolom {field} harus diisi minimal {param} huruf.',
-    'max_length'   => 'Kolom {field} paling panjang {param} huruf.',
-    'exact_length' => 'Kolom {field} harus tepat {param} huruf.',
+    // Panjang isian.
+    // Dipakai 'karakter', bukan 'huruf': aturan ini juga mengenai kolom angka
+    // seperti NIK dan nomor HP, sehingga "minimal 16 huruf" menyesatkan.
+    'min_length'   => 'Kolom {field} harus diisi minimal {param} karakter.',
+    'max_length'   => 'Kolom {field} paling panjang {param} karakter.',
+    'exact_length' => 'Kolom {field} harus tepat {param} karakter.',
 
     // Angka
     'numeric'               => 'Kolom {field} harus berupa angka.',
