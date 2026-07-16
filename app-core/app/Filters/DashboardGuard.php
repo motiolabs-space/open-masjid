@@ -16,10 +16,30 @@ class DashboardGuard implements FilterInterface
 
         $role = session()->get('role');
 
-        // Pengurus & superadmin boleh mengakses seluruh area dashboard/superadmin.
-        // (Akses ke 'superadmin/*' tetap dibatasi ulang di SuperAdmin::initController.)
-        if (in_array($role, ['pengurus', 'superadmin'], true)) {
+        if ($role === 'superadmin') {
+            // Akses ke 'superadmin/*' tetap dibatasi ulang di
+            // SuperAdmin::initController.
             return;
+        }
+
+        if ($role === 'pengurus') {
+            // Keanggotaan diperiksa ulang ke basis data setiap permintaan.
+            // session('role') hanya salinan dari saat login: tanpa pemeriksaan
+            // ini, pengurus yang sudah DICOPOT lewat menu admin tetap bisa
+            // mengelola masjid sampai ia logout sendiri — dan tidak ada yang
+            // bisa memaksanya keluar.
+            helper('custom');
+
+            if (pengurus_saat_ini() !== null) {
+                return;
+            }
+
+            // Sudah bukan pengurus, tetapi akunnya tetap sah: perlakukan sebagai
+            // jamaah biasa dengan jatuh ke daftar izin di bawah. JANGAN
+            // mengalihkan ke 'dashboard' dari sini — halaman itu dijaga filter
+            // ini juga, sehingga pengalihannya akan berputar tanpa henti.
+            session()->remove(['masjid_id', 'masjid_name', 'masjid_username']);
+            session()->set('role', 'jamaah');
         }
 
         // Selain itu (mis. jamaah) hanya boleh membuka halaman non-manajemen.

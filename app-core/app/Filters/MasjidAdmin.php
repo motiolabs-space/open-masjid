@@ -12,13 +12,16 @@ use CodeIgniter\HTTP\ResponseInterface;
  * Ada tiga hal berbeda yang sama-sama bernama "role" di aplikasi ini — mudah
  * tertukar, jadi dicatat di sini:
  *
- *   users.role            'superadmin' | 'admin' | 'user' — tingkat platform.
- *   session('role')       'superadmin' | 'pengurus' | 'jamaah' — dipakai
- *                         DashboardGuard. Nilai 'pengurus' di sini hanya berarti
- *                         "orang ini mengurus suatu masjid", BUKAN jabatannya.
- *   session('masjid_role') 'admin' | 'pengurus' — jabatan di masjid yang sedang
- *                         dibuka, disalin dari masjid_pengurus.role. Inilah yang
- *                         diperiksa filter ini.
+ *   users.role             'superadmin' | 'admin' | 'user' — tingkat platform.
+ *   session('role')        'superadmin' | 'pengurus' | 'jamaah' — dipakai
+ *                          DashboardGuard. Nilai 'pengurus' di sini hanya
+ *                          berarti "orang ini mengurus suatu masjid", BUKAN
+ *                          jabatannya.
+ *   masjid_pengurus.role   'admin' | 'pengurus' — jabatan sesungguhnya di
+ *                          masjid yang sedang dibuka. Inilah yang diperiksa
+ *                          filter ini, dibaca langsung dari basis data lewat
+ *                          is_admin_masjid() supaya perubahan dari menu admin
+ *                          langsung berlaku (lihat catatan di helper itu).
  *
  * Sebelumnya masjid_pengurus.role tersimpan dan bisa diubah lewat UI, tetapi
  * tidak pernah dibaca untuk apa pun — admin dan pengurus praktis punya akses
@@ -32,13 +35,10 @@ class MasjidAdmin implements FilterInterface
             return redirect()->to('login')->with('error', 'Silakan login terlebih dahulu.');
         }
 
-        // Superadmin platform mengelola seluruh masjid dan tidak punya baris di
-        // masjid_pengurus, sehingga tidak mungkin punya masjid_role.
-        if (session()->get('role') === 'superadmin') {
-            return;
-        }
+        // Filter berjalan sebelum controller, jadi helper belum termuat sendiri.
+        helper('custom');
 
-        if (session()->get('masjid_role') === 'admin') {
+        if (is_admin_masjid()) {
             return;
         }
 

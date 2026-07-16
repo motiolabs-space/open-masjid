@@ -102,7 +102,7 @@
 </a>
 <?php // Khusus Admin Masjid (lihat filter 'masjidAdmin' pada Routes.php).
       // Tanpa penyaringan ini pengurus melihat menunya lalu ditolak saat diklik. ?>
-<?php if (session()->get('masjid_role') === 'admin' || session()->get('role') === 'superadmin'): ?>
+<?php if (is_admin_masjid()): ?>
 <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg <?= ($uri == 'dashboard/pembayaran') ? $activeClass : $inactiveClass ?>" href="<?= base_url('dashboard/pembayaran') ?>">
 <span class="material-symbols-outlined text-xl">payments</span>
 <span class="text-sm font-medium">Pengaturan Pembayaran</span>

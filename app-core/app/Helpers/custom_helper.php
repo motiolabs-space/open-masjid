@@ -14,6 +14,67 @@ if (!function_exists('format_wa')) {
     }
 }
 
+if (!function_exists('pengurus_saat_ini')) {
+    /**
+     * Baris masjid_pengurus milik pengguna yang login untuk masjid yang sedang
+     * dibuka — dibaca dari basis data, BUKAN dari session.
+     *
+     * Ini disengaja. Jabatan pernah disalin ke session saat login, dan
+     * akibatnya setiap perubahan dari menu admin baru berlaku setelah orangnya
+     * logout: menurunkan admin menjadi pengurus tidak mencabut apa pun, dan
+     * mencopot pengurus sama sekali tidak mengeluarkannya — ia tetap bisa
+     * mengelola masjid yang sudah bukan haknya selama session masih hidup.
+     * Session adalah salinan; salinan bisa basi. Basis data tidak.
+     *
+     * Hasilnya di-cache per-permintaan, jadi satu kueri saja meski dipanggil
+     * berkali-kali oleh filter dan view.
+     *
+     * @return array|null null bila pengguna bukan pengurus masjid tersebut.
+     */
+    function pengurus_saat_ini(): ?array
+    {
+        static $cache = null;
+        static $sudahDibaca = false;
+
+        if ($sudahDibaca) {
+            return $cache;
+        }
+        $sudahDibaca = true;
+
+        $userId   = session()->get('user_id');
+        $masjidId = session()->get('masjid_id');
+
+        if (empty($userId) || empty($masjidId)) {
+            return $cache = null;
+        }
+
+        $cache = (new \App\Models\MasjidPengurusModel())
+            ->where(['user_id' => $userId, 'masjid_id' => $masjidId])
+            ->first();
+
+        return $cache;
+    }
+}
+
+if (!function_exists('is_admin_masjid')) {
+    /**
+     * Apakah pengguna yang login adalah Admin Masjid pada masjid yang dibuka.
+     *
+     * Dipakai filter 'masjidAdmin' maupun view. Menyembunyikan tombol di view
+     * hanya merapikan tampilan — penegakannya tetap di filter.
+     */
+    function is_admin_masjid(): bool
+    {
+        // Superadmin platform mengelola semua masjid dan tidak punya baris di
+        // masjid_pengurus.
+        if (session()->get('role') === 'superadmin') {
+            return true;
+        }
+
+        return (pengurus_saat_ini()['role'] ?? null) === 'admin';
+    }
+}
+
 if (!function_exists('parse_rupiah')) {
     /**
      * Membaca nominal uang dari teks bebas menjadi angka.

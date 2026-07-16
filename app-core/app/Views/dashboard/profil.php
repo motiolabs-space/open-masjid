@@ -1,12 +1,7 @@
 <?= $this->extend('layout/dashboard') ?>
 
 <?= $this->section('content') ?>
-<?php
-    // Jabatan di masjid yang sedang dibuka. Superadmin platform tidak punya
-    // baris di masjid_pengurus, jadi tidak akan pernah punya masjid_role.
-    $isAdminMasjid = session()->get('masjid_role') === 'admin'
-        || session()->get('role') === 'superadmin';
-?>
+<?php $isAdminMasjid = is_admin_masjid(); ?>
 <div class="max-w-5xl mx-auto">
     <!-- Page Heading & Progress -->
     <div class="mb-8">

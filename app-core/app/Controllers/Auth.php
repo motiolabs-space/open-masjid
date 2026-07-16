@@ -79,10 +79,6 @@ class Auth extends BaseController
                 'masjid_id'       => $masjidId,
                 'masjid_name'     => $masjidData['name'],
                 'masjid_username' => $masjidData['username'],
-                // Harus sama dengan $pengurusData['role'] di atas ('admin').
-                // Tanpa baris ini pendiri masjid langsung terkunci dari
-                // masjidnya sendiri begitu selesai mendaftar.
-                'masjid_role'     => 'admin',
             ]);
 
             // 4. Send Telegram Notification
@@ -215,10 +211,6 @@ class Auth extends BaseController
             'masjid_id'       => $masjid['id'],
             'masjid_name'     => $masjid['name'],
             'masjid_username' => $masjid['username'],
-            // Jabatan mengikuti masjid yang sedang dibuka: seseorang bisa jadi
-            // admin di satu masjid dan pengurus biasa di masjid lain, sehingga
-            // nilai ini WAJIB diperbarui setiap kali berganti masjid.
-            'masjid_role'     => $isManaged['role'] ?? 'pengurus',
         ]);
 
         return redirect()->to('dashboard')->with('success', 'Selamat datang di ' . $masjid['name']);
@@ -290,10 +282,6 @@ class Auth extends BaseController
                 $sessionData['masjid_id'] = $p['masjid_id'];
                 $sessionData['masjid_name'] = $masjid['name'] ?? 'Masjid Saya';
                 $sessionData['masjid_username'] = $masjid['username'] ?? '';
-                // Jabatan di masjid ini: 'admin' atau 'pengurus'. Jangan
-                // tertukar dengan $sessionData['role'] di atas, yang hanya
-                // menandai "orang ini mengurus suatu masjid".
-                $sessionData['masjid_role'] = $p['role'] ?? 'pengurus';
 
                 $session->set($sessionData);
                 return redirect()->to('dashboard')->with('success', 'Selamat datang kembali, ' . $user['name'] . '!');
