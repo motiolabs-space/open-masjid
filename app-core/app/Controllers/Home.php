@@ -260,7 +260,11 @@ class Home extends BaseController
             'title'   => esc($news['title']) . ' - ' . esc($masjid['name']),
             'masjid'  => $masjid,
             'news'    => $news,
-            'storage' => new \App\Libraries\Storage()
+            'storage' => new \App\Libraries\Storage(),
+            // Dibaca di sini, bukan di view: $this->include() hanya meneruskan
+            // data dari controller, sehingga variabel yang dibuat di dalam view
+            // tidak akan pernah sampai ke partials/embed.
+            'embed'   => \App\Libraries\Embed::baca($news['video_url'] ?? null),
         ]);
     }
 

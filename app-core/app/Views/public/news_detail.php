@@ -43,23 +43,13 @@
     <div class="max-w-[1000px] mx-auto lg:grid lg:grid-cols-12 gap-16">
         <div class="lg:col-span-8">
             <!-- Main Featured Image / Video -->
-            <?php if (!empty($news['video_url'])): ?>
-                <?php 
-                    // Convert YouTube URL to embed
-                    $vId = '';
-                    if (preg_match('%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/ ]{11})%i', $news['video_url'], $match)) {
-                        $vId = $match[1];
-                    }
-                ?>
-                <div class="aspect-video rounded-[2.5rem] overflow-hidden bg-black shadow-2xl mb-12 animate-in fade-in zoom-in duration-1000">
-                    <?php if ($vId): ?>
-                        <iframe class="size-full" src="https://www.youtube.com/embed/<?= $vId ?>" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                    <?php else: ?>
-                        <div class="size-full flex items-center justify-center text-white/20">
-                            <span class="material-symbols-outlined text-6xl">play_disabled</span>
-                        </div>
-                    <?php endif; ?>
-                </div>
+            <?php // Dulu hanya YouTube yang dikenali di sini, dan tautan lain
+                  // berakhir sebagai ikon play dicoret tanpa penjelasan apa pun.
+                  // Pengenalannya kini di App\Libraries\Embed (dipanggil dari
+                  // Home::newsDetail): YouTube, TikTok, Instagram, dan kartu
+                  // tautan untuk sisanya. ?>
+            <?php if (!empty($embed)): ?>
+                <?= $this->include('partials/embed') ?>
             <?php elseif (!empty($news['thumbnail'])): ?>
                 <div class="aspect-video rounded-[2.5rem] overflow-hidden bg-gray-100 shadow-2xl mb-12 animate-in fade-in zoom-in duration-1000">
                     <img src="<?= $storage->url($news['thumbnail']) ?>" class="size-full object-cover">

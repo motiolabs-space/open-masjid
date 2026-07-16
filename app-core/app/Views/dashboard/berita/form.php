@@ -77,6 +77,25 @@
                             <p class="text-[10px] text-[#608a7e] mt-2">Format: JPG, PNG, WEBP (Maks 2MB). Rekomendasi 1200x675px.</p>
                         </div>
 
+                        <?php // Kolom video_url sudah ada di basis data dan sudah
+                              // dibaca saveBerita, tetapi field-nya tidak pernah
+                              // dibuat di sini — sematan tidak pernah bisa diisi
+                              // dari halaman ini. ?>
+                        <div>
+                            <label class="block text-sm font-bold mb-2">Tautan Video / Kiriman <span class="font-normal text-[#608a7e]">(opsional)</span></label>
+                            <div class="relative">
+                                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#608a7e] text-xl">link</span>
+                                <input type="url" name="video_url" value="<?= old('video_url', $news['video_url'] ?? '') ?>"
+                                       placeholder="Tempel tautan di sini"
+                                       class="w-full bg-[#f0f5f3] dark:bg-white/5 border-none rounded-2xl focus:ring-2 focus:ring-primary py-3.5 pl-12 pr-4 text-sm">
+                            </div>
+                            <p class="text-[10px] text-[#608a7e] mt-2 leading-relaxed">
+                                Tempel tautan YouTube, TikTok, atau Instagram &mdash; videonya akan tampil
+                                langsung di dalam berita, menggantikan foto sampul.
+                                Tautan lain (misalnya artikel berita) tampil sebagai tautan sumber.
+                            </p>
+                        </div>
+
                         <div>
                             <label class="block text-sm font-bold mb-2">Status Publikasi</label>
                             <div class="grid grid-cols-2 gap-2">
