@@ -32,7 +32,8 @@
                         <li><strong>Telegram</strong> &mdash; Token Bot masjid belum diisi di Pengaturan Masjid.</li>
                     <?php endif; ?>
                     <?php if (!$whatsappSiap): ?>
-                        <li><strong>WhatsApp</strong> &mdash; gateway belum disetel di server (WHATSAPP_API_KEY).</li>
+                        <li><strong>WhatsApp</strong> &mdash; Kunci Gateway WhatsApp masjid belum diisi di Pengaturan Masjid.
+                            Perlu akun Fonnte sendiri; Telegram tidak memerlukannya dan gratis.</li>
                     <?php endif; ?>
                 </ul>
             </div>

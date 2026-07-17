@@ -16,6 +16,13 @@ namespace App\Libraries\Channel;
  * mengembalikan true — seluruh kode Fonnte-nya dikomentari. Akibatnya tidak satu
  * pun pesan WhatsApp pernah terkirim sejak awal, termasuk kuitansi donasi, dan
  * tidak ada yang tahu karena kegagalannya selalu dilaporkan sebagai berhasil.
+ *
+ * TOKEN PER MASJID, TIDAK ADA CADANGAN KE AKUN PLATFORM
+ * Token diambil dari masjid.whatsapp_api_key — lihat alasannya pada migrasi
+ * AddWhatsappTokenToMasjid. Sengaja TIDAK ada cadangan ke env('WHATSAPP_API_KEY'):
+ * masjid yang diam-diam memakai nomor bersama akan ikut mati begitu nomor itu
+ * diblokir, dan tidak akan tahu sebabnya. Lebih baik ia diberi tahu bahwa
+ * kanalnya belum disetel, lalu memakai Telegram yang gratis dan resmi.
  */
 class WhatsAppChannel implements ChannelInterface
 {
@@ -24,9 +31,9 @@ class WhatsAppChannel implements ChannelInterface
     private ?string $token;
     private ?string $galat = null;
 
-    public function __construct(?string $token = null)
+    public function __construct(?string $token)
     {
-        $this->token = $token ?: (env('WHATSAPP_API_KEY') ?: null);
+        $this->token = $token ?: null;
     }
 
     public function siap(): bool
@@ -37,7 +44,7 @@ class WhatsAppChannel implements ChannelInterface
     public function kirim(string $groupId, string $pesan): bool
     {
         if (!$this->siap()) {
-            $this->galat = 'Gateway WhatsApp belum disetel. Isi WHATSAPP_API_KEY pada berkas .env server.';
+            $this->galat = 'WhatsApp masjid belum disetel. Isi Kunci Gateway WhatsApp pada Pengaturan Masjid.';
 
             return false;
         }

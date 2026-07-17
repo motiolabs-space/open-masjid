@@ -168,14 +168,31 @@ class Payment extends BaseController
                 if ($prog) $programName = $prog['title'];
             }
 
-            $wa = new \App\Libraries\WhatsAppService();
-            $wa->sendDonationReceipt($donation['donor_phone'], [
+            // Kunci WhatsApp milik masjid penerima donasi, bukan platform.
+            $wa = new \App\Libraries\WhatsAppService($masjid['whatsapp_api_key'] ?? null);
+            $terkirim = $wa->sendDonationReceipt($donation['donor_phone'], [
                 'masjid_name'     => $masjid['name'],
                 'masjid_username' => $masjid['username'],
                 'donor_name'      => $donation['donor_name'],
                 'amount'          => $donation['amount'],
                 'program_name'    => $programName
             ]);
+
+            // Kuitansi yang gagal TIDAK boleh menggagalkan donasinya: uangnya
+            // sudah masuk dan sudah tercatat di kas. Tetapi kegagalannya dicatat
+            // supaya pengurus punya jejak ketika donatur bertanya "kok saya
+            // tidak dapat konfirmasi?" — dulu hal ini tidak terlihat di mana pun
+            // karena pengirimannya selalu mengaku berhasil.
+            // Tingkat 'error', bukan 'warning': logger.threshold bernilai 4,
+            // sehingga CI4 MEMBUANG seluruh pesan 'warning' (tingkat 5) tanpa
+            // menulisnya ke mana pun. Peringatan yang tidak pernah terbaca sama
+            // saja dengan diam.
+            if (!$terkirim) {
+                log_message('error', 'Kuitansi WhatsApp gagal terkirim untuk invoice {inv}: {sebab}', [
+                    'inv'   => $donation['invoice_number'],
+                    'sebab' => $wa->pesanGalat() ?? 'tidak diketahui',
+                ]);
+            }
         }
     }
 

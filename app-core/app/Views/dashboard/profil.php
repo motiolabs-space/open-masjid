@@ -389,6 +389,26 @@
                     <div>
                         <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-1.5">Telegram Bot Token</label>
                         <input name="telegram_bot_token" class="w-full rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary font-mono text-sm" type="text" value="<?= esc($masjid['telegram_bot_token'] ?? '') ?>" placeholder="1234567890:AAH..."/>
+                        <p class="text-xs text-[#608a7e] mt-1.5">Dipakai juga untuk menyiarkan pengumuman ke grup Telegram jamaah.</p>
+                    </div>
+
+                    <?php // Kunci per masjid, bukan satu akun platform: nomor
+                          // pengirim harus jadi anggota grup jamaah, dan satu
+                          // nomor bersama yang diblokir WhatsApp akan mematikan
+                          // siaran seluruh masjid sekaligus. ?>
+                    <div class="pt-4 border-t border-[#dbe6e3] dark:border-white/10">
+                        <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-1.5">
+                            Kunci Gateway WhatsApp <span class="font-normal text-[#608a7e]">(opsional)</span>
+                        </label>
+                        <input name="whatsapp_api_key" class="w-full rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 focus:border-primary focus:ring-primary font-mono text-sm" type="text" value="<?= esc($masjid['whatsapp_api_key'] ?? '') ?>" placeholder="Token perangkat dari Fonnte"/>
+                        <p class="text-xs text-[#608a7e] mt-1.5 leading-relaxed">
+                            Isi hanya bila ingin menyiarkan ke grup <strong>WhatsApp</strong>. WhatsApp tidak
+                            mengizinkan kirim ke grup lewat jalur resmi, jadi diperlukan gateway
+                            <a href="https://fonnte.com" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:underline">Fonnte</a>
+                            dengan nomor masjid sendiri &mdash; nomor yang dikenali jamaah, dan
+                            risikonya tidak menular ke masjid lain.
+                            <strong>Telegram tidak memerlukan ini</strong> dan gratis.
+                        </p>
                     </div>
                 </div>
                 

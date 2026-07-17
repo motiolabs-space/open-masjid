@@ -12,7 +12,8 @@ namespace App\Libraries\Channel;
 class ChannelFactory
 {
     /**
-     * @param array $masjid baris tabel masjid (butuh telegram_bot_token)
+     * @param array $masjid baris tabel masjid — kedua kanal memakai kredensial
+     *        milik masjid itu sendiri, bukan milik platform.
      *
      * @throws \InvalidArgumentException bila kanalnya tidak dikenal — sengaja
      *         dilempar, bukan mengembalikan null, agar salah ketik nama kanal
@@ -22,9 +23,9 @@ class ChannelFactory
     public static function untuk(string $channel, array $masjid): ChannelInterface
     {
         return match ($channel) {
-            'telegram'  => new TelegramChannel($masjid['telegram_bot_token'] ?? null),
-            'whatsapp'  => new WhatsAppChannel(),
-            default     => throw new \InvalidArgumentException("Kanal tidak dikenal: {$channel}"),
+            'telegram' => new TelegramChannel($masjid['telegram_bot_token'] ?? null),
+            'whatsapp' => new WhatsAppChannel($masjid['whatsapp_api_key'] ?? null),
+            default    => throw new \InvalidArgumentException("Kanal tidak dikenal: {$channel}"),
         };
     }
 }
