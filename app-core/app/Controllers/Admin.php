@@ -1865,7 +1865,7 @@ class Admin extends BaseController
             // siap, alih-alih membiarkan pengurus menulis panjang-panjang lalu
             // menekan kirim dan gagal.
             'telegramSiap' => !empty($masjid['telegram_bot_token']),
-            'whatsappSiap' => !empty(env('WHATSAPP_API_KEY')),
+            'whatsappSiap' => !empty($masjid['whatsapp_api_key']),
         ]);
     }
 
@@ -1882,7 +1882,7 @@ class Admin extends BaseController
             'groups'       => (new \App\Models\MasjidGroupModel())
                                 ->where('masjid_id', $masjidId)->orderBy('name')->findAll(),
             'telegramSiap' => !empty($masjid['telegram_bot_token']),
-            'whatsappSiap' => !empty(env('WHATSAPP_API_KEY')),
+            'whatsappSiap' => !empty($masjid['whatsapp_api_key']),
         ]);
     }
 

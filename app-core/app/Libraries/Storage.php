@@ -150,14 +150,22 @@ class Storage
                 // Simpan ke disk sebagai cadangan; url() akan mengutamakan berkas
                 // lokal bila ada, sehingga gambarnya tetap tampil. Setelah S3 pulih,
                 // berkas ini dapat disalin dengan migrasi MigrateFilesToS3.
-                log_message('error', 'S3 Upload Error: ' . $e->getMessage() . ' — beralih menyimpan ke disk.');
-
                 if ($this->simpanLokal($file, $path, $newName)) {
-                    log_message('warning', "Storage: {$path}/{$newName} tersimpan di disk sebagai cadangan, BELUM ada di S3.");
+                    // Nama berkasnya ikut disebut di baris 'error' ini, bukan di
+                    // baris 'warning' tersendiri: logger.threshold bernilai 4,
+                    // sehingga CI4 MEMBUANG seluruh pesan 'warning' (tingkat 5).
+                    // Tanpa penggabungan ini yang tercatat hanya "S3 gagal",
+                    // tanpa petunjuk berkas mana yang kini cuma ada di disk.
+                    log_message(
+                        'error',
+                        "S3 Upload Error: {$e->getMessage()} — {$path}/{$newName} tersimpan di disk sebagai cadangan, BELUM ada di S3."
+                    );
+
                     return $path . '/' . $newName;
                 }
 
-                log_message('error', 'Storage: cadangan ke disk juga gagal untuk ' . $path);
+                log_message('error', "S3 Upload Error: {$e->getMessage()} — cadangan ke disk juga gagal untuk {$path}/{$newName}.");
+
                 return null;
             }
         }
