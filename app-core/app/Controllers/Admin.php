@@ -1855,68 +1855,226 @@ class Admin extends BaseController
 
     public function createBroadcast()
     {
+        $masjidId = session()->get('masjid_id');
+        $masjid   = (new \App\Models\MasjidModel())->find($masjidId);
+
         return view('dashboard/broadcast/form', [
-            'title' => 'Buat Siaran Baru - Masj.id'
+            'title'  => 'Buat Siaran Baru - Masj.id',
+            'groups' => (new \App\Models\MasjidGroupModel())->aktifMilik($masjidId),
+            // Dipakai formulir untuk memberi tahu lebih dulu bila kanalnya belum
+            // siap, alih-alih membiarkan pengurus menulis panjang-panjang lalu
+            // menekan kirim dan gagal.
+            'telegramSiap' => !empty($masjid['telegram_bot_token']),
+            'whatsappSiap' => !empty(env('WHATSAPP_API_KEY')),
         ]);
     }
 
-    public function sendBroadcast()
+    /**
+     * Halaman kelola grup jamaah tujuan siaran.
+     */
+    public function groups()
     {
         $masjidId = session()->get('masjid_id');
-        $subject = $this->request->getPost('subject');
-        $content = $this->request->getPost('content');
-        
-        // 1. Save to Database
-        $broadcastModel = new \App\Models\MasjidBroadcastModel();
-        $broadcastId = $broadcastModel->insert([
-            'masjid_id' => $masjidId,
-            'subject'   => $subject,
-            'content'   => $content,
-            'type'      => 'email',
-            'status'    => 'draft',
-            'recipient_count' => 0
+        $masjid   = (new \App\Models\MasjidModel())->find($masjidId);
+
+        return view('dashboard/broadcast/groups', [
+            'title'        => 'Grup Jamaah - Masj.id',
+            'groups'       => (new \App\Models\MasjidGroupModel())
+                                ->where('masjid_id', $masjidId)->orderBy('name')->findAll(),
+            'telegramSiap' => !empty($masjid['telegram_bot_token']),
+            'whatsappSiap' => !empty(env('WHATSAPP_API_KEY')),
         ]);
+    }
 
-        // 2. Get Active Subscribers
-        $subscriberModel = new \App\Models\MasjidSubscriberModel();
-        $subscribers = $subscriberModel->where(['masjid_id' => $masjidId, 'is_active' => 1])->findAll();
-        
-        if (empty($subscribers)) {
-             return redirect()->to('dashboard/broadcast')->with('error', 'Belum ada subscriber aktif.');
-        }
+    public function saveGroup()
+    {
+        $masjidId   = session()->get('masjid_id');
+        $groupModel = new \App\Models\MasjidGroupModel();
+        $id         = $this->request->getPost('id');
 
-        // 3. Send Emails (Looping - MVP Approach)
-        $email = \Config\Services::email();
-        $masjidModel = new \App\Models\MasjidModel();
-        $masjid = $masjidModel->find($masjidId);
-        $count = 0;
+        // 'id' dari POST tidak dipercaya: tanpa pemeriksaan ini, mengirim id
+        // milik masjid lain akan menimpa datanya sekaligus memindahkan
+        // kepemilikannya, karena masjid_id di bawah ditulis dari session.
+        if ($id) {
+            $milik = $groupModel->where(['id' => $id, 'masjid_id' => $masjidId])->first();
 
-        foreach ($subscribers as $sub) {
-            $email->clear();
-            $email->setTo($sub['email']);
-            $email->setSubject($subject);
-            
-            // Simple Template
-            $body = "<h2>Berita dari " . esc($masjid['name']) . "</h2>";
-            $body .= "<hr>";
-            $body .= $content;
-            $body .= "<br><br><small>Anda menerima email ini karena berlangganan update dari " . esc($masjid['name']) . " via Masj.id.</small>";
-
-            $email->setMessage($body);
-
-            if ($email->send()) {
-                $count++;
+            if (!$milik) {
+                return redirect()->to('dashboard/broadcast/groups')
+                    ->with('error', 'Grup tidak ditemukan.');
             }
         }
 
-        // 4. Update Status
-        $broadcastModel->update($broadcastId, [
-            'status' => 'sent', 
-            'recipient_count' => $count,
-            'sent_at' => date('Y-m-d H:i:s')
-        ]);
+        $data = [
+            'masjid_id' => $masjidId,
+            'channel'   => $this->request->getPost('channel'),
+            'group_id'  => trim((string) $this->request->getPost('group_id')),
+            'name'      => trim((string) $this->request->getPost('name')),
+            'is_active' => $this->request->getPost('is_active') ? 1 : 0,
+        ];
 
-        return redirect()->to('dashboard/broadcast')->with('success', "Siaran berhasil dikirim ke $count subscriber.");
+        $tersimpan = $id ? $groupModel->update($id, $data) : $groupModel->insert($data);
+
+        if (!$tersimpan) {
+            return redirect()->back()->withInput()
+                ->with('error', 'Gagal menyimpan grup: ' . implode(' ', $groupModel->errors()));
+        }
+
+        return redirect()->to('dashboard/broadcast/groups')
+            ->with('success', $id ? 'Grup diperbarui.' : 'Grup berhasil didaftarkan.');
+    }
+
+    public function deleteGroup($id)
+    {
+        $masjidId   = session()->get('masjid_id');
+        $groupModel = new \App\Models\MasjidGroupModel();
+
+        if (!$groupModel->where(['id' => $id, 'masjid_id' => $masjidId])->first()) {
+            return redirect()->to('dashboard/broadcast/groups')->with('error', 'Grup tidak ditemukan.');
+        }
+
+        $groupModel->delete($id);
+
+        return redirect()->to('dashboard/broadcast/groups')->with('success', 'Grup dihapus.');
+    }
+
+    /**
+     * Uji kirim ke satu grup, supaya pengurus tahu grupnya benar-benar
+     * terjangkau sebelum menyiarkan pengumuman sungguhan ke jamaah.
+     */
+    public function testGroup($id)
+    {
+        $masjidId = session()->get('masjid_id');
+        $masjid   = (new \App\Models\MasjidModel())->find($masjidId);
+
+        $grup = (new \App\Models\MasjidGroupModel())
+            ->where(['id' => $id, 'masjid_id' => $masjidId])->first();
+
+        if (!$grup) {
+            return redirect()->to('dashboard/broadcast/groups')->with('error', 'Grup tidak ditemukan.');
+        }
+
+        $kanal = \App\Libraries\Channel\ChannelFactory::untuk($grup['channel'], $masjid);
+        $pesan = $grup['channel'] === 'telegram'
+            ? '<b>Uji koneksi</b>' . "\n\n" . 'Grup ini sudah terhubung dengan ' . esc($masjid['name']) . '.'
+            : '*Uji koneksi*' . "\n\n" . 'Grup ini sudah terhubung dengan ' . $masjid['name'] . '.';
+
+        if (!$kanal->kirim($grup['group_id'], $pesan)) {
+            return redirect()->to('dashboard/broadcast/groups')
+                ->with('error', 'Uji kirim gagal: ' . $kanal->pesanGalat());
+        }
+
+        return redirect()->to('dashboard/broadcast/groups')
+            ->with('success', 'Uji kirim berhasil. Cek pesan di grup ' . $grup['name'] . '.');
+    }
+
+    /**
+     * Mengirim siaran ke grup jamaah yang dipilih (Telegram / WhatsApp).
+     *
+     * Sebelumnya method ini mengirim EMAIL satu per satu ke subscriber — bukan
+     * ke grup — dan tidak pernah dipakai: subscriber di produksi nol. Selain
+     * itu ia melapor "berhasil dikirim ke 0 subscriber" ketika setiap
+     * pengirimannya gagal, karena hasil $email->send() hanya dihitung, tidak
+     * pernah dijadikan sebab kegagalan.
+     */
+    public function sendBroadcast()
+    {
+        $masjidId = session()->get('masjid_id');
+        $subject  = $this->request->getPost('subject');
+        $content  = $this->request->getPost('content');
+        $groupIds = $this->request->getPost('group_ids');
+
+        if (empty($groupIds) || !is_array($groupIds)) {
+            return redirect()->back()->withInput()
+                ->with('error', 'Pilih setidaknya satu grup tujuan.');
+        }
+
+        // group_ids datang dari POST: hanya grup milik masjid ini yang boleh
+        // dituju. Tanpa ini pengurus satu masjid bisa menyiarkan pengumuman ke
+        // grup jamaah masjid lain — dan pesan yang sudah terkirim tidak bisa
+        // ditarik kembali.
+        $groupModel = new \App\Models\MasjidGroupModel();
+        $grup = $groupModel->whereIn('id', $groupIds)
+            ->where(['masjid_id' => $masjidId, 'is_active' => 1])
+            ->findAll();
+
+        if (empty($grup)) {
+            return redirect()->back()->withInput()
+                ->with('error', 'Grup tujuan tidak ditemukan.');
+        }
+
+        $masjid = (new \App\Models\MasjidModel())->find($masjidId);
+
+        $broadcastModel = new \App\Models\MasjidBroadcastModel();
+        $berhasil = [];
+        $gagal    = [];
+
+        foreach ($grup as $g) {
+            $kanal = \App\Libraries\Channel\ChannelFactory::untuk($g['channel'], $masjid);
+            // Teksnya disusun per kanal: Telegram dan WhatsApp memakai penanda
+            // tebal yang berbeda, dan HTML yang dikirim ke WhatsApp akan terbaca
+            // mentah sebagai '<b>' oleh jamaah.
+            $terkirim = $kanal->kirim(
+                $g['group_id'],
+                $this->susunPesanSiaran($masjid, $subject, $content, $g['channel'])
+            );
+
+            // Tiap grup dicatat sendiri: satu grup gagal tidak boleh membuat
+            // yang lain ikut dianggap gagal, dan pengurus perlu tahu persis
+            // grup mana yang perlu diulang.
+            $broadcastModel->insert([
+                'masjid_id'       => $masjidId,
+                'subject'         => $subject,
+                'content'         => $content,
+                'type'            => $g['channel'],
+                'group_id'        => $g['group_id'],
+                'status'          => $terkirim ? 'sent' : 'failed',
+                'recipient_count' => $terkirim ? 1 : 0,
+                'sent_at'         => $terkirim ? date('Y-m-d H:i:s') : null,
+            ]);
+
+            if ($terkirim) {
+                $berhasil[] = $g['name'];
+            } else {
+                $gagal[] = $g['name'] . ' (' . $kanal->pesanGalat() . ')';
+            }
+        }
+
+        if (empty($berhasil)) {
+            return redirect()->back()->withInput()
+                ->with('error', 'Siaran tidak terkirim ke satu grup pun. ' . implode(' ', $gagal));
+        }
+
+        $kabar = 'Siaran terkirim ke ' . count($berhasil) . ' grup: ' . implode(', ', $berhasil) . '.';
+        if (!empty($gagal)) {
+            $kabar .= ' Gagal: ' . implode(' ', $gagal);
+        }
+
+        return redirect()->to('dashboard/broadcast')->with('success', $kabar);
+    }
+
+    /**
+     * Menyusun teks siaran sesuai kanalnya.
+     *
+     * Telegram hanya menerima HTML terbatas (b, i, a, code, pre); tag di luar
+     * itu membuat Telegram MENOLAK seluruh pesannya, jadi isi dari editor
+     * dibersihkan dulu. WhatsApp tidak mengenal HTML sama sekali — mengirim
+     * '<b>' ke sana membuat jamaah membaca tanda kurung sikunya apa adanya.
+     */
+    private function susunPesanSiaran(array $masjid, string $subject, string $content, string $channel): string
+    {
+        if ($channel === 'telegram') {
+            return '<b>' . esc($subject) . '</b>' . "\n\n"
+                . trim(strip_tags($content, '<b><i><a><code><pre>')) . "\n\n"
+                . '— ' . esc($masjid['name']);
+        }
+
+        // WhatsApp: teks polos, tebal ditandai *bintang*. Entitas HTML dari
+        // editor ikut dikembalikan agar '&amp;' tidak terbaca mentah.
+        $isi = html_entity_decode(strip_tags($content), ENT_QUOTES, 'UTF-8');
+
+        return '*' . $subject . '*' . "\n\n"
+            . trim($isi) . "\n\n"
+            . '— ' . $masjid['name'];
     }
 
     // AID DISTRIBUTION (PENYALURAN) MODULE

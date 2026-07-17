@@ -113,6 +113,12 @@ $routes->get('dashboard/subscribers/delete/(:num)', 'Admin::deleteSubscriber/$1'
 $routes->get('dashboard/broadcast', 'Admin::broadcasts');
 $routes->get('dashboard/broadcast/new', 'Admin::createBroadcast');
 $routes->post('dashboard/broadcast/send', 'Admin::sendBroadcast');
+// Grup jamaah tujuan siaran. Mendaftar & menghapus grup dibatasi Admin Masjid:
+// grup yang salah daftar berarti pengumuman masjid melayang ke pihak lain.
+$routes->get('dashboard/broadcast/groups', 'Admin::groups');
+$routes->post('dashboard/broadcast/groups/save', 'Admin::saveGroup', ['filter' => 'masjidAdmin']);
+$routes->get('dashboard/broadcast/groups/delete/(:num)', 'Admin::deleteGroup/$1', ['filter' => 'masjidAdmin']);
+$routes->get('dashboard/broadcast/groups/test/(:num)', 'Admin::testGroup/$1');
 
 // Aid Distribution to Warga (Penyaluran Bantuan berbasis warga)
 // Namespace terpisah dari modul Mustahik ('dashboard/distribution/*') agar

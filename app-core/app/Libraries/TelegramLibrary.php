@@ -60,7 +60,14 @@ class TelegramLibrary
         curl_setopt($ch, CURLOPT_POST, count($data));
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        // Verifikasi TLS WAJIB menyala. Sebelumnya dimatikan, sehingga token bot
+        // dan seluruh isi pesan bisa disadap dan diubah di tengah jalan oleh
+        // siapa pun yang menguasai jaringan — dan token bot itu memberi kendali
+        // penuh atas bot masjid.
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
 
         $result = curl_exec($ch);
         $error = curl_error($ch);
