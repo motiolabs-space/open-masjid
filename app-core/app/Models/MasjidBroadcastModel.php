@@ -12,7 +12,11 @@ class MasjidBroadcastModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['masjid_id', 'subject', 'content', 'type', 'status', 'recipient_count', 'sent_at'];
+    // 'group_id' WAJIB ada di sini. Kolom yang tidak terdaftar dibuang diam-diam
+    // oleh model — tanpa pesan apa pun — sehingga riwayat siaran tersimpan tanpa
+    // keterangan grup tujuannya dan pertanyaan "pengumuman kemarin masuk ke grup
+    // mana?" tidak bisa dijawab.
+    protected $allowedFields    = ['masjid_id', 'subject', 'content', 'type', 'group_id', 'status', 'recipient_count', 'sent_at'];
 
     // Dates
     protected $useTimestamps = true;
