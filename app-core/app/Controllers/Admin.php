@@ -2965,15 +2965,33 @@ class Admin extends BaseController
     {
         $masjidId = session()->get('masjid_id');
         $userId = $this->request->getPost('user_id');
-        $role = $this->request->getPost('role') ?? 'admin';
-        $title = $this->request->getPost('title') ?? 'Pengurus';
+        // Default 'pengurus', BUKAN 'admin': default yang aman. Hanya nilai yang
+        // dikenal yang diterima — role dari POST tidak boleh menyimpan string
+        // sembarang. Catatan: penegakan hak akses saat ini hanya membedakan
+        // 'admin' vs selainnya; role lain (bendahara, amil, dst) baru label.
+        $role = $this->request->getPost('role') ?: 'pengurus';
+        $roleSah = ['admin', 'pengurus', 'bendahara', 'lms_admin', 'amil', 'distributor'];
+        if (!in_array($role, $roleSah, true)) {
+            $role = 'pengurus';
+        }
+        $title = $this->request->getPost('title') ?: 'Pengurus';
 
         if (empty($userId)) {
             return $this->response->setJSON(['status' => 'error', 'message' => 'User tidak ditemukan.']);
         }
 
+        // user_id dari POST WAJIB benar-benar pengikut masjid ini. Tanpa cek ini,
+        // admin bisa mengangkat pengguna mana pun di platform — bahkan yang tak
+        // pernah mengikuti masjidnya — menjadi pengurus, atau membuat baris
+        // pengurus yatim bila user_id-nya tidak ada.
+        $isFollower = (new \App\Models\MasjidFollowerModel())
+            ->where(['masjid_id' => $masjidId, 'user_id' => $userId])->first();
+        if (!$isFollower) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Pengguna ini bukan pengikut masjid Anda.']);
+        }
+
         $pengurusModel = new \App\Models\MasjidPengurusModel();
-        
+
         $exists = $pengurusModel->where(['masjid_id' => $masjidId, 'user_id' => $userId])->first();
         if ($exists) {
             return $this->response->setJSON(['status' => 'error', 'message' => 'Pengguna ini sudah menjadi pengurus.']);
