@@ -1938,6 +1938,94 @@ class Admin extends BaseController
     }
 
     /**
+     * Halaman kelola pengingat terjadwal ke grup jamaah.
+     */
+    public function reminders()
+    {
+        $masjidId = session()->get('masjid_id');
+
+        return view('dashboard/broadcast/reminders', [
+            'title'     => 'Pengingat Terjadwal - Masj.id',
+            'reminders' => (new \App\Models\MasjidReminderModel())->aktifMilik($masjidId),
+            // Hanya grup aktif yang boleh jadi tujuan; tanpa grup, tak ada
+            // yang bisa dikirimi.
+            'groups'    => (new \App\Models\MasjidGroupModel())->aktifMilik($masjidId),
+        ]);
+    }
+
+    public function saveReminder()
+    {
+        $masjidId = session()->get('masjid_id');
+        $model    = new \App\Models\MasjidReminderModel();
+        $id       = $this->request->getPost('id');
+
+        // 'id' dari POST diperiksa kepemilikannya sebelum diperbarui.
+        if ($id) {
+            $milik = $model->where(['id' => $id, 'masjid_id' => $masjidId])->first();
+            if (!$milik) {
+                return redirect()->to('dashboard/broadcast/reminders')->with('error', 'Pengingat tidak ditemukan.');
+            }
+        }
+
+        // group_id dari POST WAJIB milik masjid ini: tanpa cek ini pengingat
+        // bisa diarahkan mengirim ke grup masjid lain.
+        $groupId = (int) $this->request->getPost('group_id');
+        $grup    = (new \App\Models\MasjidGroupModel())
+            ->where(['id' => $groupId, 'masjid_id' => $masjidId])->first();
+        if (!$grup) {
+            return redirect()->back()->withInput()->with('error', 'Grup tujuan tidak ditemukan.');
+        }
+
+        $frekuensi = $this->request->getPost('frequency');
+        $data = [
+            'masjid_id'    => $masjidId,
+            'group_id'     => $groupId,
+            'type'         => $this->request->getPost('type'),
+            'frequency'    => $frekuensi,
+            // Hari hanya relevan sesuai frekuensinya; sisanya dikosongkan agar
+            // tidak menyimpan angka yang menyesatkan.
+            'day_of_week'  => $frekuensi === 'mingguan' ? (int) $this->request->getPost('day_of_week') : null,
+            'day_of_month' => $frekuensi === 'bulanan' ? (int) $this->request->getPost('day_of_month') : null,
+            'time'         => $this->request->getPost('time') . ':00',
+            'is_active'    => 1,
+        ];
+
+        $tersimpan = $id ? $model->update($id, $data) : $model->insert($data);
+        if (!$tersimpan) {
+            return redirect()->back()->withInput()
+                ->with('error', 'Gagal menyimpan pengingat: ' . implode(' ', $model->errors()));
+        }
+
+        return redirect()->to('dashboard/broadcast/reminders')
+            ->with('success', $id ? 'Pengingat diperbarui.' : 'Pengingat ditambahkan.');
+    }
+
+    public function toggleReminder($id)
+    {
+        $masjidId = session()->get('masjid_id');
+        $model    = new \App\Models\MasjidReminderModel();
+        $r = $model->where(['id' => $id, 'masjid_id' => $masjidId])->first();
+        if (!$r) {
+            return redirect()->to('dashboard/broadcast/reminders')->with('error', 'Pengingat tidak ditemukan.');
+        }
+        $model->update($id, ['is_active' => (int) $r['is_active'] === 1 ? 0 : 1]);
+
+        return redirect()->to('dashboard/broadcast/reminders')->with('success', 'Status pengingat diperbarui.');
+    }
+
+    public function deleteReminder($id)
+    {
+        $masjidId = session()->get('masjid_id');
+        $model    = new \App\Models\MasjidReminderModel();
+        if (!$model->where(['id' => $id, 'masjid_id' => $masjidId])->first()) {
+            return redirect()->to('dashboard/broadcast/reminders')->with('error', 'Pengingat tidak ditemukan.');
+        }
+        $model->delete($id);
+
+        return redirect()->to('dashboard/broadcast/reminders')->with('success', 'Pengingat dihapus.');
+    }
+
+    /**
      * Halaman kelola grup jamaah tujuan siaran.
      */
     public function groups()

@@ -9,10 +9,20 @@
                 <p class="text-[#608a7e]">Kirim update, berita, dan laporan ke jamaah yang berlangganan.</p>
             </div>
             
-            <a href="<?= base_url('dashboard/broadcast/new') ?>" class="bg-primary text-white px-5 py-3 rounded-xl font-bold hover:bg-emerald-900 transition-all shadow-lg shadow-primary/20 flex items-center gap-2">
-                <span class="material-symbols-outlined text-xl">send</span>
-                <span>Buat Siaran Baru</span>
-            </a>
+            <div class="flex flex-wrap gap-2">
+                <a href="<?= base_url('dashboard/broadcast/reminders') ?>" class="bg-white dark:bg-white/5 border border-[#e5e7eb] dark:border-white/10 text-[#111816] dark:text-white px-4 py-3 rounded-xl font-bold hover:bg-[#f0f5f3] transition-all flex items-center gap-2">
+                    <span class="material-symbols-outlined text-xl">schedule</span>
+                    <span>Pengingat</span>
+                </a>
+                <a href="<?= base_url('dashboard/broadcast/groups') ?>" class="bg-white dark:bg-white/5 border border-[#e5e7eb] dark:border-white/10 text-[#111816] dark:text-white px-4 py-3 rounded-xl font-bold hover:bg-[#f0f5f3] transition-all flex items-center gap-2">
+                    <span class="material-symbols-outlined text-xl">groups</span>
+                    <span>Grup</span>
+                </a>
+                <a href="<?= base_url('dashboard/broadcast/new') ?>" class="bg-primary text-white px-5 py-3 rounded-xl font-bold hover:bg-emerald-900 transition-all shadow-lg shadow-primary/20 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-xl">send</span>
+                    <span>Buat Siaran Baru</span>
+                </a>
+            </div>
         </div>
 
         <?php if (session()->getFlashdata('success')): ?>
