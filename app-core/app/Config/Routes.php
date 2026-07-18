@@ -113,6 +113,7 @@ $routes->get('dashboard/subscribers/delete/(:num)', 'Admin::deleteSubscriber/$1'
 $routes->get('dashboard/broadcast', 'Admin::broadcasts');
 $routes->get('dashboard/broadcast/new', 'Admin::createBroadcast');
 $routes->post('dashboard/broadcast/send', 'Admin::sendBroadcast');
+$routes->post('dashboard/broadcast/draft', 'Admin::draftBroadcast'); // bantu susun via AI
 // Grup jamaah tujuan siaran. Mendaftar & menghapus grup dibatasi Admin Masjid:
 // grup yang salah daftar berarti pengumuman masjid melayang ke pihak lain.
 $routes->get('dashboard/broadcast/groups', 'Admin::groups');
