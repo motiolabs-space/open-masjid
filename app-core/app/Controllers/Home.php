@@ -573,74 +573,15 @@ class Home extends BaseController
      */
     private function _ambilJadwalSholat(array $masjid): ?array
     {
-        // Koordinat wajib; 0,0 dianggap belum diisi.
-        if (empty($masjid['latitude']) || empty($masjid['longitude'])
-            || ($masjid['latitude'] == 0 && $masjid['longitude'] == 0)) {
-            return null;
-        }
-
-        $lat  = $masjid['latitude'];
-        $long = $masjid['longitude'];
-        $tz   = $this->_timezoneMasjid($masjid);
-        $date = date('d-m-Y');
-
-        // Zona ikut dalam kunci cache: mengubah zona harus langsung terasa,
-        // tidak menunggu cache 24 jam kedaluwarsa.
-        $cacheKey = 'prayer_aladhan_' . $masjid['id'] . '_' . $date . '_' . md5((string) $tz);
-        $tersimpan = cache($cacheKey);
-        if ($tersimpan) {
-            return $tersimpan;
-        }
-
-        try {
-            $client = \Config\Services::curlrequest();
-            // Method 20 = Kementerian Agama RI.
-            // WAJIB https: AlAdhan membalas 301 ke HTTPS untuk permintaan http,
-            // sehingga respons bukan JSON dan jadwal sholat gagal tampil.
-            $apiUrl = "https://api.aladhan.com/v1/timings/$date?latitude=$lat&longitude=$long&method=20";
-            if ($tz !== null) {
-                $apiUrl .= '&timezonestring=' . rawurlencode($tz);
-            }
-
-            $response = $client->request('GET', $apiUrl, ['timeout' => 5]);
-            $body = json_decode($response->getBody(), true);
-
-            if (isset($body['code']) && $body['code'] == 200) {
-                cache()->save($cacheKey, $body['data'], 86400); // 24 jam
-                return $body['data'];
-            }
-        } catch (\Exception $e) {
-            log_message('error', 'AlAdhan API Error: ' . $e->getMessage());
-        }
-
-        return null;
+        // Logika dipindahkan ke App\Libraries\PrayerTimes agar dipakai bersama
+        // pengingat terjadwal (spark broadcast:reminders) — satu sumber jadwal
+        // untuk layar masjid maupun pesan ke grup.
+        return (new \App\Libraries\PrayerTimes())->ambil($masjid);
     }
 
     private function _terapkanKoreksi(array $timings, array $koreksi): array
     {
-        // Nama pada AlAdhan -> nama yang dipakai pengurus.
-        $peta = [
-            'Fajr'    => 'Subuh',
-            'Dhuhr'   => 'Dzuhur',
-            'Asr'     => 'Ashar',
-            'Maghrib' => 'Maghrib',
-            'Isha'    => 'Isya',
-        ];
-
-        foreach ($peta as $kunciApi => $namaSholat) {
-            $menit = (int) ($koreksi[$namaSholat] ?? 0);
-            if ($menit === 0 || empty($timings[$kunciApi])) {
-                continue;
-            }
-
-            // AlAdhan dapat mengembalikan "17:52" atau "17:52 (WIB)".
-            $jam = explode(' ', trim($timings[$kunciApi]))[0];
-            [$j, $m] = array_map('intval', explode(':', $jam));
-
-            // Dijaga tetap dalam satu hari agar tidak melompat ke tanggal lain.
-            $total = (($j * 60) + $m + $menit + 1440) % 1440;
-            $timings[$kunciApi] = sprintf('%02d:%02d', intdiv($total, 60), $total % 60);
-        }
+        return (new \App\Libraries\PrayerTimes())->terapkanKoreksi($timings, $koreksi);
 
         return $timings;
     }
