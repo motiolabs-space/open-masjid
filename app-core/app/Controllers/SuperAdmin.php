@@ -20,6 +20,36 @@ class SuperAdmin extends BaseController
         }
     }
 
+    /**
+     * Rekap pemakaian token AI, khusus superadmin (kunci SumoPod satu untuk
+     * semua masjid, jadi biayanya beban platform). initController sudah
+     * membatasi akses ke superadmin.
+     */
+    public function aiUsage(): string
+    {
+        // Rentang default: bulan berjalan. Bisa dipersempit lewat ?dari=&sampai=.
+        $dari   = $this->request->getGet('dari') ?: date('Y-m-01');
+        $sampai = $this->request->getGet('sampai') ?: date('Y-m-d');
+
+        // Tolak rentang terbalik ketimbang mengembalikan tabel kosong yang
+        // membingungkan.
+        if ($dari > $sampai) {
+            [$dari, $sampai] = [$sampai, $dari];
+        }
+
+        $log = new \App\Models\AiUsageLogModel();
+
+        return view('superadmin/ai_usage', [
+            'title'     => 'Pemakaian AI - Superadmin',
+            'dari'      => $dari,
+            'sampai'    => $sampai,
+            'ringkasan' => $log->ringkasan($dari, $sampai),
+            'perModel'  => $log->perModel($dari, $sampai),
+            'perFitur'  => $log->perFitur($dari, $sampai),
+            'perMasjid' => $log->perMasjid($dari, $sampai),
+        ]);
+    }
+
     public function index(): string
     {
         $masjidModel = new MasjidModel();

@@ -99,7 +99,7 @@ class Distribution extends BaseController
         ];
 
         // Generate AI Score synchronously
-        $sumoPod = new SumoPodAI();
+        $sumoPod = new SumoPodAI((int) session()->get('masjid_id'));
         $aiResult = $sumoPod->scoreMustahik($data);
 
         if ($aiResult) {
@@ -156,7 +156,7 @@ class Distribution extends BaseController
         
         if (!$mustahik) return redirect()->to('dashboard/distribution')->with('error', 'Mustahik tidak ditemukan.');
 
-        $sumoPod = new SumoPodAI();
+        $sumoPod = new SumoPodAI((int) session()->get('masjid_id'));
         $aiResult = $sumoPod->scoreMustahik($mustahik);
 
         if ($aiResult) {
