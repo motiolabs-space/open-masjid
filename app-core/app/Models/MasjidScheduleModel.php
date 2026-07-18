@@ -26,9 +26,18 @@ class MasjidScheduleModel extends Model
     // Validation
     protected $validationRules      = [
         'masjid_id'   => 'required|numeric',
-        'date'        => 'required|valid_date',
-        'prayer_type' => 'required|in_list[subuh,dzuhur,ashar,maghrib,isya,jumat,tarawih,eid_fitr,eid_adha]',
-        'imam_name'   => 'permit_empty|min_length[3]|max_length[100]',
+        'date'        => [
+            'label' => 'Tanggal',
+            'rules' => 'required|valid_date',
+        ],
+        'prayer_type' => [
+            'label' => 'Waktu Sholat',
+            'rules' => 'required|in_list[subuh,dzuhur,ashar,maghrib,isya,jumat,tarawih,eid_fitr,eid_adha]',
+        ],
+        'imam_name'   => [
+            'label' => 'Nama Imam',
+            'rules' => 'permit_empty|min_length[3]|max_length[100]',
+        ],
     ];
     protected $validationMessages   = [];
     protected $skipValidation       = false;
