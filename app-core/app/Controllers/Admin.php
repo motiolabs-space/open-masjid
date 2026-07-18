@@ -1870,6 +1870,74 @@ class Admin extends BaseController
     }
 
     /**
+     * Menyusun draf pengumuman dari poin-poin singkat pengurus (dibantu AI).
+     *
+     * Dijawab sebagai JSON untuk fetch(); pengurus tetap menyunting dan
+     * menyetujui hasilnya sebelum benar-benar dikirim — draf ini bukan siaran.
+     */
+    public function draftBroadcast()
+    {
+        $poin = trim((string) $this->request->getPost('poin'));
+        if ($poin === '') {
+            return $this->response->setStatusCode(422)->setJSON([
+                'status'  => 'error',
+                'message' => 'Tuliskan dulu poin-poin pengumumannya.',
+            ]);
+        }
+
+        $masjidId = session()->get('masjid_id');
+        $masjid   = (new \App\Models\MasjidModel())->find($masjidId);
+
+        // Nada disediakan sebagai pilihan supaya draf sesuai konteks (kabar duka
+        // tidak boleh terdengar ceria). Nilai di luar daftar diabaikan.
+        $nada = $this->request->getPost('nada');
+        $nadaTeks = [
+            'resmi'    => 'resmi dan sopan',
+            'hangat'   => 'hangat dan mengajak',
+            'ringkas'  => 'sangat ringkas dan padat',
+            'duka'     => 'penuh empati dan berbelasungkawa',
+        ][$nada] ?? 'resmi dan sopan';
+
+        $prompt  = "Susun sebuah pengumuman resmi dari '{$masjid['name']}' untuk dikirim ke grup jamaah "
+                 . "(Telegram/WhatsApp), berdasarkan poin-poin dari pengurus di bawah.\n\n";
+        $prompt .= "Poin-poin dari pengurus:\n{$poin}\n\n";
+        $prompt .= "Aturan:\n";
+        $prompt .= "1. Bahasa Indonesia yang {$nadaTeks}, bernuansa Islami secukupnya.\n";
+        // Pagar terpenting: model TIDAK boleh menambah tanggal, nominal, atau
+        // detail yang tidak ada di poin — pengumuman salah yang sudah terkirim
+        // ke jamaah tidak bisa ditarik.
+        $prompt .= "2. JANGAN menambahkan informasi, tanggal, angka, atau nama yang tidak ada di poin. "
+                 . "Bila sebuah detail tidak disebutkan, jangan mengarangnya.\n";
+        $prompt .= "3. Panjang wajar untuk pesan grup, tidak bertele-tele.\n";
+        $prompt .= "4. Output HANYA teks pengumuman yang siap dikirim — tanpa judul 'Pengumuman:', "
+                 . "tanpa tanda kutip pembungkus, tanpa penjelasan apa pun di luar teksnya.";
+
+        // Berkualitas: pengumuman ini dibaca seluruh jamaah. Volume rendah
+        // (pengurus menyusun sesekali), jadi biaya bukan pertimbangan utama.
+        $ai    = new \App\Libraries\SumoPodAI((int) $masjidId);
+        $draft = $ai->chatCompletion($prompt, [
+            'temperature' => 0.7,
+            'max_tokens'  => 1500,
+            'tier'        => 'berat',
+            'feature'     => 'draft_pengumuman',
+        ]);
+
+        if (!$draft) {
+            // 503, bukan 200 dengan draf kosong: pengurus harus tahu ini gagal,
+            // bukan mengira AI tak punya saran.
+            return $this->response->setStatusCode(503)->setJSON([
+                'status'  => 'error',
+                'message' => 'AI sedang tidak dapat dihubungi. Coba lagi sebentar lagi, atau tulis manual.',
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'draft'  => trim($draft),
+        ]);
+    }
+
+    /**
      * Halaman kelola grup jamaah tujuan siaran.
      */
     public function groups()
