@@ -118,6 +118,7 @@ $routes->post('dashboard/broadcast/send', 'Admin::sendBroadcast');
 $routes->get('dashboard/broadcast/groups', 'Admin::groups');
 $routes->post('dashboard/broadcast/groups/save', 'Admin::saveGroup', ['filter' => 'masjidAdmin']);
 $routes->get('dashboard/broadcast/groups/delete/(:num)', 'Admin::deleteGroup/$1', ['filter' => 'masjidAdmin']);
+$routes->get('dashboard/broadcast/groups/toggle/(:num)', 'Admin::toggleGroup/$1', ['filter' => 'masjidAdmin']);
 $routes->get('dashboard/broadcast/groups/test/(:num)', 'Admin::testGroup/$1');
 
 // Aid Distribution to Warga (Penyaluran Bantuan berbasis warga)

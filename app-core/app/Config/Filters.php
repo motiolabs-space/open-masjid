@@ -75,7 +75,13 @@ class Filters extends BaseFilters
     public array $globals = [
         'before' => [
             // 'honeypot',
-            'csrf' => ['except' => ['payment/callback']],
+            // Webhook dari layanan luar TIDAK membawa token CSRF, jadi harus
+            // dikecualikan atau seluruh update ditolak 403 di pintu. Telegram
+            // sebelumnya tidak dikecualikan — botnya tidak pernah bisa menerima
+            // satu pun pesan, terlepas dari kunci API. Keamanannya dijaga
+            // dengan cara lain: token bot per masjid ada di URL-nya, dan grup
+            // harus terdaftar (lihat Api\Telegram).
+            'csrf' => ['except' => ['payment/callback', 'api/telegram/webhook/*']],
             // 'invalidchars',
         ],
         'after' => [

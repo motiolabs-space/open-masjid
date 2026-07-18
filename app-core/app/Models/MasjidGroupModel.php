@@ -64,4 +64,41 @@ class MasjidGroupModel extends Model
             'is_active' => 1,
         ])->first();
     }
+
+    /**
+     * Baris grup apa pun statusnya (aktif maupun menunggu persetujuan).
+     * Dipakai webhook untuk membedakan grup baru dari yang sudah tercatat.
+     */
+    public function cari(string $channel, string $groupId): ?array
+    {
+        return $this->where(['channel' => $channel, 'group_id' => $groupId])->first();
+    }
+
+    /**
+     * Mencatat grup baru sebagai MENUNGGU PERSETUJUAN (is_active = 0).
+     *
+     * Dipanggil webhook saat bot menerima pesan dari grup yang belum dikenal.
+     * Tujuannya semata memunculkan group_id di halaman kelola grup supaya
+     * pengurus bisa mengaktifkannya — bot TIDAK melayani grup selama masih
+     * menunggu, sehingga siapa pun boleh memasukkan bot ke grupnya tanpa
+     * membocorkan apa-apa. Aktivasi adalah keputusan pengurus.
+     *
+     * Tidak menimpa baris yang sudah ada (unik channel+group_id), sehingga grup
+     * yang sudah diaktifkan tidak diam-diam dikembalikan ke status menunggu.
+     */
+    public function catatPending(int $masjidId, string $channel, string $groupId, string $nama): void
+    {
+        if ($this->cari($channel, $groupId) !== null) {
+            return;
+        }
+
+        $this->insert([
+            'masjid_id' => $masjidId,
+            'channel'   => $channel,
+            'group_id'  => $groupId,
+            'name'      => $nama !== '' ? $nama : 'Grup Baru',
+            'is_active' => 0,
+        ]);
+    }
 }
+

@@ -1938,6 +1938,30 @@ class Admin extends BaseController
     }
 
     /**
+     * Menyalakan/mematikan sebuah grup.
+     *
+     * Aktivasi adalah persetujuan pengurus atas grup yang dicatat webhook: sejak
+     * aktif, bot melayani grup itu dan grup itu menerima siaran. Karena itu
+     * dibatasi Admin Masjid, seperti mendaftarkan grup.
+     */
+    public function toggleGroup($id)
+    {
+        $masjidId   = session()->get('masjid_id');
+        $groupModel = new \App\Models\MasjidGroupModel();
+
+        $grup = $groupModel->where(['id' => $id, 'masjid_id' => $masjidId])->first();
+        if (!$grup) {
+            return redirect()->to('dashboard/broadcast/groups')->with('error', 'Grup tidak ditemukan.');
+        }
+
+        $aktif = (int) $grup['is_active'] === 1 ? 0 : 1;
+        $groupModel->update($id, ['is_active' => $aktif]);
+
+        return redirect()->to('dashboard/broadcast/groups')
+            ->with('success', $aktif ? 'Grup "' . $grup['name'] . '" diaktifkan.' : 'Grup "' . $grup['name'] . '" dinonaktifkan.');
+    }
+
+    /**
      * Uji kirim ke satu grup, supaya pengurus tahu grupnya benar-benar
      * terjangkau sebelum menyiarkan pengumuman sungguhan ke jamaah.
      */
