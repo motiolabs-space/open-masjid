@@ -410,8 +410,40 @@
                             <strong>Telegram tidak memerlukan ini</strong> dan gratis.
                         </p>
                     </div>
+
+                    <?php // Token MCP: memberi agen AI akses HANYA-BACA ke data
+                          // masjid ini (kas, jadwal sholat, donasi). Aksi buat/
+                          // cabut berupa tautan GET, bukan bagian form simpan. ?>
+                    <div class="pt-4 border-t border-[#dbe6e3] dark:border-white/10">
+                        <label class="block text-sm font-semibold text-[#111816] dark:text-white mb-1.5">
+                            Token MCP <span class="font-normal text-[#608a7e]">(akses agen AI, opsional)</span>
+                        </label>
+                        <?php if (!empty($masjid['mcp_token'])): ?>
+                            <input readonly value="<?= esc($masjid['mcp_token']) ?>" onclick="this.select()"
+                                   class="w-full rounded-lg border-[#dbe6e3] dark:bg-white/5 dark:border-white/10 font-mono text-xs bg-[#f0f5f3]"/>
+                            <div class="flex gap-3 mt-2">
+                                <a href="<?= base_url('dashboard/mcp/generate') ?>" onclick="return confirm('Buat token baru? Token lama langsung tidak berlaku.')"
+                                   class="text-xs font-bold text-primary hover:underline">Buat ulang</a>
+                                <a href="<?= base_url('dashboard/mcp/revoke') ?>" onclick="return confirm('Cabut token? Akses agen AI dinonaktifkan.')"
+                                   class="text-xs font-bold text-red-500 hover:underline">Cabut</a>
+                            </div>
+                            <p class="text-[11px] text-[#608a7e] mt-2 leading-relaxed">
+                                Endpoint: <code><?= base_url('api/mcp') ?></code> — kirim header
+                                <code>Authorization: Bearer &lt;token&gt;</code>. Akses <strong>hanya-baca</strong>,
+                                terbatas masjid ini saja.
+                            </p>
+                        <?php else: ?>
+                            <a href="<?= base_url('dashboard/mcp/generate') ?>"
+                               class="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline">
+                                <span class="material-symbols-outlined text-sm">key</span> Buat Token MCP
+                            </a>
+                            <p class="text-[11px] text-[#608a7e] mt-2">
+                                Belum aktif. Buat token bila ingin menghubungkan agen AI (mis. Claude) ke data masjid.
+                            </p>
+                        <?php endif; ?>
+                    </div>
                 </div>
-                
+
                 <div class="bg-blue-50 dark:bg-blue-900/20 p-5 rounded-xl border border-blue-100 dark:border-blue-800/30">
                     <h3 class="font-bold text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-2">
                         <span class="material-symbols-outlined text-sm">webhook</span>

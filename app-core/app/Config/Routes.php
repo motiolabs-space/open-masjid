@@ -30,6 +30,9 @@ $routes->get('dashboard/followers', 'Admin::followers');
 $routes->post('dashboard/followers/promote', 'Admin::promoteFollower', ['filter' => 'masjidAdmin']);
 $routes->get('dashboard/profil', 'Admin::profil');
 $routes->post('dashboard/profil', 'Admin::updateProfile', ['filter' => 'masjidAdmin']);
+// Token MCP (akses agen AI) — hanya Admin Masjid.
+$routes->get('dashboard/mcp/generate', 'Admin::generateMcpToken', ['filter' => 'masjidAdmin']);
+$routes->get('dashboard/mcp/revoke', 'Admin::revokeMcpToken', ['filter' => 'masjidAdmin']);
 $routes->get('dashboard/regencies/(:num)', 'Admin::getRegencies/$1');
 $routes->get('dashboard/users/search', 'Admin::searchUsers');
 $routes->post('dashboard/pengurus/add', 'Admin::addPengurus', ['filter' => 'masjidAdmin']);
@@ -225,6 +228,9 @@ $routes->get('payment/success/(:segment)', 'Payment::success/$1');
 
 // Telegram Webhook
 $routes->post('api/telegram/webhook/(:any)', 'Api\Telegram::webhook/$1');
+
+// MCP server (agen AI) — auth via token Bearer, hanya-baca, ter-scope 1 masjid.
+$routes->post('api/mcp', 'Api\Mcp::handle');
 
 // Prevent asset paths from being captured by wildcard
 $routes->get('(images|assets|uploads|css|js|fonts)/(:any)', function() {
