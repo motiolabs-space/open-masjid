@@ -72,16 +72,29 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span class="text-xs font-bold <?= $g['is_active'] ? 'text-green-600' : 'text-slate-400' ?>">
-                                        <?= $g['is_active'] ? 'Aktif' : 'Nonaktif' ?>
-                                    </span>
+                                    <?php if ($g['is_active']): ?>
+                                        <span class="text-xs font-bold text-green-600">Aktif</span>
+                                    <?php else: ?>
+                                        <?php // Grup yang dicatat webhook masuk sebagai menunggu:
+                                              // pengurus perlu menyetujuinya sebelum bot melayaninya. ?>
+                                        <span class="text-xs font-bold text-amber-600">Menunggu persetujuan</span>
+                                    <?php endif; ?>
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex justify-end gap-3">
-                                        <a href="<?= base_url('dashboard/broadcast/groups/test/' . $g['id']) ?>"
-                                           class="text-[#608a7e] hover:text-primary" title="Uji kirim ke grup ini">
-                                            <span class="material-symbols-outlined text-xl">send</span>
-                                        </a>
+                                        <?php if ($isAdminMasjid): ?>
+                                            <a href="<?= base_url('dashboard/broadcast/groups/toggle/' . $g['id']) ?>"
+                                               class="text-xs font-bold <?= $g['is_active'] ? 'text-slate-400 hover:text-slate-600' : 'text-green-600 hover:text-green-700' ?>"
+                                               title="<?= $g['is_active'] ? 'Nonaktifkan grup' : 'Aktifkan grup' ?>">
+                                                <?= $g['is_active'] ? 'Nonaktifkan' : 'Aktifkan' ?>
+                                            </a>
+                                        <?php endif; ?>
+                                        <?php if ($g['is_active']): ?>
+                                            <a href="<?= base_url('dashboard/broadcast/groups/test/' . $g['id']) ?>"
+                                               class="text-[#608a7e] hover:text-primary" title="Uji kirim ke grup ini">
+                                                <span class="material-symbols-outlined text-xl">send</span>
+                                            </a>
+                                        <?php endif; ?>
                                         <?php if ($isAdminMasjid): ?>
                                             <a href="<?= base_url('dashboard/broadcast/groups/delete/' . $g['id']) ?>"
                                                onclick="return confirm('Hapus grup <?= esc($g['name'], 'js') ?> dari daftar tujuan siaran?')"

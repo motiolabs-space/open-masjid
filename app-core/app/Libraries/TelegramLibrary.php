@@ -27,12 +27,14 @@ class TelegramLibrary
 
     /**
      * Send a text message to the configured chat ID.
-     * 
-     * @param string $message
-     * @param string $parseMode (HTML or Markdown)
+     *
+     * @param string   $message
+     * @param string   $parseMode        (HTML or Markdown)
+     * @param int|null $replyToMessageId Balas pesan tertentu — di grup, ini
+     *                                   memperjelas bot menjawab pertanyaan siapa.
      * @return bool|array
      */
-    public function sendMessage($message, $parseMode = 'HTML')
+    public function sendMessage($message, $parseMode = 'HTML', $replyToMessageId = null)
     {
         if (empty($this->botToken) || empty($this->chatId)) {
             log_message('error', 'Telegram Bot Token or Chat ID is not configured in .env');
@@ -40,14 +42,52 @@ class TelegramLibrary
         }
 
         $url = $this->apiUrl . $this->botToken . '/sendMessage';
-        
+
         $data = [
             'chat_id'    => $this->chatId,
             'text'       => $message,
             'parse_mode' => $parseMode,
         ];
+        if ($replyToMessageId !== null) {
+            $data['reply_to_message_id'] = $replyToMessageId;
+        }
 
         return $this->sendRequest($url, $data);
+    }
+
+    /**
+     * Identitas bot (id & username), untuk mengenali mention dan balasan di
+     * grup. Di-cache karena tidak pernah berubah — tanpa itu setiap pesan grup
+     * memicu satu panggilan tambahan ke Telegram.
+     *
+     * @return array|null ['id' => int, 'username' => string]
+     */
+    public function getMe(): ?array
+    {
+        if (empty($this->botToken)) {
+            return null;
+        }
+
+        $cache = \Config\Services::cache();
+        $kunci = 'tg_bot_me_' . md5($this->botToken);
+
+        $tersimpan = $cache->get($kunci);
+        if (is_array($tersimpan)) {
+            return $tersimpan;
+        }
+
+        $hasil = $this->sendRequest($this->apiUrl . $this->botToken . '/getMe', []);
+        if (!is_array($hasil) || empty($hasil['result']['id'])) {
+            return null;
+        }
+
+        $me = [
+            'id'       => (int) $hasil['result']['id'],
+            'username' => (string) ($hasil['result']['username'] ?? ''),
+        ];
+        $cache->save($kunci, $me, DAY);
+
+        return $me;
     }
 
     /**
