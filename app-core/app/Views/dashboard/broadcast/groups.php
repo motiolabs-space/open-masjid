@@ -89,6 +89,12 @@
                                                 <?= $g['is_active'] ? 'Nonaktifkan' : 'Aktifkan' ?>
                                             </a>
                                         <?php endif; ?>
+                                        <?php if ($g['is_active'] && $g['channel'] === 'telegram'): ?>
+                                            <button type="button" onclick="ringkasGrup(<?= $g['id'] ?>, '<?= esc($g['name'], 'js') ?>')"
+                                               class="text-[#608a7e] hover:text-primary" title="Ringkas obrolan grup (AI)">
+                                                <span class="material-symbols-outlined text-xl">summarize</span>
+                                            </button>
+                                        <?php endif; ?>
                                         <?php if ($g['is_active']): ?>
                                             <a href="<?= base_url('dashboard/broadcast/groups/test/' . $g['id']) ?>"
                                                class="text-[#608a7e] hover:text-primary" title="Uji kirim ke grup ini">
@@ -167,4 +173,51 @@
 
     </div>
 </div>
+
+<!-- Modal ringkasan obrolan -->
+<div id="ringkasModal" style="display:none" class="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-hidden flex flex-col">
+        <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+            <h3 class="font-bold text-[#111816] dark:text-white flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">summarize</span>
+                Ringkasan Obrolan
+            </h3>
+            <button type="button" onclick="document.getElementById('ringkasModal').style.display='none'" class="text-slate-400 hover:text-slate-600">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="p-6 overflow-y-auto">
+            <p id="ringkasGrupNama" class="text-xs font-bold text-[#608a7e] uppercase tracking-widest mb-3"></p>
+            <div id="ringkasIsi" class="text-sm text-[#111816] dark:text-white whitespace-pre-wrap leading-relaxed"></div>
+        </div>
+        <div class="px-6 py-3 border-t border-slate-100 dark:border-slate-800">
+            <p class="text-[10px] text-[#608a7e]">
+                Ringkasan dibuat AI dari obrolan grup beberapa hari terakhir. Periksa sebelum menindaklanjuti.
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+async function ringkasGrup(id, nama) {
+    const modal = document.getElementById('ringkasModal');
+    const isi = document.getElementById('ringkasIsi');
+    document.getElementById('ringkasGrupNama').textContent = nama;
+    isi.textContent = 'Menyusun ringkasan...';
+    modal.style.display = 'flex';
+    try {
+        const res = await fetch('<?= base_url('dashboard/broadcast/groups/summarize') ?>/' + id, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+            isi.textContent = data.ringkasan + '\n\n(' + data.jml_pesan + ' pesan dianalisis)';
+        } else {
+            isi.textContent = data.message || 'Gagal menyusun ringkasan.';
+        }
+    } catch (e) {
+        isi.textContent = 'Gagal terhubung. Coba lagi.';
+    }
+}
+</script>
 <?= $this->endSection() ?>

@@ -101,6 +101,13 @@ class Telegram extends BaseController
             return false;
         }
 
+        // Grup terdaftar & aktif: simpan pesannya untuk fitur "Ringkas obrolan".
+        // Hanya di sini — grup asing/menunggu tidak pernah tersimpan (privasi).
+        // Bot baru menerima SEMUA pesan bila privacy mode dimatikan di BotFather;
+        // bila menyala, hanya pesan yang menyapa bot yang sampai ke sini.
+        (new \App\Models\MasjidGroupMessageModel())
+            ->simpan((int) $masjid['id'], (int) $grup['id'], $message);
+
         // Aktif: hanya jawab bila bot benar-benar disapa, bukan tiap pesan.
         return $this->botDisapa($message, $telegram);
     }

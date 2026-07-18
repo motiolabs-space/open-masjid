@@ -121,6 +121,7 @@ $routes->post('dashboard/broadcast/groups/save', 'Admin::saveGroup', ['filter' =
 $routes->get('dashboard/broadcast/groups/delete/(:num)', 'Admin::deleteGroup/$1', ['filter' => 'masjidAdmin']);
 $routes->get('dashboard/broadcast/groups/toggle/(:num)', 'Admin::toggleGroup/$1', ['filter' => 'masjidAdmin']);
 $routes->get('dashboard/broadcast/groups/test/(:num)', 'Admin::testGroup/$1');
+$routes->get('dashboard/broadcast/groups/summarize/(:num)', 'Admin::summarizeGroup/$1'); // ringkas obrolan (AI)
 // Pengingat terjadwal. Mendaftar/menghapus dibatasi Admin Masjid: pengingat
 // yang salah setel mengirim pesan berulang ke jamaah tanpa diminta.
 $routes->get('dashboard/broadcast/reminders', 'Admin::reminders');
