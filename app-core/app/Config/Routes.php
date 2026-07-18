@@ -179,6 +179,9 @@ $routes->group('superadmin', ['filter' => 'dashboardGuard'], function($routes) {
     $routes->get('profile', 'SuperAdmin::profile');
     $routes->post('profile/password', 'SuperAdmin::updatePassword');
     
+    // Pemakaian token AI (khusus superadmin)
+    $routes->get('ai-usage', 'SuperAdmin::aiUsage');
+
     // Superadmin Settings
     $routes->get('settings', 'SuperAdmin::settings');
     $routes->post('settings/save', 'SuperAdmin::saveSettings');

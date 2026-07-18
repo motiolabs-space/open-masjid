@@ -79,7 +79,26 @@
 #--------------------------------------------------------------------
 # sumopod.apiUrl = 'https://ai.sumopod.com/v1'
 # sumopod.apiKey = ''
+#
+# DUA TINGKAT MODEL
+# Pemakaian AI dibagi dua tingkat, dipilih per tugas di dalam kode (lihat
+# App\Libraries\SumoPodAI). Yang perlu diatur hanya nama modelnya di sini —
+# tidak ada nama model yang tersebar di kode.
+#
+#   sumopod.model      -> tingkat 'ringan': tugas harian bervolume tinggi
+#                         (tanya-jawab bot Telegram, kategorisasi CSV bank).
+#                         Pakai model murah.
+#   sumopod.modelBerat -> tingkat 'berat': tugas penting bervolume rendah
+#                         (skoring kelayakan mustahik, audit & laporan keuangan).
+#                         Pakai model bernalar lebih kuat.
+#
+# Bila modelBerat dikosongkan, tugas 'berat' ikut memakai model 'ringan'.
 # sumopod.model = 'gpt-4o-mini'
+# sumopod.modelBerat = 'claude-haiku-4-5'
+#
+# Rantai cadangan bila model utama gagal (mis. kuota habis), dipisah koma.
+# Bila kosong, dipakai bawaan: gpt-4o-mini, claude-haiku-4-5, gemini/gemini-2.5-flash.
+# sumopod.fallbackModels = 'gpt-4o-mini, claude-haiku-4-5, gemini/gemini-2.5-flash'
 
 #--------------------------------------------------------------------
 # GOOGLE SSO

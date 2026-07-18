@@ -56,8 +56,8 @@ class VirtualAuditor extends BaseController
         // 2. Get Past 3 Months Data for Baseline
         $historicalData = $this->getHistoricalAverages($masjidId, $monthYear);
 
-        // 3. Send to AI
-        $ai = new SumoPodAI();
+        // 3. Send to AI (tingkat 'berat' diatur di dalam runFinancialAudit)
+        $ai = new SumoPodAI((int) $masjidId);
         $anomalies = $ai->runFinancialAudit($currentData, $historicalData);
 
         if ($anomalies === null) {

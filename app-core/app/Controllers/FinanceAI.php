@@ -61,7 +61,7 @@ class FinanceAI extends BaseController
         }
 
         // Call AI
-        $sumoPod = new SumoPodAI();
+        $sumoPod = new SumoPodAI((int) session()->get('masjid_id'));
         $prompt = "Anda adalah AI Akuntan Masjid. Tugas Anda adalah mengkategorikan transaksi bank berikut ke dalam kategori yang tepat.\n\n";
         $prompt .= "Kategori Pemasukan Tersedia: " . json_encode($catMap['pemasukan'] ?? []) . "\n";
         $prompt .= "Kategori Pengeluaran Tersedia: " . json_encode($catMap['pengeluaran'] ?? []) . "\n\n";
@@ -74,7 +74,10 @@ class FinanceAI extends BaseController
 
         $response = $sumoPod->chatCompletion($prompt, [
             'temperature' => 0.1,
-            'max_tokens' => 1500
+            'max_tokens' => 1500,
+            // Ringan: mengategorikan transaksi bank tugas rutin bervolume tinggi.
+            'tier'    => 'ringan',
+            'feature' => 'csv_kategori',
         ]);
 
         $aiResults = [];
@@ -244,8 +247,8 @@ class FinanceAI extends BaseController
             ->countAllResults();
 
         if ($this->request->getMethod() === 'POST' || $this->request->getMethod() === 'post') {
-            $sumoPod = new SumoPodAI();
-            
+            $sumoPod = new SumoPodAI((int) session()->get('masjid_id'));
+
             $prompt = "Kamu adalah Sekretaris Masjid yang profesional, hangat, dan komunikatif.\n";
             $prompt .= "Buat draf narasi/copywriting Laporan Keuangan dan Kegiatan Bulanan yang cocok dikirim melalui WhatsApp Broadcast ke jamaah.\n";
             $prompt .= "Data Bulan Ini (" . date('F Y') . "):\n";
@@ -260,7 +263,11 @@ class FinanceAI extends BaseController
 
             $response = $sumoPod->chatCompletion($prompt, [
                 'temperature' => 0.7,
-                'max_tokens' => 800
+                'max_tokens' => 800,
+                // Berkualitas: laporan ini dikirim ke seluruh jamaah, jadi
+                // hasilnya harus rapi dan enak dibaca.
+                'tier'    => 'berat',
+                'feature' => 'laporan',
             ]);
 
             // chatCompletion() mengembalikan null bila AI tak terjangkau. Dulu

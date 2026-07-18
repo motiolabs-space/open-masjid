@@ -177,11 +177,12 @@ Jika jamaah bertanya tentang kondisi, keuangan, atau program, rangkumkan berdasa
 
         $this->sendChatAction($botToken, $chatId, 'typing');
 
-        $ai = new SumoPodAI();
+        // Ringan: tanya-jawab jamaah adalah aktivitas harian bervolume tinggi.
+        $ai = new SumoPodAI((int) $masjid['id']);
         $aiResponse = $ai->chatCompletion([
             ['role' => 'system', 'content' => $systemPrompt],
             ['role' => 'user', 'content' => $userText],
-        ]);
+        ], ['tier' => 'ringan', 'feature' => 'telegram']);
 
         // Di grup, balasan ditautkan ke pesan penanya agar jelas menjawab siapa.
         if ($aiResponse) {

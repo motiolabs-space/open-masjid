@@ -8,64 +8,89 @@ class SumoPodAI
 {
     protected $apiUrl;
     protected $apiKey;
-    protected $model;
+    protected $model;        // model tingkat 'ringan' (harian, murah)
+    protected $modelBerat;   // model tingkat 'berat' (kualitas, tugas penting)
     protected $fallbackModels;
     protected $client;
+    protected $masjidId;     // konteks tenant untuk catatan pemakaian, boleh null
 
-    public function __construct()
+    /**
+     * @param int|null $masjidId Masjid pemicu, dicatat pada log pemakaian token.
+     *        Boleh null untuk panggilan yang tidak terikat masjid tertentu.
+     */
+    public function __construct(?int $masjidId = null)
     {
-        // Load configurations from .env
-        $this->apiUrl = getenv('sumopod.apiUrl') ?: 'https://ai.sumopod.com/v1';
-        $this->apiKey = getenv('sumopod.apiKey');
-        $this->model  = getenv('sumopod.model') ?: 'gpt-4o-mini';
-        
+        $this->apiUrl     = getenv('sumopod.apiUrl') ?: 'https://ai.sumopod.com/v1';
+        $this->apiKey     = getenv('sumopod.apiKey');
+        $this->model      = getenv('sumopod.model') ?: 'gpt-4o-mini';
+        // Bila model berkualitas tidak disetel, jatuh ke model ringan — lebih
+        // baik memakai yang murah daripada memakai nama model yang tidak ada.
+        $this->modelBerat = getenv('sumopod.modelBerat') ?: $this->model;
+        $this->masjidId   = $masjidId;
+
         $fallback = getenv('sumopod.fallbackModels');
         if ($fallback) {
             $this->fallbackModels = array_map('trim', explode(',', $fallback));
         } else {
-            $this->fallbackModels = ['gpt-4o-mini', 'claude-3-5-haiku-20241022', 'gemini-1.5-flash'];
+            $this->fallbackModels = ['gpt-4o-mini', 'claude-haiku-4-5', 'gemini/gemini-2.5-flash'];
         }
-        
+
         $this->client = Services::curlrequest();
+    }
+
+    /**
+     * Menerjemahkan tingkat tugas menjadi nama model.
+     *
+     * Model tetap tinggal di .env (config), tidak tersebar di kode. Pemanggil
+     * cukup menyebut 'ringan' atau 'berat', sehingga mengganti model satu
+     * tingkat tidak menyentuh satu baris kode pun.
+     */
+    private function modelUntukTingkat(string $tier): string
+    {
+        return $tier === 'berat' ? $this->modelBerat : $this->model;
     }
 
     /**
      * Send a chat completion request to SumoPod AI
      *
-     * @param string|array $messages The message string or array of messages
-     * @param array $options Additional options like max_tokens, temperature
-     * @return string|null The response content
+     * @param string|array $messages Pesan tunggal atau array pesan.
+     * @param array $options Opsi tambahan. Selain parameter API biasa
+     *        (max_tokens, temperature), dikenali tiga kunci khusus yang TIDAK
+     *        diteruskan ke API:
+     *          - 'tier'    : 'ringan' (default) | 'berat' — memilih model.
+     *          - 'feature' : label pemicu untuk catatan pemakaian (mis. 'audit').
+     *          - 'model'   : memaksa model tertentu, mengalahkan 'tier'.
+     * @return string|null Isi balasan, atau null bila semua model gagal.
      */
     public function chatCompletion($messages, array $options = [])
     {
-        // If it's a simple string, convert to messages array format
         if (is_string($messages)) {
-            $messages = [
-                ['role' => 'user', 'content' => $messages]
-            ];
+            $messages = [['role' => 'user', 'content' => $messages]];
         }
 
-        $primaryModel = $options['model'] ?? $this->model;
-        $modelsToTry = [$primaryModel];
-        
+        // Keluarkan kunci khusus agar tidak ikut terkirim sebagai parameter API.
+        $tier    = $options['tier'] ?? 'ringan';
+        $feature = $options['feature'] ?? null;
+        $paksaModel = $options['model'] ?? null;
+        unset($options['tier'], $options['feature'], $options['model']);
+
+        $primaryModel = $paksaModel ?: $this->modelUntukTingkat($tier);
+        $modelsToTry  = [$primaryModel];
         foreach ($this->fallbackModels as $fb) {
-            if (!in_array($fb, $modelsToTry)) {
+            if (!in_array($fb, $modelsToTry, true)) {
                 $modelsToTry[] = $fb;
             }
         }
 
         $url = rtrim($this->apiUrl, '/') . '/chat/completions';
-        
+
         foreach ($modelsToTry as $currentModel) {
             $payload = array_merge([
-                'model'    => $currentModel,
-                'messages' => $messages,
                 'max_tokens'  => 150,
                 'temperature' => 0.7,
             ], $options);
-            
-            // Ensure we use the current model in the loop
-            $payload['model'] = $currentModel;
+            $payload['model']    = $currentModel;
+            $payload['messages'] = $messages;
 
             try {
                 $response = $this->client->post($url, [
@@ -74,20 +99,30 @@ class SumoPodAI
                         'Content-Type'  => 'application/json',
                     ],
                     'json' => $payload,
-                    'http_errors' => false
+                    'http_errors' => false,
                 ]);
 
                 if ($response->getStatusCode() === 200) {
                     $body = json_decode($response->getBody(), true);
+
+                    // Model yang dicatat adalah yang DILAPORKAN balasan API —
+                    // bisa berbeda dari yang diminta bila server mengarahkannya.
+                    $this->catatPemakaian(
+                        $tier,
+                        $feature,
+                        $primaryModel,
+                        $body['model'] ?? $currentModel,
+                        $body['usage'] ?? []
+                    );
+
                     return $body['choices'][0]['message']['content'] ?? null;
                 }
 
-                // If failed (e.g. 429 Quota Exceeded), log warning and continue to next model
+                // Gagal (mis. 429 kuota habis): lanjut ke model berikutnya.
                 log_message('warning', "SumoPod AI Error on model {$currentModel}: [" . $response->getStatusCode() . '] ' . $response->getBody());
                 continue;
 
             } catch (\Exception $e) {
-                // If network error, log and continue to next model
                 log_message('error', "SumoPod AI Exception on model {$currentModel}: " . $e->getMessage());
                 continue;
             }
@@ -96,6 +131,33 @@ class SumoPodAI
         // If all models fail
         log_message('error', 'SumoPod AI: All fallback models failed.');
         return null;
+    }
+
+    /**
+     * Mencatat satu pemakaian token ke ai_usage_logs.
+     *
+     * Dibungkus try/catch dan tidak pernah melempar: pencatatan biaya TIDAK
+     * boleh menggagalkan jawaban AI yang sudah berhasil didapat jamaah. Bila
+     * tabelnya belum ada atau basis data sedang bermasalah, panggilan tetap
+     * berjalan seperti biasa.
+     */
+    private function catatPemakaian(string $tier, ?string $feature, string $diminta, string $dipakai, array $usage): void
+    {
+        try {
+            (new \App\Models\AiUsageLogModel())->insert([
+                'masjid_id'         => $this->masjidId,
+                'tier'              => $tier,
+                'feature'           => $feature,
+                'model_requested'   => $diminta,
+                'model_used'        => $dipakai,
+                'prompt_tokens'     => (int) ($usage['prompt_tokens'] ?? 0),
+                'completion_tokens' => (int) ($usage['completion_tokens'] ?? 0),
+                'total_tokens'      => (int) ($usage['total_tokens'] ?? 0),
+                'created_at'        => date('Y-m-d H:i:s'),
+            ]);
+        } catch (\Throwable $e) {
+            log_message('error', 'Gagal mencatat pemakaian token AI: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -116,7 +178,11 @@ class SumoPodAI
 
         $response = $this->chatCompletion($prompt, [
             'temperature' => 0.2, // Low temperature for consistent scoring
-            'max_tokens'  => 100
+            'max_tokens'  => 100,
+            // Berkualitas: skor ini menentukan siapa yang dinilai layak menerima
+            // bantuan zakat — bukan tempat berhemat model.
+            'tier'    => 'berat',
+            'feature' => 'skor_mustahik',
         ]);
 
         if ($response) {
@@ -155,7 +221,10 @@ class SumoPodAI
 
         $response = $this->chatCompletion($prompt, [
             'temperature' => 0.2,
-            'max_tokens'  => 800
+            'max_tokens'  => 800,
+            // Berkualitas: audit anomali keuangan perlu nalar yang tajam.
+            'tier'    => 'berat',
+            'feature' => 'audit_keuangan',
         ]);
 
         if ($response) {
