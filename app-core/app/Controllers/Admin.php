@@ -1550,6 +1550,19 @@ class Admin extends BaseController
         $invModel = new \App\Models\MasjidInventoryModel();
         $id = $this->request->getPost('id');
 
+        // Kepemilikan diperiksa DI DEPAN, sebelum menyentuh berkas. Sebelumnya
+        // foto lama dihapus lewat find($id) yang tidak difilter masjid_id, dan
+        // itu jalan sebelum cek kepemilikan — mengirim id aset masjid lain
+        // beserta foto akan menghapus foto aset masjid itu lebih dulu, baru
+        // permintaannya ditolak. Kini id asing berhenti di sini.
+        $oldItem = null;
+        if ($id) {
+            $oldItem = $invModel->where(['id' => $id, 'masjid_id' => $masjidId])->first();
+            if (!$oldItem) {
+                return redirect()->to('dashboard/inventory')->with('error', 'Aset tidak ditemukan.');
+            }
+        }
+
         $data = [
             'masjid_id'      => $masjidId,
             'name'           => $this->request->getPost('name'),
@@ -1562,15 +1575,12 @@ class Admin extends BaseController
             'description'    => $this->request->getPost('description'),
         ];
 
-        // Handle Photo
+        // Handle Photo — $oldItem sudah dipastikan milik masjid ini.
         $file = $this->request->getFile('photo');
         if ($file && $file->isValid() && !$file->hasMoved()) {
             $storage = new Storage();
-            if ($id) {
-                $oldItem = $invModel->find($id);
-                if (!empty($oldItem['photo'])) {
-                    $storage->delete($oldItem['photo']);
-                }
+            if ($oldItem && !empty($oldItem['photo'])) {
+                $storage->delete($oldItem['photo']);
             }
             $fileName = $storage->upload($file, 'inventaris');
             if ($fileName) {
@@ -1581,19 +1591,15 @@ class Admin extends BaseController
         }
 
         if ($id) {
-             // Security Check
-             $oldItem = $invModel->where(['id' => $id, 'masjid_id' => $masjidId])->first();
-             if (!$oldItem) {
-                 return redirect()->to('dashboard/inventory')->with('error', 'Aset tidak ditemukan.');
-             }
-
             if (!$invModel->update($id, $data)) {
-                return redirect()->back()->withInput()->with('error', 'Gagal update.');
+                return redirect()->back()->withInput()
+                    ->with('error', 'Gagal memperbarui aset: ' . implode(' ', $invModel->errors()));
             }
             $message = 'Aset berhasil diperbarui.';
         } else {
             if (!$invModel->insert($data)) {
-                return redirect()->back()->withInput()->with('error', 'Gagal menyimpan.');
+                return redirect()->back()->withInput()
+                    ->with('error', 'Gagal menyimpan aset: ' . implode(' ', $invModel->errors()));
             }
             $message = 'Aset berhasil ditambahkan.';
         }
@@ -1674,10 +1680,13 @@ class Admin extends BaseController
             }
         }
 
-        if ($id) {
-            $payModel->update($id, $data);
-        } else {
-            $payModel->insert($data);
+        // Hasil simpan diperiksa: bila validasi gagal, pengurus tidak boleh
+        // dibalas 'berhasil disimpan' sementara rekening penerima donasi tak
+        // berubah.
+        $tersimpan = $id ? $payModel->update($id, $data) : $payModel->insert($data);
+        if (!$tersimpan) {
+            return redirect()->back()->withInput()
+                ->with('error', 'Gagal menyimpan pengaturan: ' . implode(' ', $payModel->errors()));
         }
 
         return redirect()->to('dashboard/pembayaran')->with('success', 'Pengaturan pembayaran berhasil disimpan.');
@@ -1763,10 +1772,14 @@ class Admin extends BaseController
             // SECURITY CHECK
             $exists = $schedModel->where(['id' => $id, 'masjid_id' => $masjidId])->first();
             if (!$exists) return redirect()->back()->with('error', 'Akses ditolak.');
+        }
 
-            $schedModel->update($id, $data);
-        } else {
-            $schedModel->insert($data);
+        // Hasil simpan diperiksa: tanggal/jenis sholat yang tak sah tidak boleh
+        // dijawab 'berhasil disimpan' sementara tak ada yang tersimpan.
+        $tersimpan = $id ? $schedModel->update($id, $data) : $schedModel->insert($data);
+        if (!$tersimpan) {
+            return redirect()->back()->withInput()
+                ->with('error', 'Gagal menyimpan jadwal: ' . implode(' ', $schedModel->errors()));
         }
 
         return redirect()->to('dashboard/schedules')->with('success', 'Jadwal berhasil disimpan.');
