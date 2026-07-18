@@ -121,6 +121,12 @@ $routes->post('dashboard/broadcast/groups/save', 'Admin::saveGroup', ['filter' =
 $routes->get('dashboard/broadcast/groups/delete/(:num)', 'Admin::deleteGroup/$1', ['filter' => 'masjidAdmin']);
 $routes->get('dashboard/broadcast/groups/toggle/(:num)', 'Admin::toggleGroup/$1', ['filter' => 'masjidAdmin']);
 $routes->get('dashboard/broadcast/groups/test/(:num)', 'Admin::testGroup/$1');
+// Pengingat terjadwal. Mendaftar/menghapus dibatasi Admin Masjid: pengingat
+// yang salah setel mengirim pesan berulang ke jamaah tanpa diminta.
+$routes->get('dashboard/broadcast/reminders', 'Admin::reminders');
+$routes->post('dashboard/broadcast/reminders/save', 'Admin::saveReminder', ['filter' => 'masjidAdmin']);
+$routes->get('dashboard/broadcast/reminders/toggle/(:num)', 'Admin::toggleReminder/$1', ['filter' => 'masjidAdmin']);
+$routes->get('dashboard/broadcast/reminders/delete/(:num)', 'Admin::deleteReminder/$1', ['filter' => 'masjidAdmin']);
 
 // Aid Distribution to Warga (Penyaluran Bantuan berbasis warga)
 // Namespace terpisah dari modul Mustahik ('dashboard/distribution/*') agar
