@@ -81,7 +81,9 @@ class Filters extends BaseFilters
             // satu pun pesan, terlepas dari kunci API. Keamanannya dijaga
             // dengan cara lain: token bot per masjid ada di URL-nya, dan grup
             // harus terdaftar (lihat Api\Telegram).
-            'csrf' => ['except' => ['payment/callback', 'api/telegram/webhook/*']],
+            // 'api/mcp' ikut dikecualikan: agen AI memanggil dengan token Bearer,
+            // bukan token CSRF. Keamanannya dijaga token per masjid + hanya-baca.
+            'csrf' => ['except' => ['payment/callback', 'api/telegram/webhook/*', 'api/mcp']],
             // 'invalidchars',
         ],
         'after' => [

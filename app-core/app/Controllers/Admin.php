@@ -1951,6 +1951,30 @@ class Admin extends BaseController
     }
 
     /**
+     * Membuat / memperbarui token MCP masjid (mengaktifkan akses agen AI).
+     *
+     * Token lama otomatis tergantikan — memutus akses agen yang memakai token
+     * lama, yang justru diinginkan saat ingin mencabut akses.
+     */
+    public function generateMcpToken()
+    {
+        $masjidId = session()->get('masjid_id');
+        $token = 'mcp_' . bin2hex(random_bytes(24)); // 48 hex + prefix
+
+        (new \App\Models\MasjidModel())->update($masjidId, ['mcp_token' => $token]);
+
+        return redirect()->to('dashboard/profil')->with('success', 'Token MCP dibuat. Salin dan simpan baik-baik.');
+    }
+
+    public function revokeMcpToken()
+    {
+        $masjidId = session()->get('masjid_id');
+        (new \App\Models\MasjidModel())->update($masjidId, ['mcp_token' => null]);
+
+        return redirect()->to('dashboard/profil')->with('success', 'Token MCP dicabut. Akses agen AI dinonaktifkan.');
+    }
+
+    /**
      * Meringkas obrolan sebuah grup jamaah untuk pengurus (dibantu AI).
      *
      * Dijawab JSON untuk fetch(). Hanya grup milik masjid ini yang boleh
