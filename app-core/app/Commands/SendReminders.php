@@ -33,6 +33,14 @@ class SendReminders extends BaseCommand
     {
         $dry = array_key_exists('dry', $params) || in_array('--dry', $params, true);
 
+        // Pangkas pesan grup lama lebih dulu (numpang cron yang sama supaya
+        // tidak perlu cron kedua) — obrolan jamaah tidak disimpan lebih lama
+        // dari masa retensi. Lihat MasjidGroupMessageModel.
+        $terpangkas = (new \App\Models\MasjidGroupMessageModel())->pangkasLama();
+        if ($terpangkas > 0) {
+            CLI::write("Pesan grup lama dipangkas: {$terpangkas}.", 'dark_gray');
+        }
+
         $reminderModel = new MasjidReminderModel();
         $masjidModel   = new MasjidModel();
 

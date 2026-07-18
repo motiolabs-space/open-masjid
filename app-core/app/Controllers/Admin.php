@@ -1938,6 +1938,72 @@ class Admin extends BaseController
     }
 
     /**
+     * Meringkas obrolan sebuah grup jamaah untuk pengurus (dibantu AI).
+     *
+     * Dijawab JSON untuk fetch(). Hanya grup milik masjid ini yang boleh
+     * diringkas, dan hanya dari pesan yang sudah tersimpan (retensi pendek —
+     * lihat MasjidGroupMessageModel).
+     */
+    public function summarizeGroup($groupId)
+    {
+        $masjidId = session()->get('masjid_id');
+
+        // group_id dari URL WAJIB milik masjid ini.
+        $grup = (new \App\Models\MasjidGroupModel())
+            ->where(['id' => $groupId, 'masjid_id' => $masjidId])->first();
+        if (!$grup) {
+            return $this->response->setStatusCode(404)->setJSON([
+                'status' => 'error', 'message' => 'Grup tidak ditemukan.',
+            ]);
+        }
+
+        $pesan = (new \App\Models\MasjidGroupMessageModel())->terbaru((int) $groupId, 150);
+        if (count($pesan) < 3) {
+            return $this->response->setJSON([
+                'status'  => 'kosong',
+                'message' => 'Belum cukup obrolan untuk diringkas. '
+                           . 'Pastikan bot ada di grup dan privacy mode-nya dimatikan.',
+            ]);
+        }
+
+        $percakapan = '';
+        foreach ($pesan as $p) {
+            $percakapan .= '[' . ($p['sender_name'] ?: 'Anonim') . '] ' . $p['text'] . "\n";
+        }
+
+        $prompt  = "Berikut cuplikan obrolan grup jamaah masjid. Sebagai asisten pengurus, "
+                 . "buat ringkasan SINGKAT dalam bahasa Indonesia yang menyorot hal-hal yang perlu "
+                 . "PERHATIAN atau TINDAKAN pengurus: pertanyaan yang belum terjawab, usulan, keluhan, "
+                 . "atau kesepakatan penting. Abaikan obrolan basa-basi. Bila tidak ada yang penting, "
+                 . "katakan begitu secara singkat.\n\n"
+                 . "Obrolan:\n{$percakapan}\n\n"
+                 . "Format: poin-poin ringkas, maksimal 5 poin.";
+
+        // Berkualitas: ringkasan ini dasar pengurus mengambil tindakan; volume
+        // rendah (diminta sesekali).
+        $ai      = new \App\Libraries\SumoPodAI((int) $masjidId);
+        $ringkas = $ai->chatCompletion($prompt, [
+            'temperature' => 0.4,
+            'max_tokens'  => 700,
+            'tier'        => 'berat',
+            'feature'     => 'ringkas_grup',
+        ]);
+
+        if (!$ringkas) {
+            return $this->response->setStatusCode(503)->setJSON([
+                'status'  => 'error',
+                'message' => 'AI sedang tidak dapat dihubungi. Coba lagi sebentar lagi.',
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'status'      => 'success',
+            'ringkasan'   => trim($ringkas),
+            'jml_pesan'   => count($pesan),
+        ]);
+    }
+
+    /**
      * Halaman kelola pengingat terjadwal ke grup jamaah.
      */
     public function reminders()
