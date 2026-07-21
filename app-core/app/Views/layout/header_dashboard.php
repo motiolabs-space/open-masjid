@@ -1,5 +1,9 @@
-<header class="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-8 sticky top-0 z-20">
+<header class="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-20">
 <div class="flex items-center gap-2">
+    <?php // Tombol menu — hanya di mobile (lg:hidden); membuka drawer sidebar. ?>
+    <button type="button" onclick="toggleSidebar(true)" class="lg:hidden p-2 -ml-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+        <span class="material-symbols-outlined">menu</span>
+    </button>
     <span class="material-symbols-outlined text-primary">location_on</span>
     <span class="text-sm font-bold text-slate-700 dark:text-slate-200"><?= session()->get('masjid_name') ?? 'Masj.id' ?></span>
     <?php if (session()->get('role') === 'superadmin'): ?>

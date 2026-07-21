@@ -40,8 +40,11 @@
 </head>
 <body class="bg-background-light dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen flex">
 
-    <!-- Super Admin Sidebar -->
-    <aside class="w-72 bg-slate-900 text-white flex flex-col shrink-0">
+    <!-- Backdrop drawer (mobile) -->
+    <div id="saBackdrop" onclick="toggleSaSidebar(false)" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden"></div>
+
+    <!-- Super Admin Sidebar: drawer di mobile, statis di desktop -->
+    <aside id="saSidebar" class="w-72 bg-slate-900 text-white flex flex-col shrink-0 h-screen fixed lg:sticky top-0 left-0 z-40 -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
         <div class="p-6 border-b border-slate-800">
             <a href="<?= base_url('superadmin') ?>" class="flex items-center gap-3">
                 <img src="<?= asset_url('logo.png') ?>" alt="Logo" class="h-6 brightness-0 invert">
@@ -92,9 +95,12 @@
 
     <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
         <!-- Header -->
-        <header class="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-8 shrink-0">
-            <div class="flex items-center gap-4">
-                <h1 class="font-bold text-lg"><?= $title ?></h1>
+        <header class="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 sm:px-8 shrink-0">
+            <div class="flex items-center gap-3">
+                <button type="button" onclick="toggleSaSidebar(true)" class="lg:hidden p-2 -ml-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+                <h1 class="font-bold text-base sm:text-lg truncate"><?= $title ?></h1>
             </div>
             <div class="flex items-center gap-4">
                 <div class="text-right hidden sm:block">
@@ -107,8 +113,28 @@
             </div>
         </header>
 
-        <div class="flex-1 overflow-y-auto p-8 space-y-8 bg-slate-50 dark:bg-slate-950/50">
+        <div class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6 lg:space-y-8 bg-slate-50 dark:bg-slate-950/50">
             <?= $this->renderSection('content') ?>
         </div>
     </main>
+
+    <script>
+    function toggleSaSidebar(buka) {
+        const sb = document.getElementById('saSidebar');
+        const bd = document.getElementById('saBackdrop');
+        if (!sb || !bd) return;
+        sb.classList.toggle('-translate-x-full', !buka);
+        bd.classList.toggle('hidden', !buka);
+        document.body.style.overflow = buka ? 'hidden' : '';
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        const sb = document.getElementById('saSidebar');
+        if (!sb) return;
+        sb.querySelectorAll('a').forEach(function (a) {
+            a.addEventListener('click', function () {
+                if (window.innerWidth < 1024) toggleSaSidebar(false);
+            });
+        });
+    });
+    </script>
 </body></html>

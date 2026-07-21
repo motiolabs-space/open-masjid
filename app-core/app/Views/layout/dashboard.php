@@ -54,9 +54,38 @@
         
         <?= $this->include('layout/header_dashboard') ?>
 
-        <div class="flex-1 overflow-y-auto p-8 space-y-8">
+        <div class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6 lg:space-y-8">
             <?= $this->renderSection('content') ?>
         </div>
     </main>
+
+    <?php // Buka/tutup drawer sidebar di mobile. Di desktop (lg) sidebar selalu
+          // tampil, jadi fungsi ini praktis hanya dipakai di layar kecil. ?>
+    <script>
+    function toggleSidebar(buka) {
+        const sb = document.getElementById('dashboardSidebar');
+        const bd = document.getElementById('sidebarBackdrop');
+        if (!sb || !bd) return;
+        if (buka) {
+            sb.classList.remove('-translate-x-full');
+            bd.classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // cegah scroll latar saat drawer buka
+        } else {
+            sb.classList.add('-translate-x-full');
+            bd.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+    }
+    // Klik menu di dalam sidebar (mobile) langsung menutup drawer.
+    document.addEventListener('DOMContentLoaded', function () {
+        const sb = document.getElementById('dashboardSidebar');
+        if (!sb) return;
+        sb.querySelectorAll('a').forEach(function (a) {
+            a.addEventListener('click', function () {
+                if (window.innerWidth < 1024) toggleSidebar(false);
+            });
+        });
+    });
+    </script>
     <?= $this->renderSection('scripts') ?>
 </body></html>
