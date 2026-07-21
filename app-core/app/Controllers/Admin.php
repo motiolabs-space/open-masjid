@@ -1968,6 +1968,21 @@ class Admin extends BaseController
     }
 
     /**
+     * Halaman panduan REST API masjid untuk admin.
+     */
+    public function apiGuide()
+    {
+        $masjidId = session()->get('masjid_id');
+        $masjid   = (new \App\Models\MasjidModel())->find($masjidId);
+
+        return view('dashboard/api/guide', [
+            'title'   => 'Panduan REST API - Masj.id',
+            'masjid'  => $masjid,
+            'baseUrl' => base_url('api/v1'),
+        ]);
+    }
+
+    /**
      * Membuat / memperbarui token MCP masjid (mengaktifkan akses agen AI).
      *
      * Token lama otomatis tergantikan — memutus akses agen yang memakai token
@@ -1980,7 +1995,7 @@ class Admin extends BaseController
 
         (new \App\Models\MasjidModel())->update($masjidId, ['mcp_token' => $token]);
 
-        return redirect()->to('dashboard/profil')->with('success', 'Token MCP dibuat. Salin dan simpan baik-baik.');
+        return redirect()->to('dashboard/mcp')->with('success', 'Token MCP dibuat. Salin dan simpan baik-baik.');
     }
 
     public function revokeMcpToken()
@@ -1988,7 +2003,27 @@ class Admin extends BaseController
         $masjidId = session()->get('masjid_id');
         (new \App\Models\MasjidModel())->update($masjidId, ['mcp_token' => null]);
 
-        return redirect()->to('dashboard/profil')->with('success', 'Token MCP dicabut. Akses agen AI dinonaktifkan.');
+        return redirect()->to('dashboard/mcp')->with('success', 'Token MCP dicabut. Akses agen AI dinonaktifkan.');
+    }
+
+    /**
+     * Token REST API — terpisah dari MCP agar bisa dicabut sendiri.
+     */
+    public function generateApiToken()
+    {
+        $masjidId = session()->get('masjid_id');
+        $token = 'api_' . bin2hex(random_bytes(24));
+        (new \App\Models\MasjidModel())->update($masjidId, ['api_token' => $token]);
+
+        return redirect()->to('dashboard/api')->with('success', 'Token API dibuat. Salin dan simpan baik-baik.');
+    }
+
+    public function revokeApiToken()
+    {
+        $masjidId = session()->get('masjid_id');
+        (new \App\Models\MasjidModel())->update($masjidId, ['api_token' => null]);
+
+        return redirect()->to('dashboard/api')->with('success', 'Token API dicabut. Akses API dinonaktifkan.');
     }
 
     /**

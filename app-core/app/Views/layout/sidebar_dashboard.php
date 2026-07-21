@@ -109,7 +109,11 @@
 </a>
 <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg <?= (str_starts_with($uri, 'dashboard/mcp')) ? $activeClass : $inactiveClass ?>" href="<?= base_url('dashboard/mcp') ?>">
 <span class="material-symbols-outlined text-xl">smart_toy</span>
-<span class="text-sm font-medium">API / MCP</span>
+<span class="text-sm font-medium">MCP (Agen AI)</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg <?= (str_starts_with($uri, 'dashboard/api')) ? $activeClass : $inactiveClass ?>" href="<?= base_url('dashboard/api') ?>">
+<span class="material-symbols-outlined text-xl">api</span>
+<span class="text-sm font-medium">REST API</span>
 </a>
 <?php endif; ?>
 </nav>

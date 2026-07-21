@@ -35,6 +35,10 @@ $routes->get('dashboard/mcp', 'Admin::mcpGuide');
 // Token MCP (akses agen AI) — hanya Admin Masjid.
 $routes->get('dashboard/mcp/generate', 'Admin::generateMcpToken', ['filter' => 'masjidAdmin']);
 $routes->get('dashboard/mcp/revoke', 'Admin::revokeMcpToken', ['filter' => 'masjidAdmin']);
+// Panduan & token REST API.
+$routes->get('dashboard/api', 'Admin::apiGuide');
+$routes->get('dashboard/api/generate', 'Admin::generateApiToken', ['filter' => 'masjidAdmin']);
+$routes->get('dashboard/api/revoke', 'Admin::revokeApiToken', ['filter' => 'masjidAdmin']);
 $routes->get('dashboard/regencies/(:num)', 'Admin::getRegencies/$1');
 $routes->get('dashboard/users/search', 'Admin::searchUsers');
 $routes->post('dashboard/pengurus/add', 'Admin::addPengurus', ['filter' => 'masjidAdmin']);
@@ -233,6 +237,12 @@ $routes->post('api/telegram/webhook/(:any)', 'Api\Telegram::webhook/$1');
 
 // MCP server (agen AI) — auth via token Bearer, hanya-baca, ter-scope 1 masjid.
 $routes->post('api/mcp', 'Api\Mcp::handle');
+
+// REST API (integrasi umum) — auth via api_token Bearer, hanya-baca, 1 masjid.
+$routes->get('api/v1/kas', 'Api\RestApi::kas');
+$routes->get('api/v1/jadwal-sholat', 'Api\RestApi::jadwalSholat');
+$routes->get('api/v1/donasi', 'Api\RestApi::donasi');
+$routes->get('api/v1/profil', 'Api\RestApi::profil');
 
 // Prevent asset paths from being captured by wildcard
 $routes->get('(images|assets|uploads|css|js|fonts)/(:any)', function() {
