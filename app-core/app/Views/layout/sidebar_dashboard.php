@@ -1,4 +1,10 @@
-<aside class="w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col h-screen sticky top-0">
+<?php // Backdrop gelap saat drawer terbuka di mobile; klik untuk menutup.
+      // Tersembunyi di layar besar (lg) tempat sidebar selalu tampil. ?>
+<div id="sidebarBackdrop" onclick="toggleSidebar(false)" class="fixed inset-0 bg-black/40 z-30 hidden lg:hidden"></div>
+
+<?php // Mobile: drawer off-canvas (fixed, geser dari kiri). Desktop (lg):
+      // kolom statis selebar 72 seperti biasa. ?>
+<aside id="dashboardSidebar" class="w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col h-screen fixed lg:sticky top-0 left-0 z-40 -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
 <div class="p-6 border-b border-slate-100 dark:border-slate-800">
     <div class="flex items-center justify-center">
         <img src="<?= asset_url('logo.png') ?>" alt="Logo Masj.id" class="h-12">
