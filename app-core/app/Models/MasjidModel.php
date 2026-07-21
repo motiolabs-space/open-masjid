@@ -23,7 +23,7 @@ class MasjidModel extends Model
         // terdaftar. Setiap kolom baru wajib ditambahkan ke sini bersamaan
         // dengan migrasinya.
         'visi', 'misi', 'foto_utama', 'logo', 'about_us', 'phone', 'whatsapp', 'email',
-        'telegram_bot_token', 'whatsapp_api_key', 'mcp_token',
+        'telegram_bot_token', 'whatsapp_api_key', 'mcp_token', 'api_token',
         'action_button_active', 'action_button_text', 'action_button_url',
         'latitude', 'longitude', 'timezone', 'is_external_service',
         'username_updated_at', 'menu_berita', 'menu_program', 'menu_laporan', 'menu_kontak'

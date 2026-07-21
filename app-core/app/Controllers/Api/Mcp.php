@@ -152,30 +152,18 @@ class Mcp extends BaseController
 
     private function toolCekKas(): string
     {
-        $rows = (new MasjidFinanceTransactionModel())
-            ->where('masjid_id', $this->masjid['id'])
-            ->where('MONTH(date)', date('m'))
-            ->where('YEAR(date)', date('Y'))
-            ->findAll();
-
-        $masuk = 0;
-        $keluar = 0;
-        foreach ($rows as $t) {
-            if ($t['type'] === 'pemasukan') $masuk += $t['amount'];
-            elseif ($t['type'] === 'pengeluaran') $keluar += $t['amount'];
-        }
-
+        $k  = (new \App\Libraries\MasjidData())->kasBulanIni($this->masjid);
         $rp = fn($n) => 'Rp ' . number_format((float) $n, 0, ',', '.');
 
         return "Kas {$this->masjid['name']} bulan " . date('m/Y') . ":\n"
-             . "- Pemasukan: {$rp($masuk)}\n"
-             . "- Pengeluaran: {$rp($keluar)}\n"
-             . "- Saldo: {$rp($masuk - $keluar)}";
+             . "- Pemasukan: {$rp($k['pemasukan'])}\n"
+             . "- Pengeluaran: {$rp($k['pengeluaran'])}\n"
+             . "- Saldo: {$rp($k['saldo'])}";
     }
 
     private function toolJadwalSholat(): string
     {
-        $jadwal = (new PrayerTimes())->hariIni($this->masjid);
+        $jadwal = (new \App\Libraries\MasjidData())->jadwalSholatHariIni($this->masjid);
         if (!$jadwal) {
             return "Jadwal sholat belum tersedia (koordinat masjid belum diisi atau layanan jadwal gagal).";
         }
@@ -190,22 +178,14 @@ class Mcp extends BaseController
 
     private function toolDonasiTerbaru(): string
     {
-        $rows = \Config\Database::connect()->table('masjid_donations')
-            ->select('donor_name, amount, paid_at')
-            ->where('masjid_id', $this->masjid['id'])
-            ->where('status', 'success')
-            ->orderBy('paid_at', 'DESC')
-            ->limit(10)
-            ->get()->getResultArray();
-
+        $rows = (new \App\Libraries\MasjidData())->donasiTerbaru($this->masjid, 10);
         if (empty($rows)) {
             return "Belum ada donasi berhasil di {$this->masjid['name']}.";
         }
 
         $baris = [];
         foreach ($rows as $d) {
-            $nama = $d['donor_name'] ?: 'Hamba Allah';
-            $baris[] = '- ' . $nama . ': Rp ' . number_format((float) $d['amount'], 0, ',', '.')
+            $baris[] = '- ' . $d['donor_name'] . ': Rp ' . number_format($d['amount'], 0, ',', '.')
                      . ' (' . ($d['paid_at'] ?: '-') . ')';
         }
 
