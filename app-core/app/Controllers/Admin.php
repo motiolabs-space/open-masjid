@@ -1951,6 +1951,23 @@ class Admin extends BaseController
     }
 
     /**
+     * Halaman panduan penggunaan MCP / API masjid untuk admin.
+     */
+    public function mcpGuide()
+    {
+        $masjidId = session()->get('masjid_id');
+        $masjid   = (new \App\Models\MasjidModel())->find($masjidId);
+
+        return view('dashboard/mcp/guide', [
+            'title'    => 'Panduan API / MCP - Masj.id',
+            'masjid'   => $masjid,
+            'endpoint' => base_url('api/mcp'),
+            // Sumber tunggal daftar tool — sama dengan yang dilayani server MCP.
+            'tools'    => \App\Controllers\Api\Mcp::daftarTool(),
+        ]);
+    }
+
+    /**
      * Membuat / memperbarui token MCP masjid (mengaktifkan akses agen AI).
      *
      * Token lama otomatis tergantikan — memutus akses agen yang memakai token

@@ -30,6 +30,8 @@ $routes->get('dashboard/followers', 'Admin::followers');
 $routes->post('dashboard/followers/promote', 'Admin::promoteFollower', ['filter' => 'masjidAdmin']);
 $routes->get('dashboard/profil', 'Admin::profil');
 $routes->post('dashboard/profil', 'Admin::updateProfile', ['filter' => 'masjidAdmin']);
+// Panduan & token MCP (akses agen AI).
+$routes->get('dashboard/mcp', 'Admin::mcpGuide');
 // Token MCP (akses agen AI) — hanya Admin Masjid.
 $routes->get('dashboard/mcp/generate', 'Admin::generateMcpToken', ['filter' => 'masjidAdmin']);
 $routes->get('dashboard/mcp/revoke', 'Admin::revokeMcpToken', ['filter' => 'masjidAdmin']);

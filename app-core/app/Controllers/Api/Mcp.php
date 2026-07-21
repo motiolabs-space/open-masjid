@@ -72,7 +72,7 @@ class Mcp extends BaseController
                 return $this->response->setStatusCode(202)->setBody('');
 
             case 'tools/list':
-                return $this->response->setJSON($this->hasil($id, ['tools' => $this->daftarTool()]));
+                return $this->response->setJSON($this->hasil($id, ['tools' => self::daftarTool()]));
 
             case 'tools/call':
                 return $this->response->setJSON($this->panggilTool($id, $params));
@@ -101,7 +101,11 @@ class Mcp extends BaseController
 
     // ── Definisi & pemanggilan tool ──────────────────────────────────────
 
-    private function daftarTool(): array
+    /**
+     * Daftar tool MCP. public static agar halaman panduan di dashboard memakai
+     * sumber yang sama — deskripsi tool tidak berduplikat.
+     */
+    public static function daftarTool(): array
     {
         $kosong = ['type' => 'object', 'properties' => new \stdClass()];
 
