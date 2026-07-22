@@ -41,6 +41,12 @@ class SendReminders extends BaseCommand
             CLI::write("Pesan grup lama dipangkas: {$terpangkas}.", 'dark_gray');
         }
 
+        // Draf impor CSV yang menganggur ikut dipangkas.
+        $draf = (new \App\Models\CsvImportDraftModel())->pangkasLama();
+        if ($draf > 0) {
+            CLI::write("Draf impor CSV lama dipangkas: {$draf}.", 'dark_gray');
+        }
+
         $reminderModel = new MasjidReminderModel();
         $masjidModel   = new MasjidModel();
 

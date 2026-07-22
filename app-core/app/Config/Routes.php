@@ -109,7 +109,7 @@ $routes->post('dashboard/keuangan/category/delete', 'Admin::deleteFinanceCategor
 // Finance AI Features
 $routes->get('dashboard/keuangan/import-csv', 'FinanceAI::importCSV');
 $routes->post('dashboard/keuangan/import-csv/process', 'FinanceAI::processCSV');
-$routes->get('dashboard/keuangan/review-csv', 'FinanceAI::reviewCSV');
+$routes->get('dashboard/keuangan/review-csv/(:num)', 'FinanceAI::reviewCSV/$1');
 $routes->post('dashboard/keuangan/import-csv/save', 'FinanceAI::saveCSV');
 $routes->get('dashboard/keuangan/report', 'FinanceAI::generateReport');
 $routes->post('dashboard/keuangan/report', 'FinanceAI::generateReport');
