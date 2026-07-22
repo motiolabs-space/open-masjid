@@ -1,8 +1,12 @@
-# MCP Server (akses agen AI)
+# MCP Server & REST API (akses agen AI / integrasi)
 
-Masj.id menyediakan **MCP (Model Context Protocol) server** hanya-baca: agen AI
-mana pun yang berbicara MCP (mis. Claude) dapat menanyakan data sebuah masjid
-lewat token — kas, jadwal sholat, donasi.
+Masj.id menyediakan **MCP (Model Context Protocol) server** dan **REST API** per
+masjid. Keduanya dapat **membaca** (kas, jadwal sholat, donasi) **dan mengubah
+data** (buat/ubah/hapus transaksi kas, berita, program) lewat token.
+
+> **PENTING — token ini bisa mengubah & menghapus data.** Perlakukan seperti
+> password. Setiap perubahan, berhasil maupun **ditolak**, tercatat di
+> **Dashboard › API/MCP › Audit**. Bila ada yang tidak dikenali, cabut tokennya.
 
 Ditulis tangan sebagai JSON-RPC 2.0 minimal (tanpa pustaka pihak ketiga), agar
 permukaan serangannya kecil dan penyaringan tenant-nya mudah diaudit.
@@ -20,8 +24,15 @@ Aplikasi ini multi-tenant (banyak masjid, satu server). Karena itu:
   diturunkan dari token — agen tidak bisa meminta data masjid lain, secara
   struktural. (Diuji: token masjid A mengembalikan kas masjid A; token masjid B
   mengembalikan kas masjid B; tidak ada kebocoran silang.)
-- **Semua tool HANYA-BACA.** Tidak ada yang mengubah data. Menambah tool yang
-  menulis kelak menuntut pertimbangan tersendiri.
+- **Tool baca DAN tulis tersedia.** Seluruh operasi tulis melewati satu layanan
+  bersama (`App\Libraries\MasjidWriter`) yang dipakai MCP maupun REST, sehingga
+  aturan keamanannya hanya ditulis sekali dan tak mungkin berbeda antar
+  antarmuka. Ubah/hapus wajib menyasar data milik sendiri; `kategori_id` yang
+  dikirim juga diperiksa kepemilikannya.
+- **SETIAP perubahan tercatat** di `api_audit_logs` — berhasil maupun gagal,
+  beserta sumber (API/MCP), aksi, entitas, alasan penolakan, dan IP. Percobaan
+  yang ditolak justru sinyal terpenting saat menyelidiki token bocor. Dilihat di
+  **Dashboard › API/MCP › Audit**; tidak bisa diubah/dihapus lewat API mana pun.
 - **Token bisa dicabut** kapan saja dari Pengaturan Masjid — langsung memutus
   akses agen.
 
@@ -67,8 +78,37 @@ curl -X POST https://masj.id/api/mcp \
 | `cek_kas` | Ringkasan kas bulan berjalan: pemasukan, pengeluaran, saldo. |
 | `jadwal_sholat` | Jadwal sholat hari ini (termasuk koreksi menit pengurus). |
 | `donasi_terbaru` | Ringkasan donasi berhasil terbaru (maks 10). |
+| `buat_data` | Membuat data baru: `{entitas, data}`. |
+| `ubah_data` | Mengubah data: `{entitas, id, data}` — kirim hanya field yang diubah. |
+| `hapus_data` | Menghapus data: `{entitas, id}`. Tidak dapat dibatalkan. |
 
-Semuanya tanpa argumen dan terbatas pada masjid pemilik token.
+`entitas` yang didukung: **transaksi**, **berita**, **program**. Semua terbatas
+pada masjid pemilik token.
+
+Field per entitas:
+- **transaksi**: `tanggal`, `jenis` (pemasukan|pengeluaran), `nominal`,
+  `kategori_id`, `keterangan`
+- **berita**: `judul`, `isi`, `kategori_id?`, `status?` (published|draft)
+- **program**: `judul`, `deskripsi`, `tanggal_mulai`, `lokasi?`,
+  `target_donasi?`, `kategori_id?`
+
+## REST API — menulis data
+
+```
+POST   /api/v1/{entitas}        buat   -> 201 {status, data:{id}}
+PUT    /api/v1/{entitas}/{id}   ubah
+DELETE /api/v1/{entitas}/{id}   hapus
+```
+
+Contoh:
+```bash
+curl -X POST https://masj.id/api/v1/transaksi \
+  -H "Authorization: Bearer <api_token>" -H "Content-Type: application/json" \
+  -d '{"tanggal":"2026-07-20","jenis":"pemasukan","nominal":"2.500.000","kategori_id":12,"keterangan":"Infaq Jumat"}'
+```
+
+Nominal menerima format rupiah (`2.500.000`) maupun angka polos. Tanggal
+menerima `YYYY-MM-DD` maupun `DD/MM/YYYY`.
 
 ## Catatan pengembangan
 

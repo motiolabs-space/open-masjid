@@ -17,8 +17,11 @@ use App\Libraries\PrayerTimes;
  *     (masjid.mcp_token, unik). Masjid TIDAK PERNAH diambil dari parameter
  *     pemanggil — selalu diturunkan dari token. Dengan begitu, tool apa pun
  *     secara struktural tidak bisa menyentuh masjid lain.
- *   - Semua tool HANYA-BACA. Tidak ada yang mengubah data. Menambah tool yang
- *     menulis kelak menuntut pertimbangan tersendiri (persetujuan, audit).
+ *   - Tool BACA dan TULIS tersedia. Seluruh operasi tulis melewati
+ *     App\Libraries\MasjidWriter — sama persis dengan REST API — sehingga
+ *     penjagaan tenant hanya ditulis sekali, dan SETIAP perubahan (berhasil
+ *     maupun gagal) tercatat di api_audit_logs. Audit itu pengaman utamanya:
+ *     perubahan lewat agen AI tidak meninggalkan jejak seperti aksi dashboard.
  *
  * Ditulis tangan sebagai JSON-RPC 2.0 minimal (tanpa pustaka pihak ketiga) agar
  * permukaan serangannya kecil dan mudah diaudit — yang paling penting di sini
@@ -125,17 +128,64 @@ class Mcp extends BaseController
                 'description' => 'Ringkasan donasi berhasil terbaru masjid ini (maksimal 10).',
                 'inputSchema' => $kosong,
             ],
+            // ── Tool yang MENGUBAH data. Semua tercatat di audit log. ──
+            [
+                'name'        => 'buat_data',
+                'description' => 'Membuat data baru milik masjid ini. '
+                    . 'transaksi: {tanggal, jenis(pemasukan|pengeluaran), nominal, kategori_id, keterangan}. '
+                    . 'berita: {judul, isi, kategori_id?, status(published|draft)?}. '
+                    . 'program: {judul, deskripsi, tanggal_mulai, lokasi?, target_donasi?, kategori_id?}.',
+                'inputSchema' => [
+                    'type'       => 'object',
+                    'properties' => [
+                        'entitas' => ['type' => 'string', 'enum' => \App\Libraries\MasjidWriter::ENTITAS],
+                        'data'    => ['type' => 'object'],
+                    ],
+                    'required'   => ['entitas', 'data'],
+                ],
+            ],
+            [
+                'name'        => 'ubah_data',
+                'description' => 'Mengubah data milik masjid ini. Kirim hanya field yang ingin diubah.',
+                'inputSchema' => [
+                    'type'       => 'object',
+                    'properties' => [
+                        'entitas' => ['type' => 'string', 'enum' => \App\Libraries\MasjidWriter::ENTITAS],
+                        'id'      => ['type' => 'integer'],
+                        'data'    => ['type' => 'object'],
+                    ],
+                    'required'   => ['entitas', 'id', 'data'],
+                ],
+            ],
+            [
+                'name'        => 'hapus_data',
+                'description' => 'Menghapus data milik masjid ini. Tidak dapat dibatalkan.',
+                'inputSchema' => [
+                    'type'       => 'object',
+                    'properties' => [
+                        'entitas' => ['type' => 'string', 'enum' => \App\Libraries\MasjidWriter::ENTITAS],
+                        'id'      => ['type' => 'integer'],
+                    ],
+                    'required'   => ['entitas', 'id'],
+                ],
+            ],
         ];
     }
 
     private function panggilTool($id, array $params)
     {
         $nama = $params['name'] ?? '';
+        $arg  = $params['arguments'] ?? [];
 
         $teks = match ($nama) {
             'cek_kas'         => $this->toolCekKas(),
             'jadwal_sholat'   => $this->toolJadwalSholat(),
             'donasi_terbaru'  => $this->toolDonasiTerbaru(),
+            // Tool yang mengubah data — lewat MasjidWriter yang sama dengan REST,
+            // sehingga penjagaan tenant & audit log identik di kedua antarmuka.
+            'buat_data'       => $this->toolTulis('buat', $arg),
+            'ubah_data'       => $this->toolTulis('ubah', $arg),
+            'hapus_data'      => $this->toolTulis('hapus', $arg),
             default           => null,
         };
 
@@ -149,6 +199,37 @@ class Mcp extends BaseController
     }
 
     // ── Tool (semua ter-scope ke $this->masjid) ─────────────────────────
+
+    /**
+     * Menjalankan operasi tulis lewat MasjidWriter dan mengembalikan ringkasan
+     * yang mudah dibaca agen AI. Hasil gagal dikembalikan sebagai teks (bukan
+     * galat protokol) agar agen bisa menjelaskan sebabnya ke pengurus.
+     */
+    private function toolTulis(string $aksi, array $arg): string
+    {
+        $entitas = (string) ($arg['entitas'] ?? '');
+        $writer  = new \App\Libraries\MasjidWriter(
+            $this->masjid,
+            'mcp',
+            $this->request->getIPAddress()
+        );
+
+        $hasil = match ($aksi) {
+            'buat'  => $writer->buat($entitas, (array) ($arg['data'] ?? [])),
+            'ubah'  => $writer->ubah($entitas, (int) ($arg['id'] ?? 0), (array) ($arg['data'] ?? [])),
+            'hapus' => $writer->hapus($entitas, (int) ($arg['id'] ?? 0)),
+        };
+
+        if (!$hasil['ok']) {
+            return "Gagal: {$hasil['error']}";
+        }
+
+        return match ($aksi) {
+            'buat'  => "Berhasil membuat {$entitas} baru (id {$hasil['id']}).",
+            'ubah'  => "Berhasil mengubah {$entitas} id {$hasil['id']}.",
+            'hapus' => "Berhasil menghapus {$entitas} id {$hasil['id']}.",
+        };
+    }
 
     private function toolCekKas(): string
     {

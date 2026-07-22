@@ -37,6 +37,7 @@ $routes->get('dashboard/profil', 'Admin::profil');
 $routes->post('dashboard/profil', 'Admin::updateProfile', ['filter' => 'masjidAdmin']);
 // Panduan & token MCP (akses agen AI).
 $routes->get('dashboard/mcp', 'Admin::mcpGuide');
+$routes->get('dashboard/mcp/audit', 'Admin::apiAudit', ['filter' => 'masjidAdmin']);
 // Token MCP (akses agen AI) — hanya Admin Masjid.
 $routes->get('dashboard/mcp/generate', 'Admin::generateMcpToken', ['filter' => 'masjidAdmin']);
 $routes->get('dashboard/mcp/revoke', 'Admin::revokeMcpToken', ['filter' => 'masjidAdmin']);
@@ -248,6 +249,12 @@ $routes->get('api/v1/kas', 'Api\RestApi::kas');
 $routes->get('api/v1/jadwal-sholat', 'Api\RestApi::jadwalSholat');
 $routes->get('api/v1/donasi', 'Api\RestApi::donasi');
 $routes->get('api/v1/profil', 'Api\RestApi::profil');
+// Tulis data (transaksi|berita|program). Semua perubahan tercatat di audit log.
+// Dikecualikan dari CSRF (memakai Bearer token, bukan form) — lihat Filters.php.
+$routes->post('api/v1/(:segment)', 'Api\RestApi::buat/$1');
+$routes->put('api/v1/(:segment)/(:num)', 'Api\RestApi::ubah/$1/$2');
+$routes->patch('api/v1/(:segment)/(:num)', 'Api\RestApi::ubah/$1/$2');
+$routes->delete('api/v1/(:segment)/(:num)', 'Api\RestApi::hapus/$1/$2');
 
 // Prevent asset paths from being captured by wildcard
 $routes->get('(images|assets|uploads|css|js|fonts)/(:any)', function() {
