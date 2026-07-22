@@ -28,6 +28,8 @@
     <div class="bg-white dark:bg-white/5 rounded-[3rem] border border-[#e5e7eb] dark:border-white/10 overflow-hidden shadow-sm">
         <form id="saveForm" action="<?= base_url('dashboard/keuangan/import-csv/save') ?>" method="POST">
             <?= csrf_field() ?>
+            <?php // id draf CSV (di DB) supaya bisa dibuang setelah tersimpan. ?>
+            <input type="hidden" name="draft_id" value="<?= (int) ($draftId ?? 0) ?>">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>

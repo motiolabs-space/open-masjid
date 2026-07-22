@@ -103,36 +103,50 @@ class FinanceAI extends BaseController
             $mergedTransactions[] = $t;
         }
 
-        // Store temporarily in session for review page
-        session()->set('temp_csv_transactions', $mergedTransactions);
+        // Disimpan ke DB, BUKAN session: data besar di session membuat file
+        // session membengkak dan gagal ditulis di sebagian hosting ("error
+        // session" saat unggah). Id draf dibawa lewat URL review, jadi alur ini
+        // tidak menyentuh session sama sekali.
+        $draftId = (new \App\Models\CsvImportDraftModel())->simpan(
+            (int) $masjidId,
+            (int) session()->get('user_id'),
+            $mergedTransactions
+        );
 
         // Impor tetap berjalan tanpa AI, tetapi diamnya menyesatkan: pengurus
         // melihat semua kategori berisi 'Lainnya' tanpa tahu sebabnya dan
         // mengira fiturnya rusak. Katakan apa adanya.
         if (empty($aiResults)) {
-            return redirect()->to('/dashboard/keuangan/review-csv')
+            return redirect()->to('/dashboard/keuangan/review-csv/' . $draftId)
                 ->with('error', 'Kategori otomatis dari AI sedang tidak tersedia. '
                     . 'Data tetap terbaca — silakan pilih kategorinya sendiri di bawah ini.');
         }
 
-        return redirect()->to('/dashboard/keuangan/review-csv');
+        return redirect()->to('/dashboard/keuangan/review-csv/' . $draftId);
     }
 
-    public function reviewCSV()
+    public function reviewCSV($draftId = null)
     {
-        $transactions = session()->get('temp_csv_transactions');
+        $masjidId = session()->get('masjid_id');
+        $userId   = (int) session()->get('user_id');
+
+        // Draf diambil dari DB berdasarkan id di URL — hanya bila milik masjid &
+        // pengguna ini, sehingga id draf orang lain tak bisa ditebak.
+        $transactions = (new \App\Models\CsvImportDraftModel())
+            ->ambil((int) $draftId, (int) $masjidId, $userId);
+
         if (!$transactions) {
             return redirect()->to('/dashboard/keuangan')->with('error', 'Tidak ada data CSV yang sedang direview.');
         }
 
-        $masjidId = session()->get('masjid_id');
         $categoryModel = new MasjidFinanceCategoryModel();
         $categories = $categoryModel->where('masjid_id', $masjidId)->findAll();
 
         return view('dashboard/keuangan/review_csv', [
             'title' => 'Review Mutasi Bank - Masj.id',
             'transactions' => $transactions,
-            'categories' => $categories
+            'categories' => $categories,
+            'draftId' => (int) $draftId,
         ]);
     }
 
@@ -212,7 +226,13 @@ class FinanceAI extends BaseController
 
         if (!empty($insertData)) {
             $transactionModel->insertBatch($insertData);
-            session()->remove('temp_csv_transactions');
+
+            // Draf CSV dibuang setelah tersimpan (id dibawa dari form review).
+            $draftId = (int) $this->request->getPost('draft_id');
+            if ($draftId > 0) {
+                (new \App\Models\CsvImportDraftModel())
+                    ->hapusMilik($draftId, (int) $masjidId, (int) session()->get('user_id'));
+            }
 
             $pesan = count($insertData) . ' Transaksi berhasil disimpan.';
             if ($dilewati > 0) {
