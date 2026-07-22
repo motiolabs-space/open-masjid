@@ -30,18 +30,27 @@
                 <span class="material-symbols-outlined text-primary">smart_toy</span> Apa ini?
             </h2>
             <p class="text-sm text-[#374151] dark:text-slate-300 leading-relaxed">
-                Fitur ini membuka "pintu" agar asisten AI bisa <strong>membaca</strong> data masjid Anda
-                &mdash; misalnya menanyakan saldo kas, jadwal sholat, atau donasi terbaru &mdash; lalu
-                menjawabnya untuk Anda. Aksesnya <strong>hanya membaca, tidak mengubah apa pun</strong>,
-                dan <strong>hanya untuk masjid ini</strong>. Butuh sedikit pengetahuan teknis untuk
+                Fitur ini membuka "pintu" agar asisten AI atau aplikasi lain bisa mengakses data masjid
+                Anda &mdash; membaca (saldo kas, jadwal sholat, donasi) <strong>dan mengubah</strong>
+                (menambah/mengubah/menghapus transaksi, berita, program). Aksesnya
+                <strong>hanya untuk masjid ini</strong>. Butuh sedikit pengetahuan teknis untuk
                 menghubungkannya; bila ragu, minta bantuan pengembang Anda.
             </p>
+            <div class="mt-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-3 text-xs flex gap-2">
+                <span class="material-symbols-outlined text-base shrink-0">warning</span>
+                <p>
+                    <strong>Token ini bisa mengubah &amp; menghapus data.</strong> Perlakukan seperti password:
+                    jangan dibagikan. Setiap perubahan tercatat &mdash;
+                    <a href="<?= base_url('dashboard/mcp/audit') ?>" class="underline font-bold">lihat Audit</a>.
+                    Bila ada yang mencurigakan, cabut tokennya di bawah.
+                </p>
+            </div>
         </div>
 
         <!-- Langkah 1: Token -->
         <div class="bg-white dark:bg-white/5 rounded-2xl border border-[#e5e7eb] dark:border-white/10 p-6 mb-6">
             <h2 class="font-bold text-[#111816] dark:text-white mb-1">Langkah 1 — Token Akses</h2>
-            <p class="text-xs text-[#608a7e] mb-4">Token adalah "kunci" rahasia. Siapa pun yang memegangnya bisa membaca data masjid ini. Jaga baik-baik.</p>
+            <p class="text-xs text-[#608a7e] mb-4">Token adalah "kunci" rahasia. Siapa pun yang memegangnya bisa membaca <strong>dan mengubah</strong> data masjid ini. Jaga baik-baik.</p>
 
             <?php if ($aktif): ?>
                 <div class="flex items-center gap-2 mb-3">
@@ -100,7 +109,12 @@
                     </div>
                 <?php endforeach; ?>
             </div>
-            <p class="text-[11px] text-[#608a7e] mt-4">Semua bersifat <strong>hanya-baca</strong> dan otomatis terbatas pada masjid ini.</p>
+            <p class="text-[11px] text-[#608a7e] mt-4">
+                Tool <code>buat_data</code>, <code>ubah_data</code>, dan <code>hapus_data</code>
+                <strong>mengubah data sungguhan</strong> (transaksi kas, berita, program) &mdash; sisanya hanya membaca.
+                Semuanya otomatis terbatas pada masjid ini, dan setiap perubahan masuk
+                <a href="<?= base_url('dashboard/mcp/audit') ?>" class="underline font-bold text-primary">Audit</a>.
+            </p>
         </div>
 
         <!-- Langkah 4: Contoh -->

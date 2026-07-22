@@ -7,14 +7,18 @@ use App\Models\MasjidModel;
 use App\Libraries\MasjidData;
 
 /**
- * REST API per masjid — HANYA-BACA, dipakai integrasi umum (bukan agen AI;
- * untuk itu ada MCP di Api\Mcp).
+ * REST API per masjid untuk integrasi umum (bukan agen AI; untuk itu ada MCP di
+ * Api\Mcp). Mendukung BACA dan TULIS (create/update/delete).
  *
  * KEAMANAN MULTI-TENANT
  * Autentikasi token Bearer -> masjid.api_token (unik) -> tepat SATU masjid.
  * Tidak ada endpoint yang menerima masjid_id dari pemanggil; masjid selalu
- * diturunkan dari token. Datanya diambil lewat App\Libraries\MasjidData yang
- * sama dengan MCP, jadi angka yang disajikan kedua antarmuka selalu konsisten.
+ * diturunkan dari token. Baca lewat App\Libraries\MasjidData dan tulis lewat
+ * App\Libraries\MasjidWriter — keduanya dipakai bersama MCP, jadi aturan
+ * keamanan dan angka yang disajikan kedua antarmuka selalu sama.
+ *
+ * SETIAP PERUBAHAN TERCATAT di api_audit_logs (berhasil maupun gagal), karena
+ * perubahan lewat API tidak meninggalkan jejak seperti aksi lewat dashboard.
  *
  * Balasan seragam:
  *   sukses -> {"status":"success","data":...}
@@ -76,6 +80,78 @@ class RestApi extends BaseController
             'telepon'  => $this->masjid['phone'] ?? null,
             'timezone' => $this->masjid['timezone'] ?? null,
         ]);
+    }
+
+    // ── Tulis data (create / update / delete) ────────────────────────────
+    //
+    // Seluruh penjagaan ada di App\Libraries\MasjidWriter: masjid selalu dari
+    // token, ubah/hapus wajib milik sendiri, relasi kategori diperiksa, dan
+    // SEMUA percobaan (berhasil/gagal) tercatat di audit log.
+
+    public function buat($entitas = null)
+    {
+        if ($resp = $this->guard()) {
+            return $resp;
+        }
+
+        $hasil = $this->writer()->buat((string) $entitas, $this->bodyData());
+
+        return $hasil['ok']
+            ? $this->response->setStatusCode(201)->setJSON(['status' => 'success', 'data' => ['id' => $hasil['id']]])
+            : $this->galat(422, $hasil['error']);
+    }
+
+    public function ubah($entitas = null, $id = null)
+    {
+        if ($resp = $this->guard()) {
+            return $resp;
+        }
+
+        $hasil = $this->writer()->ubah((string) $entitas, (int) $id, $this->bodyData());
+
+        return $hasil['ok']
+            ? $this->sukses(['id' => (int) $id])
+            : $this->galat(422, $hasil['error']);
+    }
+
+    public function hapus($entitas = null, $id = null)
+    {
+        if ($resp = $this->guard()) {
+            return $resp;
+        }
+
+        $hasil = $this->writer()->hapus((string) $entitas, (int) $id);
+
+        return $hasil['ok']
+            ? $this->sukses(['id' => (int) $id, 'dihapus' => true])
+            : $this->galat(422, $hasil['error']);
+    }
+
+    private function writer(): \App\Libraries\MasjidWriter
+    {
+        return new \App\Libraries\MasjidWriter($this->masjid, 'api', $this->request->getIPAddress());
+    }
+
+    /**
+     * Isi permintaan: menerima JSON maupun form biasa, supaya klien bebas
+     * memilih. PUT/PATCH lewat form tidak terisi otomatis di PHP, jadi JSON
+     * didahulukan.
+     */
+    private function bodyData(): array
+    {
+        $json = $this->request->getJSON(true);
+        if (is_array($json) && $json !== []) {
+            return $json;
+        }
+
+        $post = $this->request->getPost();
+        if (is_array($post) && $post !== []) {
+            return $post;
+        }
+
+        parse_str((string) $this->request->getBody(), $raw);
+
+        return is_array($raw) ? $raw : [];
     }
 
     // ── Autentikasi ──────────────────────────────────────────────────────

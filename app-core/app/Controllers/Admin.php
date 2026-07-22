@@ -1951,6 +1951,23 @@ class Admin extends BaseController
     }
 
     /**
+     * Riwayat audit perubahan data lewat API / MCP.
+     *
+     * Ini pengaman utama sejak token boleh menulis: perubahan lewat API tidak
+     * meninggalkan jejak seperti aksi dashboard, jadi halaman ini yang
+     * memperlihatkannya — termasuk percobaan yang DITOLAK.
+     */
+    public function apiAudit()
+    {
+        $masjidId = session()->get('masjid_id');
+
+        return view('dashboard/mcp/audit', [
+            'title'   => 'Audit API / MCP - Masj.id',
+            'riwayat' => (new \App\Models\ApiAuditLogModel())->riwayat((int) $masjidId, 200),
+        ]);
+    }
+
+    /**
      * Halaman panduan penggunaan MCP / API masjid untuk admin.
      */
     public function mcpGuide()

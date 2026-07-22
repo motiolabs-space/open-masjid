@@ -83,7 +83,7 @@ class Filters extends BaseFilters
             // harus terdaftar (lihat Api\Telegram).
             // 'api/mcp' ikut dikecualikan: agen AI memanggil dengan token Bearer,
             // bukan token CSRF. Keamanannya dijaga token per masjid + hanya-baca.
-            'csrf' => ['except' => ['payment/callback', 'api/telegram/webhook/*', 'api/mcp']],
+            'csrf' => ['except' => ['payment/callback', 'api/telegram/webhook/*', 'api/mcp', 'api/v1/*']],
             // 'invalidchars',
         ],
         'after' => [
