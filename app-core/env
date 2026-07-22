@@ -63,6 +63,21 @@
 # session.savePath = null
 
 #--------------------------------------------------------------------
+# EMAIL TRANSAKSIONAL (lupa password, verifikasi, sambutan, laporan)
+#--------------------------------------------------------------------
+# Dikirim lewat layanan transaksional (bukan SMTP hosting) agar andal masuk
+# inbox. Default provider: Resend (https://resend.com) — buat akun, verifikasi
+# domain pengirim, ambil API key. Ganti provider dengan mengubah App\Libraries\Mailer.
+#
+# mail.provider  = 'resend'
+# mail.apiKey    = 're_xxxxxxxx'
+# mail.fromEmail = 'noreply@masj.id'   # HARUS domain yang terverifikasi di Resend
+# mail.fromName  = 'Masj.id'
+#
+# Tanpa mail.apiKey, seluruh fitur email nonaktif (dan melaporkannya, tidak
+# berpura-pura terkirim).
+
+#--------------------------------------------------------------------
 # LOGGER
 #--------------------------------------------------------------------
 

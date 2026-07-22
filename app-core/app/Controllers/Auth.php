@@ -406,4 +406,131 @@ class Auth extends BaseController
         }
         return 'Unknown';
     }
+
+    // =====================================================================
+    // LUPA PASSWORD
+    // =====================================================================
+
+    public function showForgotPassword()
+    {
+        return view('auth/forgot_password', ['title' => 'Lupa Password - Masj.id']);
+    }
+
+    /**
+     * Mengirim tautan reset ke email — bila email terdaftar.
+     *
+     * Balasan SELALU sama ("bila terdaftar, tautan dikirim") apa pun hasilnya,
+     * supaya orang luar tidak bisa memakai halaman ini untuk menebak email mana
+     * yang punya akun (anti-enumerasi).
+     */
+    public function sendResetLink()
+    {
+        $email = trim((string) $this->request->getPost('email'));
+        $pesanNetral = 'Bila email tersebut terdaftar, kami telah mengirim tautan reset. Silakan cek kotak masuk (dan folder spam).';
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return redirect()->back()->withInput()->with('error', 'Masukkan alamat email yang sah.');
+        }
+
+        $user = (new UserModel())->where('email', $email)->first();
+
+        // Hanya kirim bila user ada — tetapi balasan ke pengguna tetap netral.
+        if ($user) {
+            // Token mentah dikirim ke email; hanya HASH-nya disimpan.
+            $tokenMentah = bin2hex(random_bytes(32));
+            $db = \Config\Database::connect();
+            $db->table('password_resets')->insert([
+                'email'      => $email,
+                'token_hash' => hash('sha256', $tokenMentah),
+                'expires_at' => date('Y-m-d H:i:s', time() + 3600), // 1 jam
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+
+            $link = base_url('reset-password/' . $tokenMentah);
+            $html = view('emails/reset_password', [
+                'nama' => $user['name'] ?? 'Bapak/Ibu',
+                'link' => $link,
+            ]);
+
+            $mailer = new \App\Libraries\Mailer();
+            $terkirim = $mailer->kirim($email, $user['name'] ?? '', 'Reset Password Masj.id', $html);
+
+            if (!$terkirim) {
+                // Jujur bila layanan email gagal — jangan menyuruh pengguna
+                // mengecek email yang tak akan pernah datang.
+                log_message('error', 'Gagal kirim reset password ke ' . $email . ': ' . $mailer->pesanGalat());
+                return redirect()->back()
+                    ->with('error', 'Maaf, layanan email sedang bermasalah. Coba lagi nanti atau hubungi admin.');
+            }
+        }
+
+        return redirect()->to('login')->with('success', $pesanNetral);
+    }
+
+    public function showResetPassword($token)
+    {
+        $baris = $this->cariTokenSah($token);
+        if (!$baris) {
+            return redirect()->to('forgot-password')
+                ->with('error', 'Tautan reset tidak berlaku atau sudah kedaluwarsa. Silakan minta tautan baru.');
+        }
+
+        return view('auth/reset_password', [
+            'title' => 'Atur Password Baru - Masj.id',
+            'token' => $token,
+        ]);
+    }
+
+    public function doResetPassword()
+    {
+        $token = (string) $this->request->getPost('token');
+        $pass  = (string) $this->request->getPost('password');
+        $pass2 = (string) $this->request->getPost('password_confirm');
+
+        $baris = $this->cariTokenSah($token);
+        if (!$baris) {
+            return redirect()->to('forgot-password')
+                ->with('error', 'Tautan reset tidak berlaku atau sudah kedaluwarsa.');
+        }
+
+        if (strlen($pass) < 8) {
+            return redirect()->back()->with('error', 'Password minimal 8 karakter.');
+        }
+        if ($pass !== $pass2) {
+            return redirect()->back()->with('error', 'Konfirmasi password tidak sama.');
+        }
+
+        $userModel = new UserModel();
+        $user = $userModel->where('email', $baris['email'])->first();
+        if (!$user) {
+            return redirect()->to('forgot-password')->with('error', 'Akun tidak ditemukan.');
+        }
+
+        $userModel->update($user['id'], ['password_hash' => password_hash($pass, PASSWORD_DEFAULT)]);
+
+        // Tandai token terpakai (sekali pakai) dan buang token lain milik email
+        // ini agar tak ada tautan lama yang masih menganga.
+        $db = \Config\Database::connect();
+        $db->table('password_resets')->where('email', $baris['email'])
+            ->update(['used_at' => date('Y-m-d H:i:s')]);
+
+        return redirect()->to('login')->with('success', 'Password berhasil diubah. Silakan login dengan password baru.');
+    }
+
+    /**
+     * Baris token yang sah: cocok hash, belum dipakai, belum kedaluwarsa.
+     */
+    private function cariTokenSah(string $tokenMentah): ?array
+    {
+        if ($tokenMentah === '') {
+            return null;
+        }
+
+        $db = \Config\Database::connect();
+        return $db->table('password_resets')
+            ->where('token_hash', hash('sha256', $tokenMentah))
+            ->where('used_at', null)
+            ->where('expires_at >=', date('Y-m-d H:i:s'))
+            ->get()->getRowArray();
+    }
 }
