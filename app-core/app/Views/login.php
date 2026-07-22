@@ -83,7 +83,7 @@
 <label class="text-slate-700 dark:text-slate-300 text-sm font-semibold">
                             Password
                         </label>
-<a class="text-primary hover:text-emerald-800 text-xs font-bold transition-colors" href="#">
+<a class="text-primary hover:text-emerald-800 text-xs font-bold transition-colors" href="<?= base_url('forgot-password') ?>">
                             Lupa Password?
                         </a>
 </div>

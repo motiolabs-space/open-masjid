@@ -24,6 +24,11 @@ $routes->get('/auth/check-username', 'Auth::checkUsername');
 $routes->get('/auth/check-email', 'Auth::checkEmail');
 $routes->post('/register/masjid', 'Auth::registerMasjid');
 $routes->post('/register/jamaah', 'Auth::registerJamaah');
+// Lupa password
+$routes->get('/forgot-password', 'Auth::showForgotPassword');
+$routes->post('/forgot-password', 'Auth::sendResetLink');
+$routes->get('/reset-password/(:segment)', 'Auth::showResetPassword/$1');
+$routes->post('/reset-password', 'Auth::doResetPassword');
 $routes->get('dashboard', 'Admin::index');
 $routes->post('subscribe', 'Home::subscribe');
 $routes->get('dashboard/followers', 'Admin::followers');
