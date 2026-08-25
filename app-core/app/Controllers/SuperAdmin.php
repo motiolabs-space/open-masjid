@@ -50,6 +50,124 @@ class SuperAdmin extends BaseController
         ]);
     }
 
+    /**
+     * Laporan pertumbuhan (GTM) platform, khusus superadmin. Kartu metrik ala
+     * dashboard toko aplikasi: angka utama, perubahan, dan tren mini.
+     *
+     * PENTING soal kejujuran data: hanya metrik yang punya stempel waktu asli
+     * (created_at / paid_at / date) yang ditampilkan sebagai tren bulanan nyata.
+     * DAU/MAU/masjid-aktif TIDAK punya histori — `users.last_login` hanya
+     * menyimpan login TERAKHIR per user — jadi ditampilkan sebagai "posisi
+     * terkini" tanpa garis tren, bukan grafik karangan. initController sudah
+     * membatasi akses ke superadmin.
+     */
+    public function gtm(): string
+    {
+        $bulan = (int) ($this->request->getGet('bulan') ?: 12);
+        if (! in_array($bulan, [6, 12, 24], true)) {
+            $bulan = 12;
+        }
+
+        $db   = \Config\Database::connect();
+        $base = date('Y-m-01');
+
+        // Sumbu waktu: satu ember per bulan, dari (bulan-1) bulan lalu s.d. bulan ini.
+        $ym = [];
+        $label = [];
+        for ($i = $bulan - 1; $i >= 0; $i--) {
+            $t       = strtotime("$base -$i months");
+            $ym[]    = date('Y-m', $t);
+            $label[] = date('M y', $t);
+        }
+        $mulai = date('Y-m-01 00:00:00', strtotime("$base -" . ($bulan - 1) . " months"));
+
+        // Deret nilai per bulan dari satu query GROUP BY, disejajarkan ke $ym.
+        $deret = function (string $sql, array $bind) use ($db, $ym): array {
+            $map = [];
+            foreach ($db->query($sql, $bind)->getResultArray() as $r) {
+                $map[$r['ym']] = (float) $r['v'];
+            }
+            return array_map(fn ($k) => $map[$k] ?? 0.0, $ym);
+        };
+
+        // Hitungan sebelum jendela waktu, jadi kumulatif tidak dimulai dari nol.
+        $awal = function (string $table, string $col) use ($db, $mulai): float {
+            return (float) ($db->query(
+                "SELECT COUNT(*) v FROM {$table} WHERE {$col} < ?",
+                [$mulai]
+            )->getRow()->v ?? 0);
+        };
+        $kumulatif = function (array $s, float $a): array {
+            $out = [];
+            $run = $a;
+            foreach ($s as $v) {
+                $run += $v;
+                $out[] = $run;
+            }
+            return $out;
+        };
+
+        $q = fn (string $table, string $col, string $agg = 'COUNT(*)', string $extra = '') =>
+            "SELECT DATE_FORMAT({$col}, '%Y-%m') ym, {$agg} v FROM {$table} "
+            . "WHERE {$col} >= ? {$extra} GROUP BY ym";
+
+        $masjidBaru   = $deret($q('masjid', 'created_at'), [$mulai]);
+        $penggunaBaru = $deret($q('users', 'created_at'), [$mulai]);
+        $wargaBaru    = $deret($q('masjid_warga', 'created_at'), [$mulai]);
+        $programBaru  = $deret($q('masjid_programs', 'created_at'), [$mulai]);
+        $transaksi    = $deret($q('masjid_finance_transactions', 'date'), [$mulai]);
+        $donasi       = $deret(
+            $q('masjid_donations', 'paid_at', 'COALESCE(SUM(amount),0)', "AND status IN ('paid','success','settlement')"),
+            [$mulai]
+        );
+
+        $totalMasjid   = $kumulatif($masjidBaru, $awal('masjid', 'created_at'));
+        $totalPengguna = $kumulatif($penggunaBaru, $awal('users', 'created_at'));
+
+        // Posisi terkini (snapshot, tanpa histori harian yang tersimpan).
+        $now      = date('Y-m-d H:i:s');
+        $mau      = (int) $db->query("SELECT COUNT(*) v FROM users WHERE last_login >= ?", [date('Y-m-d H:i:s', strtotime('-30 days'))])->getRow()->v;
+        $dau      = (int) $db->query("SELECT COUNT(*) v FROM users WHERE last_login >= ?", [date('Y-m-d H:i:s', strtotime('-1 days'))])->getRow()->v;
+        $masjidAktif = (int) $db->query(
+            "SELECT COUNT(DISTINCT mp.masjid_id) v FROM masjid_pengurus mp JOIN users u ON u.id = mp.user_id WHERE u.last_login >= ?",
+            [date('Y-m-d H:i:s', strtotime('-30 days'))]
+        )->getRow()->v;
+
+        // Susun kartu. mode: flow (rata-rata + %Δ bulan terakhir), total
+        // (nilai terakhir + selisih sejak awal jendela), rupiah (jumlah, Rp).
+        $kartuTren = fn (string $judul, string $ikon, string $warna, array $s, string $mode) => [
+            'judul'  => $judul,
+            'ikon'   => $ikon,
+            'warna'  => $warna,
+            'mode'   => $mode,
+            'series' => array_map(fn ($v) => round($v, 2), $s),
+        ];
+
+        $data = [
+            'title'   => 'Laporan GTM - Superadmin',
+            'bulan'   => $bulan,
+            'label'   => $label,
+            'rentang' => date('M Y', strtotime($mulai)) . ' – ' . date('M Y'),
+            'tren'    => [
+                $kartuTren('Akuisisi Masjid', 'add_business', 'emerald', $masjidBaru, 'flow'),
+                $kartuTren('Total Masjid', 'mosque', 'sky', $totalMasjid, 'total'),
+                $kartuTren('Akuisisi Pengguna', 'person_add', 'blue', $penggunaBaru, 'flow'),
+                $kartuTren('Total Pengguna', 'group', 'violet', $totalPengguna, 'total'),
+                $kartuTren('Warga Terdaftar Baru', 'diversity_3', 'teal', $wargaBaru, 'flow'),
+                $kartuTren('Program Baru', 'event', 'amber', $programBaru, 'flow'),
+                $kartuTren('Donasi Masuk', 'volunteer_activism', 'rose', $donasi, 'rupiah'),
+                $kartuTren('Transaksi Keuangan', 'receipt_long', 'indigo', $transaksi, 'flow'),
+            ],
+            'snapshot' => [
+                ['judul' => 'Pengguna Aktif Bulanan', 'sub' => 'MAU · 30 hari terakhir', 'ikon' => 'trending_up', 'warna' => 'emerald', 'nilai' => $mau],
+                ['judul' => 'Pengguna Aktif Harian', 'sub' => 'DAU · 24 jam terakhir', 'ikon' => 'bolt', 'warna' => 'amber', 'nilai' => $dau],
+                ['judul' => 'Masjid Aktif', 'sub' => 'login pengurus 30 hari', 'ikon' => 'local_fire_department', 'warna' => 'rose', 'nilai' => $masjidAktif],
+            ],
+        ];
+
+        return view('superadmin/gtm', $data);
+    }
+
     public function index(): string
     {
         $masjidModel = new MasjidModel();

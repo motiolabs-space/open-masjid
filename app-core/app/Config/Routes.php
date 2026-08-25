@@ -202,6 +202,9 @@ $routes->group('superadmin', ['filter' => 'dashboardGuard'], function($routes) {
     $routes->get('profile', 'SuperAdmin::profile');
     $routes->post('profile/password', 'SuperAdmin::updatePassword');
     
+    // Laporan pertumbuhan / GTM (khusus superadmin)
+    $routes->get('gtm', 'SuperAdmin::gtm');
+
     // Pemakaian token AI (khusus superadmin)
     $routes->get('ai-usage', 'SuperAdmin::aiUsage');
 
