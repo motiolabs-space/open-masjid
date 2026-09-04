@@ -2655,7 +2655,10 @@ class Admin extends BaseController
         
         $openingBalance = 0;
         foreach ($prevTransactions as $t) {
-            if ($t['type'] == 'income') $openingBalance += $t['amount'];
+            // Nilai enam kolom adalah 'pemasukan'/'pengeluaran' (enum). 'income'
+            // tak pernah cocok, dulu SEMUA transaksi jatuh ke else lalu DIKURANGI
+            // — saldo awal jadi negatif sebesar seluruh transaksi sebelumnya.
+            if (in_array($t['type'], ['pemasukan', 'income'])) $openingBalance += $t['amount'];
             else $openingBalance -= $t['amount'];
         }
 
@@ -2672,7 +2675,7 @@ class Admin extends BaseController
         $totalIncome = 0;
         $totalExpense = 0;
         foreach ($transactions as $t) {
-            if ($t['type'] == 'income') $totalIncome += $t['amount'];
+            if (in_array($t['type'], ['pemasukan', 'income'])) $totalIncome += $t['amount'];
             else $totalExpense += $t['amount'];
         }
 

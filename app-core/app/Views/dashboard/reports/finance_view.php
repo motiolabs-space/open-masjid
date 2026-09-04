@@ -61,7 +61,7 @@
             ?>
             <?php foreach ($transactions as $t): ?>
                 <?php 
-                    if ($t['type'] == 'income') {
+                    if (in_array($t['type'], ['pemasukan', 'income'])) {
                         $in = $t['amount'];
                         $out = 0;
                         $runningBalance += $in;
