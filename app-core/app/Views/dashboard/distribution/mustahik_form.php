@@ -76,6 +76,18 @@
                     <option value="lainnya" <?= (isset($mustahik) && $mustahik['house_ownership'] == 'lainnya') ? 'selected' : '' ?>>Lainnya</option>
                 </select>
             </div>
+
+            <div class="md:col-span-2">
+                <?php helper('custom'); $asnafSekarang = $mustahik['asnaf'] ?? ''; ?>
+                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Golongan Zakat (Asnaf)</label>
+                <select name="asnaf" class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary">
+                    <option value="">— Belum diklasifikasi —</option>
+                    <?php foreach (daftar_asnaf() as $key => $label): ?>
+                        <option value="<?= $key ?>" <?= $asnafSekarang === $key ? 'selected' : '' ?>><?= esc($label) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <p class="text-xs text-slate-400 mt-1">Menentukan golongan penerima untuk laporan penyaluran zakat (8 asnaf).</p>
+            </div>
         </div>
 
         <div class="mt-8 flex justify-end gap-3">

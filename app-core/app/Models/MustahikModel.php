@@ -13,8 +13,8 @@ class MustahikModel extends Model
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
-        'masjid_id', 'name', 'nik', 'phone', 'address', 
-        'income_per_month', 'dependents_count', 'house_ownership', 
+        'masjid_id', 'name', 'nik', 'phone', 'address',
+        'income_per_month', 'dependents_count', 'house_ownership', 'asnaf',
         'status', 'ai_score', 'ai_reasoning'
     ];
 

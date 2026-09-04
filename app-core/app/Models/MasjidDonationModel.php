@@ -13,7 +13,7 @@ class MasjidDonationModel extends Model
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
-        'masjid_id', 'program_id', 'invoice_number', 'amount',
+        'masjid_id', 'program_id', 'zakat_type', 'invoice_number', 'amount',
         'donor_name', 'donor_email', 'donor_phone', 'message',
         'payment_method', 'payment_channel', 'payment_ref', 'payment_url',
         'status', 'paid_at'

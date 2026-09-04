@@ -95,7 +95,11 @@ class Distribution extends BaseController
             'income_per_month' => abs(parse_rupiah($this->request->getPost('income_per_month'))),
             'dependents_count' => $this->request->getPost('dependents_count') ?: 0,
             'house_ownership'  => $this->request->getPost('house_ownership') ?: 'lainnya',
-            'status'           => $this->request->getPost('status') ?: 'active'
+            'status'           => $this->request->getPost('status') ?: 'active',
+            // Asnaf dibatasi ke daftar dikenal; selain itu disimpan NULL (belum
+            // diklasifikasi) ketimbang menyimpan nilai ngawur dari POST.
+            'asnaf'            => array_key_exists((string) $this->request->getPost('asnaf'), daftar_asnaf())
+                                    ? $this->request->getPost('asnaf') : null,
         ];
 
         // Generate AI Score synchronously

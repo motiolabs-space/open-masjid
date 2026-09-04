@@ -85,9 +85,15 @@ class Donation extends BaseController
         $settings = $payModel->where('masjid_id', $masjidId)->first();
         $paymentMode = $settings['payment_mode'] ?? 'manual';
 
+        // Jenis zakat dibatasi ke daftar dikenal; selain itu NULL (= infaq/donasi
+        // biasa). Menandai zakat di sini agar laporan zakat bisa dipisahkan.
+        $zakatType = $this->request->getPost('zakat_type');
+        $zakatType = in_array($zakatType, ['maal', 'penghasilan', 'fitrah'], true) ? $zakatType : null;
+
         $data = [
             'masjid_id'      => $masjidId,
             'program_id'     => $programId ?: null,
+            'zakat_type'     => $zakatType,
             'invoice_number' => $invoice,
             'amount'         => str_replace(['.', ','], ['', '.'], $this->request->getPost('amount')),
             'donor_name'     => $this->request->getPost('name'),

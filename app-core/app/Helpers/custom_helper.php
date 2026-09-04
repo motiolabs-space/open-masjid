@@ -174,6 +174,27 @@ if (!function_exists('parse_tanggal')) {
     }
 }
 
+if (!function_exists('daftar_asnaf')) {
+    /**
+     * Delapan asnaf (golongan penerima zakat) sesuai QS. At-Taubah: 60.
+     * Kunci = nilai tersimpan di kolom, nilai = label tampil. Satu sumber
+     * dipakai form mustahik, validasi, dan laporan zakat agar tak pernah beda.
+     */
+    function daftar_asnaf(): array
+    {
+        return [
+            'fakir'        => 'Fakir',
+            'miskin'       => 'Miskin',
+            'amil'         => 'Amil (pengurus zakat)',
+            'muallaf'      => 'Muallaf',
+            'riqab'        => 'Riqab (memerdekakan budak)',
+            'gharim'       => 'Gharim (terlilit utang)',
+            'fisabilillah' => 'Fi Sabilillah',
+            'ibnu_sabil'   => 'Ibnu Sabil (musafir)',
+        ];
+    }
+}
+
 if (!function_exists('terbilang')) {
     /**
      * Mengeja bilangan bulat menjadi kata bahasa Indonesia.

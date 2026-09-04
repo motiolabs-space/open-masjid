@@ -53,6 +53,8 @@
                     <input type="hidden" name="program_id" value="<?= $program['id'] ?? '' ?>">
 
                     <?php if (!empty($labelZakat)): ?>
+                        <?php $petaZakat = ['Zakat Maal' => 'maal', 'Zakat Penghasilan' => 'penghasilan', 'Zakat Fitrah' => 'fitrah']; ?>
+                        <input type="hidden" name="zakat_type" value="<?= esc($petaZakat[$labelZakat] ?? '', 'attr') ?>">
                         <div class="bg-primary/5 border border-primary/20 text-primary px-4 py-3 rounded-xl mb-2 text-sm font-bold flex items-center gap-2">
                             <span class="material-symbols-outlined">mosque</span>
                             Anda menunaikan <?= esc($labelZakat) ?>
