@@ -173,3 +173,61 @@ if (!function_exists('parse_tanggal')) {
         return null;
     }
 }
+
+if (!function_exists('terbilang')) {
+    /**
+     * Mengeja bilangan bulat menjadi kata bahasa Indonesia.
+     *
+     * Dipakai pada kwitansi donasi: nominal wajib dieja agar sah sebagai tanda
+     * terima ("Rp 150.000 (seratus lima puluh ribu rupiah)"). Bekerja rekursif
+     * per satuan ribu/juta/miliar/triliun. Nilai desimal dibuang — rupiah pada
+     * praktiknya bilangan bulat, dan kwitansi tidak mengeja sen.
+     *
+     * Hasil huruf kecil semua; pemanggil yang mengapitalkan bila perlu.
+     */
+    function terbilang($angka): string
+    {
+        $angka = (int) abs((float) $angka);
+        $satuan = ['', 'satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'tujuh',
+                   'delapan', 'sembilan', 'sepuluh', 'sebelas'];
+
+        if ($angka < 12) {
+            return $satuan[$angka];
+        }
+        if ($angka < 20) {
+            return terbilang($angka - 10) . ' belas';
+        }
+        if ($angka < 100) {
+            $sisa = $angka % 10;
+            return terbilang(intdiv($angka, 10)) . ' puluh' . ($sisa ? ' ' . terbilang($sisa) : '');
+        }
+        if ($angka < 200) {
+            $sisa = $angka - 100;
+            return 'seratus' . ($sisa ? ' ' . terbilang($sisa) : '');
+        }
+        if ($angka < 1000) {
+            $sisa = $angka % 100;
+            return terbilang(intdiv($angka, 100)) . ' ratus' . ($sisa ? ' ' . terbilang($sisa) : '');
+        }
+        if ($angka < 2000) {
+            $sisa = $angka - 1000;
+            return 'seribu' . ($sisa ? ' ' . terbilang($sisa) : '');
+        }
+
+        // Skala besar, dari yang paling tinggi agar penempatan katanya benar.
+        $skala = [
+            1000000000000 => 'triliun',
+            1000000000    => 'miliar',
+            1000000       => 'juta',
+            1000          => 'ribu',
+        ];
+        foreach ($skala as $nilai => $nama) {
+            if ($angka >= $nilai) {
+                $sisa = $angka % $nilai;
+                return terbilang(intdiv($angka, $nilai)) . ' ' . $nama . ($sisa ? ' ' . terbilang($sisa) : '');
+            }
+        }
+
+        return $satuan[0];
+    }
+}

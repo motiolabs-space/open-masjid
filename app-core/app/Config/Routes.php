@@ -235,6 +235,7 @@ $routes->post('donation/process', 'Donation::store');
 // Nomor invoice wajib tanpa garis miring (lihat Donation::store) agar utuh
 // dalam satu segmen di sini.
 $routes->get('donation/manual/(:segment)', 'Donation::manual/$1'); // Manual Payment Instruction
+$routes->get('donation/kwitansi/(:segment)', 'Donation::kwitansi/$1'); // Kwitansi / tanda terima donasi
 
 // Payment Simulation (Dummy)
 $routes->get('payment/simulation/(:segment)', 'Payment::simulation/$1');

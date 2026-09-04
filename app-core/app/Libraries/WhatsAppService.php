@@ -58,6 +58,9 @@ class WhatsAppService
         $message .= "Kami telah menerima donasi Anda melalui *Masj.id* sebesar *Rp {$amount}* untuk program *{$program}* di *{$masjidName}*.\n\n";
         $message .= "Semoga menjadi pemberat amal timbangan di akhirat kelak. Aamiin.\n\n";
         $message .= "---\n";
+        if (! empty($data['invoice'])) {
+            $message .= 'Kwitansi resmi: ' . base_url('donation/kwitansi/' . $data['invoice']) . "\n";
+        }
         $message .= 'Cek laporan amanah di: ' . base_url(($data['masjid_username'] ?? '') . '/laporan');
 
         return $this->kanal->kirim($this->normalkanNomor($phone), $message);

@@ -159,4 +159,41 @@ class Donation extends BaseController
             'storage' => new \App\Libraries\Storage()
         ]);
     }
+
+    /**
+     * Kwitansi / tanda terima donasi — dokumen resmi per donasi, publik lewat
+     * nomor invoice. Bisa dibuka, dicetak, atau disimpan sebagai PDF oleh
+     * donatur (tombol cetak → "Simpan sebagai PDF"), tanpa pustaka PDF.
+     *
+     * Hanya donasi berstatus 'success' yang menampilkan kwitansi sah. Invoice
+     * adalah token acak (INV-YYYYMMDD-6HEX) — cukup untuk tautan langsung; tidak
+     * ada data pribadi sensitif yang ditampilkan selain nama & nominal yang
+     * memang milik kwitansi itu.
+     */
+    public function kwitansi($invoice)
+    {
+        $donation = $this->donationModel->where('invoice_number', $invoice)->first();
+        if (! $donation) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+        }
+
+        $masjid = (new \App\Models\MasjidModel())->find($donation['masjid_id']);
+
+        $programName = 'Donasi Umum';
+        if (! empty($donation['program_id'])) {
+            $prog = $this->programModel->find($donation['program_id']);
+            if ($prog) {
+                $programName = $prog['title'];
+            }
+        }
+
+        return view('payment/kwitansi', [
+            'title'       => 'Kwitansi Donasi ' . $donation['invoice_number'],
+            'donation'    => $donation,
+            'masjid'      => $masjid,
+            'programName' => $programName,
+            'lunas'       => ($donation['status'] === 'success'),
+            'storage'     => new \App\Libraries\Storage(),
+        ]);
+    }
 }

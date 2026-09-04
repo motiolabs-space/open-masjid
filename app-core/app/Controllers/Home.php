@@ -411,12 +411,38 @@ class Home extends BaseController
             ->get()
             ->getResultArray();
 
+        // Dinding transparansi: donasi online terbaru yang sudah lunas. Sengaja
+        // TIDAK diikat filter periode — ini "papan hidup" arus kepercayaan, jadi
+        // selalu menampilkan yang terbaru apa pun rentang laporannya.
+        $recentDonations = (new \App\Models\MasjidDonationModel())
+            ->select('masjid_donations.donor_name, masjid_donations.amount, masjid_donations.message, masjid_donations.paid_at, masjid_programs.title as program_title')
+            ->join('masjid_programs', 'masjid_programs.id = masjid_donations.program_id', 'left')
+            ->where('masjid_donations.masjid_id', $masjid['id'])
+            ->where('masjid_donations.status', 'success')
+            ->orderBy('masjid_donations.paid_at', 'DESC')
+            ->limit(8)
+            ->findAll();
+
+        // Penyaluran + bukti: menutup rantai "dari mana → ke mana → buktinya".
+        $db2 = \Config\Database::connect();
+        $distributions = $db2->table('masjid_distributions d')
+            ->select('d.date, d.type, d.amount, d.items, d.description, d.evidence_photo, w.name as warga_name, p.title as program_title')
+            ->join('masjid_warga w', 'w.id = d.warga_id', 'left')
+            ->join('masjid_programs p', 'p.id = d.program_id', 'left')
+            ->where('d.masjid_id', $masjid['id'])
+            ->orderBy('d.date', 'DESC')
+            ->limit(6)
+            ->get()
+            ->getResultArray();
+
         return view('public/finance_report', [
             'title'            => 'Laporan Amanah - ' . esc($masjid['name']),
             'masjid'           => $masjid,
             'transactions'     => $transactions,
             'summary'          => $summary,
             'expenditureByCat' => $expenditureByCat,
+            'recentDonations'  => $recentDonations,
+            'distributions'    => $distributions,
             'filters'          => ['start' => $start, 'end' => $end],
             'storage'          => new \App\Libraries\Storage()
         ]);

@@ -22,7 +22,11 @@
                 Semoga Allah membalas kebaikan Anda dengan pahala yang berlipat ganda. Aamiin.
             </p>
 
-            <a href="<?= base_url() ?>" class="inline-flex items-center justify-center w-full py-4 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/30 hover:shadow-xl hover:-translate-y-1 transition-all">
+            <a href="<?= base_url('donation/kwitansi/' . esc($invoice, 'url')) ?>" class="inline-flex items-center justify-center gap-2 w-full py-4 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/30 hover:shadow-xl hover:-translate-y-1 transition-all">
+                <span class="material-symbols-outlined">receipt_long</span>
+                Lihat / Unduh Kwitansi
+            </a>
+            <a href="<?= base_url() ?>" class="inline-flex items-center justify-center w-full py-3 mt-3 text-gray-500 font-bold rounded-xl hover:bg-gray-50 transition-all">
                 Kembali ke Beranda
             </a>
         </div>

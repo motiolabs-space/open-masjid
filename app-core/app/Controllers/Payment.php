@@ -175,7 +175,8 @@ class Payment extends BaseController
                 'masjid_username' => $masjid['username'],
                 'donor_name'      => $donation['donor_name'],
                 'amount'          => $donation['amount'],
-                'program_name'    => $programName
+                'program_name'    => $programName,
+                'invoice'         => $donation['invoice_number'],
             ]);
 
             // Kuitansi yang gagal TIDAK boleh menggagalkan donasinya: uangnya

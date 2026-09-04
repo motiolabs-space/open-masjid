@@ -21,6 +21,38 @@
             </div>
         </div>
 
+        <!-- Donasi Terbaru (dinding transparansi arus masuk) -->
+        <?php if (!empty($recentDonations)): ?>
+        <div class="mb-12">
+            <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">favorite</span>
+                Donasi Terbaru
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <?php foreach ($recentDonations as $d): ?>
+                <div class="bg-white dark:bg-white/5 border border-[#dbe6e3] dark:border-white/10 p-4 rounded-2xl flex items-start gap-3">
+                    <div class="size-10 shrink-0 rounded-full bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600 font-black">
+                        <?= strtoupper(substr(trim($d['donor_name'] ?? '') ?: 'H', 0, 1)) ?>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center justify-between gap-2">
+                            <p class="font-bold text-sm truncate"><?= esc(trim($d['donor_name'] ?? '') ?: 'Hamba Allah') ?></p>
+                            <p class="font-black text-sm text-emerald-600 whitespace-nowrap">Rp <?= number_format($d['amount'], 0, ',', '.') ?></p>
+                        </div>
+                        <p class="text-[11px] text-[#608a7e] mt-0.5">
+                            <?= !empty($d['program_title']) ? esc($d['program_title']) : 'Donasi Umum' ?>
+                            <?php if (!empty($d['paid_at'])): ?> &middot; <?= date('d M Y', strtotime($d['paid_at'])) ?><?php endif; ?>
+                        </p>
+                        <?php if (!empty($d['message'])): ?>
+                            <p class="text-[11px] text-slate-500 italic mt-1 line-clamp-2">&ldquo;<?= esc($d['message']) ?>&rdquo;</p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <?php endif; ?>
+
         <!-- Impact Distribution Section -->
         <?php if (!empty($expenditureByCat)): ?>
         <div class="mb-12">
@@ -55,6 +87,52 @@
                 <h3 class="text-3xl font-black text-red-500">Rp <?= number_format(array_sum(array_column(array_filter($transactions, fn($t) => $t['type'] == 'pengeluaran'), 'amount')), 0, ',', '.') ?></h3>
             </div>
         </div>
+
+        <!-- Penyaluran & Bukti (menutup rantai: ke mana dana → buktinya) -->
+        <?php if (!empty($distributions)): ?>
+        <div class="mb-12">
+            <h3 class="text-xl font-bold mb-2 flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">redeem</span>
+                Penyaluran & Bukti
+            </h3>
+            <p class="text-[#608a7e] text-sm mb-6">Ke mana amanah disalurkan — beserta bukti penerimaannya.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <?php foreach ($distributions as $d): ?>
+                <div class="bg-white dark:bg-white/5 border border-[#dbe6e3] dark:border-white/10 rounded-3xl overflow-hidden group">
+                    <?php if (!empty($d['evidence_photo'])): ?>
+                        <div class="aspect-video overflow-hidden bg-slate-100 dark:bg-white/5">
+                            <img src="<?= esc($storage->url($d['evidence_photo']), 'attr') ?>" alt="Bukti penyaluran"
+                                 loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                        </div>
+                    <?php else: ?>
+                        <div class="aspect-video flex items-center justify-center bg-emerald-50/60 dark:bg-emerald-900/10 text-emerald-600/40">
+                            <span class="material-symbols-outlined text-5xl">volunteer_activism</span>
+                        </div>
+                    <?php endif; ?>
+                    <div class="p-5">
+                        <div class="flex items-center justify-between gap-2 mb-1">
+                            <span class="text-[10px] font-black uppercase tracking-widest text-primary bg-primary/10 px-2 py-0.5 rounded">
+                                <?= esc(ucfirst($d['type'] ?: 'penyaluran')) ?>
+                            </span>
+                            <?php if (!empty($d['amount']) && $d['amount'] > 0): ?>
+                                <span class="text-sm font-black text-red-500">Rp <?= number_format($d['amount'], 0, ',', '.') ?></span>
+                            <?php endif; ?>
+                        </div>
+                        <p class="font-bold text-sm">
+                            <?= !empty($d['warga_name']) ? esc($d['warga_name']) : (!empty($d['program_title']) ? esc($d['program_title']) : 'Penerima Manfaat') ?>
+                        </p>
+                        <?php if (!empty($d['description']) || !empty($d['items'])): ?>
+                            <p class="text-[12px] text-[#608a7e] mt-1 line-clamp-2"><?= esc($d['description'] ?: $d['items']) ?></p>
+                        <?php endif; ?>
+                        <?php if (!empty($d['date'])): ?>
+                            <p class="text-[10px] text-slate-400 mt-2 font-medium"><?= date('d M Y', strtotime($d['date'])) ?></p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <?php endif; ?>
 
         <!-- Transactions Table -->
         <div class="bg-white dark:bg-white/5 rounded-[2.5rem] border border-[#dbe6e3] dark:border-white/10 overflow-hidden shadow-sm">
