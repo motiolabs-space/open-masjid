@@ -101,8 +101,14 @@ Sumber:
    - `zakat_type` pada donasi (memisahkan zakat dari infaq/donasi biasa).
    - `asnaf` (8 golongan) pada mustahik → mewarnai penyalurannya.
    - Laporan Zakat: terkumpul per jenis vs tersalur per asnaf (`dashboard/reports/zakat`).
-6. **Kampanye donasi** target + progress (perluas modul program). _(belum)_
-7. **Infaq rutin/terjadwal.** _(belum)_
+6. ✅ **Kampanye donasi** target + progress — SELESAI Sep 2026: `target_donation`
+   pada program + progress bar terkumpul/target/% di halaman detail DAN daftar
+   program (dana terkumpul dihitung satu query di controller).
+7. ✅ **Infaq rutin/terjadwal** — SELESAI Sep 2026: halaman Donasi Rutin
+   (`/{username}/donasi-rutin`) sebagai **janji + pengingat** (bukan auto-charge,
+   sebab bayar tetap manual/QRIS). Tabel `masjid_recurring_pledges`; command
+   `broadcast:reminders` mengirim pengingat WA berisi tautan donasi terisi tiap
+   periode lalu memajukan jadwal.
 
 ### Tahap 3 — Program Berdampak & Komunitas
 8. **Laporan Dampak program** — penerima manfaat, indikator, bukti foto,

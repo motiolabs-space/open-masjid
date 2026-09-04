@@ -104,6 +104,12 @@
                         Pembayaran aman & terverifikasi otomatis.
                     </p>
                 </form>
+                <div class="text-center mt-5 pt-5 border-t border-dashed border-gray-200">
+                    <a href="<?= base_url($masjid['username'] . '/donasi-rutin') ?>" class="inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline">
+                        <span class="material-symbols-outlined text-base">event_repeat</span>
+                        Ingin berinfaq rutin? Jadikan donasi berkala
+                    </a>
+                </div>
             </div>
         </div>
     </div>

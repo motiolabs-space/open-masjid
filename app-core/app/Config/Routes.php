@@ -233,6 +233,7 @@ $routes->get('auth/set-masjid/(:num)', 'Auth::setMasjidContext/$1');
 $routes->get('donation/(:segment)/form', 'Donation::create/$1');
 $routes->get('donation/(:segment)/form/(:segment)', 'Donation::create/$1/$2'); // With Program Slug
 $routes->post('donation/process', 'Donation::store');
+$routes->post('donasi-rutin/simpan', 'Home::simpanDonasiRutin');
 // Nomor invoice wajib tanpa garis miring (lihat Donation::store) agar utuh
 // dalam satu segmen di sini.
 $routes->get('donation/manual/(:segment)', 'Donation::manual/$1'); // Manual Payment Instruction
@@ -273,5 +274,6 @@ $routes->get('(:any)/program', 'Home::programList/$1');
 $routes->get('(:any)/program/(:any)', 'Home::programDetail/$1/$2');
 $routes->get('(:any)/laporan', 'Home::publicReport/$1');
 $routes->get('(:any)/zakat', 'Home::zakat/$1');
+$routes->get('(:any)/donasi-rutin', 'Home::donasiRutin/$1');
 $routes->get('(:any)/display', 'Home::display/$1');
 $routes->get('(:any)', 'Home::masjid/$1');

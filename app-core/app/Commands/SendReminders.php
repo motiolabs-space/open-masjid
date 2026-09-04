@@ -47,6 +47,11 @@ class SendReminders extends BaseCommand
             CLI::write("Draf impor CSV lama dipangkas: {$draf}.", 'dark_gray');
         }
 
+        // Pengingat donasi rutin (ke WA personal donatur) — diproses lebih dulu
+        // dan terpisah dari pengingat grup, sebab masjid bisa punya pledge tanpa
+        // punya grup mana pun (return dini di bawah tak boleh melewatinya).
+        $this->prosesDonasiRutin($dry);
+
         $reminderModel = new MasjidReminderModel();
         $masjidModel   = new MasjidModel();
 
@@ -111,6 +116,58 @@ class SendReminders extends BaseCommand
 
         CLI::write("Selesai. Terkirim: {$terkirim}, dilewati: {$dilewati}, gagal: {$gagal}.",
             $gagal > 0 ? 'red' : 'green');
+    }
+
+    /**
+     * Pengingat donasi rutin (infaq terjadwal). Untuk tiap janji yang jatuh
+     * tempo & aktif, kirim WhatsApp ke donatur berisi tautan donasi terisi, lalu
+     * majukan jadwalnya. Aman diulang: jadwal hanya maju bila pengiriman sukses.
+     */
+    private function prosesDonasiRutin(bool $dry): void
+    {
+        $pledgeModel = new \App\Models\MasjidRecurringPledgeModel();
+        $due = $pledgeModel->jatuhTempo();
+        if (empty($due)) {
+            return;
+        }
+
+        $masjidModel = new MasjidModel();
+        $kirim = 0;
+        $gagal = 0;
+
+        foreach ($due as $p) {
+            $masjid = $masjidModel->find($p['masjid_id']);
+            if (! $masjid) {
+                continue;
+            }
+
+            $amount = number_format((float) $p['amount'], 0, ',', '.');
+            $link   = base_url('donation/' . $masjid['username'] . '/form?nominal=' . (int) $p['amount']);
+            $pesan  = "Assalamu'alaikum, {$p['donor_name']}.\n\n"
+                . "Pengingat *donasi rutin* Anda di *{$masjid['name']}* sebesar *Rp {$amount}*.\n\n"
+                . "Tunaikan kapan saja lewat tautan berikut (nominal sudah terisi):\n{$link}\n\n"
+                . 'Jazakumullah khairan atas keistiqamahannya. Semoga menjadi amal jariyah.';
+
+            if ($dry) {
+                CLI::write("  [dry-rutin] -> {$p['donor_phone']} / {$masjid['name']} / Rp {$amount}", 'cyan');
+                continue;
+            }
+
+            $wa = new \App\Libraries\WhatsAppService($masjid['whatsapp_api_key'] ?? null);
+            if ($wa->kirimPesan($p['donor_phone'], $pesan)) {
+                $pledgeModel->majukanJadwal($p);
+                CLI::write("  [rutin] {$masjid['name']} -> {$p['donor_phone']} / Rp {$amount}", 'green');
+                $kirim++;
+            } else {
+                // Jadwal TIDAK dimajukan agar dicoba lagi cron berikutnya.
+                CLI::write("  [rutin-gagal] {$masjid['name']} -> {$p['donor_phone']}: " . ($wa->pesanGalat() ?? 'tidak diketahui'), 'red');
+                $gagal++;
+            }
+        }
+
+        if ($kirim > 0 || $gagal > 0) {
+            CLI::write("Donasi rutin — terkirim: {$kirim}, gagal: {$gagal}.", $gagal > 0 ? 'red' : 'green');
+        }
     }
 
     /**

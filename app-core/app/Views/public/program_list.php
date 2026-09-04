@@ -73,6 +73,23 @@
                                 </div>
                             </div>
 
+                            <?php if (!empty($item['target_donation']) && $item['target_donation'] > 0): ?>
+                                <?php $persen = min(100, round((($item['collected'] ?? 0) / $item['target_donation']) * 100)); ?>
+                                <div class="mb-6">
+                                    <div class="flex justify-between items-end mb-1.5">
+                                        <div>
+                                            <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">Terkumpul</p>
+                                            <p class="text-base font-black text-primary">Rp <?= number_format($item['collected'] ?? 0, 0, ',', '.') ?></p>
+                                        </div>
+                                        <p class="text-[11px] font-bold text-gray-400">dari Rp <?= number_format($item['target_donation'], 0, ',', '.') ?></p>
+                                    </div>
+                                    <div class="w-full bg-gray-100 dark:bg-white/10 rounded-full h-2.5 overflow-hidden">
+                                        <div class="bg-primary h-2.5 rounded-full transition-all duration-1000" style="width: <?= $persen ?>%"></div>
+                                    </div>
+                                    <p class="text-right text-[11px] font-bold text-primary mt-1"><?= $persen ?>% terpenuhi</p>
+                                </div>
+                            <?php endif; ?>
+
                             <div class="mt-auto pt-6 border-t border-gray-100 dark:border-white/5 flex items-center justify-between">
                                 <span class="text-xs font-black text-primary group-hover:translate-x-2 transition-transform uppercase tracking-widest">Detail Kegiatan</span>
                                 <span class="material-symbols-outlined text-primary group-hover:translate-x-2 transition-transform">arrow_forward</span>

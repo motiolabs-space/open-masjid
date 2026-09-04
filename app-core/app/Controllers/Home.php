@@ -330,6 +330,27 @@ class Home extends BaseController
 
         $programs = $query->orderBy('date_start', 'ASC')->findAll();
 
+        // Dana terkumpul per program dalam SATU query (bukan per kartu di view),
+        // supaya kartu kampanye bisa menampilkan progress tanpa N kueri.
+        $ids = array_column($programs, 'id');
+        $terkumpulPer = [];
+        if (! empty($ids)) {
+            $rows = \Config\Database::connect()->table('masjid_donations')
+                ->select('program_id, COALESCE(SUM(amount),0) AS total')
+                ->where('masjid_id', $masjid['id'])
+                ->where('status', 'success')
+                ->whereIn('program_id', $ids)
+                ->groupBy('program_id')
+                ->get()->getResultArray();
+            foreach ($rows as $r) {
+                $terkumpulPer[$r['program_id']] = (float) $r['total'];
+            }
+        }
+        foreach ($programs as &$p) {
+            $p['collected'] = $terkumpulPer[$p['id']] ?? 0;
+        }
+        unset($p);
+
         $categoryModel = new \App\Models\MasjidProgramCategoryModel();
         $categories = $categoryModel->where('masjid_id', $masjid['id'])->findAll();
 
@@ -390,6 +411,83 @@ class Home extends BaseController
             'masjid'  => $masjid,
             'storage' => new \App\Libraries\Storage(),
         ]);
+    }
+
+    /**
+     * Formulir Donasi Rutin (infaq terjadwal). Donatur berjanji nominal rutin;
+     * sistem mengirim pengingat berkala. Bukan auto-charge — pembayaran tetap
+     * manual/QRIS lewat tautan yang dikirim saat pengingat.
+     */
+    public function donasiRutin($username): string
+    {
+        $masjid = (new \App\Models\MasjidModel())->where('username', $username)->first();
+        if (! $masjid) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+        }
+
+        $programs = (new \App\Models\MasjidProgramModel())
+            ->where(['masjid_id' => $masjid['id'], 'status' => 'published'])
+            ->orderBy('title', 'ASC')->findAll();
+
+        return view('public/donasi_rutin', [
+            'title'    => 'Donasi Rutin - ' . esc($masjid['name']),
+            'masjid'   => $masjid,
+            'programs' => $programs,
+            'storage'  => new \App\Libraries\Storage(),
+        ]);
+    }
+
+    public function simpanDonasiRutin()
+    {
+        $masjidId = (int) $this->request->getPost('masjid_id');
+        $masjid   = (new \App\Models\MasjidModel())->find($masjidId);
+        if (! $masjid) {
+            return redirect()->to('/')->with('error', 'Masjid tidak ditemukan.');
+        }
+
+        helper('custom'); // parse_rupiah
+        $frekuensi = in_array($this->request->getPost('frequency'), ['mingguan', 'bulanan'], true)
+            ? $this->request->getPost('frequency') : 'bulanan';
+        $nominal = abs(parse_rupiah($this->request->getPost('amount')));
+        $nama    = trim((string) $this->request->getPost('name'));
+        $telp    = trim((string) $this->request->getPost('phone'));
+
+        if ($nama === '' || $telp === '' || $nominal <= 0) {
+            return redirect()->back()->withInput()
+                ->with('error', 'Nama, WhatsApp, dan nominal wajib diisi.');
+        }
+
+        // program_id divalidasi milik masjid ini agar tak bisa menautkan ke
+        // program masjid lain lewat form.
+        $programId = $this->request->getPost('program_id') ?: null;
+        if ($programId) {
+            $prog = (new \App\Models\MasjidProgramModel())
+                ->where(['id' => $programId, 'masjid_id' => $masjidId])->first();
+            $programId = $prog ? $programId : null;
+        }
+
+        // Pengingat pertama satu periode dari sekarang — donatur bisa berdonasi
+        // hari ini secara terpisah; ini komitmen ke depan.
+        $next = date('Y-m-d', strtotime($frekuensi === 'mingguan' ? '+1 week' : '+1 month'));
+
+        $ok = (new \App\Models\MasjidRecurringPledgeModel())->insert([
+            'masjid_id'          => $masjidId,
+            'program_id'         => $programId,
+            'donor_name'         => $nama,
+            'donor_phone'        => $telp,
+            'donor_email'        => $this->request->getPost('email') ?: null,
+            'amount'             => $nominal,
+            'frequency'          => $frekuensi,
+            'next_reminder_date' => $next,
+            'active'             => 1,
+        ]);
+
+        if (! $ok) {
+            return redirect()->back()->withInput()->with('error', 'Gagal menyimpan donasi rutin.');
+        }
+
+        return redirect()->to(base_url($masjid['username'] . '/donasi-rutin'))
+            ->with('sukses_rutin', 'Terima kasih! Komitmen donasi rutin Anda tercatat. Kami akan mengingatkan setiap ' . $frekuensi . '.');
     }
 
     public function publicReport($username): string

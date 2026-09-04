@@ -43,6 +43,16 @@ class WhatsAppService
     }
 
     /**
+     * Kirim pesan bebas ke satu nomor. Dipakai pengingat donasi rutin.
+     *
+     * @return bool false bila tidak terkirim — pemanggil WAJIB memeriksanya.
+     */
+    public function kirimPesan(string $phone, string $message): bool
+    {
+        return $this->kanal->kirim($this->normalkanNomor($phone), $message);
+    }
+
+    /**
      * Kuitansi "Jazakallah" untuk donatur.
      *
      * @return bool false bila tidak terkirim — pemanggil WAJIB memeriksanya.
