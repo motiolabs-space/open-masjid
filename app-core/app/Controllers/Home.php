@@ -370,6 +370,28 @@ class Home extends BaseController
         ]);
     }
 
+    /**
+     * Kalkulator Zakat per-masjid. Perhitungan dilakukan di sisi klien (JS)
+     * agar responsif; halaman ini hanya menyediakan konteks masjid dan tautan
+     * "tunaikan" yang mengalir ke form donasi dengan nominal terisi.
+     *
+     * Nishab & harga (emas/beras) bisa diubah pengguna di form — angka default
+     * hanyalah titik awal, sengaja tidak dikunci karena harga pasar berubah.
+     */
+    public function zakat($username): string
+    {
+        $masjid = (new \App\Models\MasjidModel())->where('username', $username)->first();
+        if (! $masjid) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+        }
+
+        return view('public/zakat_calculator', [
+            'title'   => 'Kalkulator Zakat - ' . esc($masjid['name']),
+            'masjid'  => $masjid,
+            'storage' => new \App\Libraries\Storage(),
+        ]);
+    }
+
     public function publicReport($username): string
     {
         $masjidModel = new \App\Models\MasjidModel();

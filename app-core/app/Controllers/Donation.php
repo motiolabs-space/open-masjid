@@ -43,6 +43,13 @@ class Donation extends BaseController
             ])->first();
         }
 
+        // Prefill dari kalkulator zakat: ?nominal= & ?untuk=. Nominal dibersihkan
+        // ke angka; label dibatasi daftar dikenal agar tak bisa disuntik teks
+        // sembarang lewat URL.
+        $prefillNominal = (int) preg_replace('/[^0-9]/', '', (string) $this->request->getGet('nominal'));
+        $untuk          = (string) $this->request->getGet('untuk');
+        $labelZakat     = in_array($untuk, ['Zakat Maal', 'Zakat Penghasilan', 'Zakat Fitrah'], true) ? $untuk : null;
+
         return view('public/donation/form', [
             'masjid'  => $masjid,
             'program' => $program,
@@ -50,7 +57,9 @@ class Donation extends BaseController
             // Dibutuhkan layout/masjid_public dan layout/navbar_masjid untuk
             // menampilkan logo serta og:image. Tanpa ini halaman gagal dengan
             // "Undefined variable $storage" pada masjid yang punya logo/foto.
-            'storage' => new \App\Libraries\Storage(),
+            'storage'        => new \App\Libraries\Storage(),
+            'prefillNominal' => $prefillNominal > 0 ? $prefillNominal : null,
+            'labelZakat'     => $labelZakat,
         ]);
     }
 

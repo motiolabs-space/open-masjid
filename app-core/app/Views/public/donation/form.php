@@ -52,12 +52,19 @@
                     <input type="hidden" name="masjid_id" value="<?= $masjid['id'] ?>">
                     <input type="hidden" name="program_id" value="<?= $program['id'] ?? '' ?>">
 
+                    <?php if (!empty($labelZakat)): ?>
+                        <div class="bg-primary/5 border border-primary/20 text-primary px-4 py-3 rounded-xl mb-2 text-sm font-bold flex items-center gap-2">
+                            <span class="material-symbols-outlined">mosque</span>
+                            Anda menunaikan <?= esc($labelZakat) ?>
+                        </div>
+                    <?php endif; ?>
+
                     <!-- Amount -->
                     <div>
                         <label class="block text-sm font-bold text-gray-900 mb-2">Nominal Donasi (Rp)</label>
                         <div class="relative">
                             <span class="absolute left-4 top-3.5 text-gray-400 font-bold">Rp</span>
-                            <input type="text" name="amount" id="amount" class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-bold text-lg" placeholder="0" required onkeyup="formatCurrency(this)">
+                            <input type="text" name="amount" id="amount" value="<?= !empty($prefillNominal) ? number_format($prefillNominal, 0, ',', '.') : '' ?>" class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-bold text-lg" placeholder="0" required onkeyup="formatCurrency(this)">
                         </div>
                         <div class="flex gap-2 mt-3 overflow-x-auto pb-2 scrollbar-hide">
                             <button type="button" onclick="setAmount(50000)" class="px-4 py-2 rounded-lg bg-gray-50 border border-gray-200 text-sm font-bold text-gray-600 hover:bg-primary/10 hover:border-primary hover:text-primary transition-all whitespace-nowrap">50.000</button>
@@ -83,7 +90,7 @@
                         </div>
                         <div class="col-span-full">
                             <label class="block text-sm font-bold text-gray-900 mb-2">Doa / Pesan (Opsional)</label>
-                            <textarea name="message" rows="3" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="Tuliskan doa atau pesan untuk masjid..."></textarea>
+                            <textarea name="message" rows="3" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="Tuliskan doa atau pesan untuk masjid..."><?= !empty($labelZakat) ? '[' . esc($labelZakat) . '] ' : '' ?></textarea>
                         </div>
                     </div>
 

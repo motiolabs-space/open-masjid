@@ -547,10 +547,16 @@
                 <h2 class="text-sm font-bold text-primary uppercase tracking-[0.2em] mb-3">Transparansi</h2>
                 <h3 class="text-3xl md:text-5xl font-black mb-6 tracking-tight leading-none text-[#111816] dark:text-white">Laporan Amanah</h3>
                 <p class="text-lg text-[#608a7e] mb-6">Kami mengelola setiap rupiah dengan penuh tanggung jawab dan keterbukaan.</p>
-                <a href="<?= base_url($masjid['username'] . '/laporan') ?>" class="inline-flex items-center gap-2 bg-white dark:bg-white/5 border border-primary text-primary px-6 py-3 rounded-xl font-bold hover:bg-primary hover:text-white transition-all">
-                    <span class="material-symbols-outlined">analytics</span>
-                    Lihat Laporan Amanah
-                </a>
+                <div class="flex flex-wrap gap-3">
+                    <a href="<?= base_url($masjid['username'] . '/laporan') ?>" class="inline-flex items-center gap-2 bg-white dark:bg-white/5 border border-primary text-primary px-6 py-3 rounded-xl font-bold hover:bg-primary hover:text-white transition-all">
+                        <span class="material-symbols-outlined">analytics</span>
+                        Lihat Laporan Amanah
+                    </a>
+                    <a href="<?= base_url($masjid['username'] . '/zakat') ?>" class="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-bold hover:-translate-y-0.5 transition-all shadow-lg shadow-primary/20">
+                        <span class="material-symbols-outlined">calculate</span>
+                        Kalkulator Zakat
+                    </a>
+                </div>
             </div>
             <div class="bg-primary px-8 py-6 rounded-[2rem] text-white shadow-2xl shadow-primary/20">
                 <p class="text-emerald-200 text-[10px] font-black uppercase tracking-widest mb-1">Amanah Kas Saat Ini</p>
