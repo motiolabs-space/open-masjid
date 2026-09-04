@@ -87,6 +87,30 @@
                 </form>
             </div>
 
+            <!-- Zakat Report -->
+            <div class="bg-white dark:bg-white/5 rounded-3xl border border-[#e5e7eb] dark:border-white/10 p-8 hover:shadow-xl transition-shadow group">
+                <div class="size-14 bg-teal-100 dark:bg-teal-900/30 text-teal-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <span class="material-symbols-outlined text-3xl">mosque</span>
+                </div>
+                <h3 class="text-xl font-black text-[#111816] dark:text-white mb-2">Laporan Zakat</h3>
+                <p class="text-sm text-gray-500 mb-6">Zakat terkumpul per jenis vs tersalur ke 8 asnaf.</p>
+
+                <form action="<?= base_url('dashboard/reports/zakat') ?>" method="GET" target="_blank" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Mulai Tanggal</label>
+                        <input type="date" name="start_date" required value="<?= date('Y-01-01') ?>" class="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 text-sm font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Sampai Tanggal</label>
+                        <input type="date" name="end_date" required value="<?= date('Y-m-d') ?>" class="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 text-sm font-bold">
+                    </div>
+                    <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors">
+                        <span class="material-symbols-outlined">print</span>
+                        Cetak Laporan
+                    </button>
+                </form>
+            </div>
+
             <!-- QR Code Public Report -->
             <div class="bg-gradient-to-br from-[#11241d] to-[#08110e] rounded-3xl p-8 text-white relative overflow-hidden shadow-2xl">
                 <div class="absolute top-0 right-0 p-32 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>

@@ -37,7 +37,7 @@ keuangan → naik ke program yang berdampak bagi masyarakat sekitar dan luas.**
 |-----------|------|---------|
 | 🔴 | **Email selamat datang, verifikasi registrasi, laporan rutin mingguan** | Fondasi `Mailer` sudah ada; tinggal template + pemicu. (Sempat direncanakan, belum jadi.) |
 | ✅ | ~~**Kwitansi donasi otomatis**~~ | Selesai Sep 2026 — lihat Tahap 1. |
-| 🟠 | **Modul Zakat** | Kalkulator zakat maal/penghasilan/fitrah + nishab + penyaluran 8 asnaf terstruktur + laporan zakat terpisah. Saat ini hanya mustahik/distribusi generik. |
+| ✅ | ~~**Modul Zakat**~~ | Selesai Sep 2026 — kalkulator, jenis zakat pada donasi, 8 asnaf pada mustahik, laporan zakat terpisah. Lihat Tahap 2. |
 | 🟠 | **Laporan Dampak program** | Penerima manfaat, sebelum/sesudah, bukti foto — mengubah "program" jadi "dampak". |
 | 🟠 | **RSVP kegiatan + absensi** | Jamaah konfirmasi hadir; pengurus lihat perkiraan & kehadiran. |
 | 🟢 | **PWA + Web Push** (adzan, pengumuman, program) | Installable, notifikasi tanpa app store. |
@@ -96,9 +96,13 @@ Sumber:
    pembayaran manual. Tidak perlu dibangun ulang.
 
 ### Tahap 2 — Kemudahan Beramal
-5. **Modul Zakat** (kalkulator + penyaluran 8 asnaf + laporan terpisah).
-6. **Kampanye donasi** target + progress (perluas modul program).
-7. **Infaq rutin/terjadwal.**
+5. ✅ **Modul Zakat** — SELESAI Sep 2026:
+   - Kalkulator Zakat per-masjid (maal/penghasilan/fitrah) → alir ke donasi.
+   - `zakat_type` pada donasi (memisahkan zakat dari infaq/donasi biasa).
+   - `asnaf` (8 golongan) pada mustahik → mewarnai penyalurannya.
+   - Laporan Zakat: terkumpul per jenis vs tersalur per asnaf (`dashboard/reports/zakat`).
+6. **Kampanye donasi** target + progress (perluas modul program). _(belum)_
+7. **Infaq rutin/terjadwal.** _(belum)_
 
 ### Tahap 3 — Program Berdampak & Komunitas
 8. **Laporan Dampak program** — penerima manfaat, indikator, bukti foto,

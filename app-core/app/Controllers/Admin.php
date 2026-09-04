@@ -2691,6 +2691,87 @@ class Admin extends BaseController
         ]);
     }
 
+    /**
+     * Laporan Zakat: zakat MASUK per jenis (donasi ber-zakat_type) vs zakat
+     * KELUAR per asnaf (penyaluran mustahik dikelompokkan mustahik.asnaf).
+     *
+     * Catatan cakupan: hanya menghitung zakat yang TERCATAT sistem — donasi
+     * online bertanda zakat dan penyaluran ke mustahik. Zakat tunai yang
+     * dibukukan sebagai transaksi kas biasa (tanpa tanda) tidak masuk ke sini;
+     * itu disengaja agar angkanya tidak mengklaim lebih dari yang bisa ditelusuri.
+     */
+    public function generateZakatReport()
+    {
+        helper('custom'); // daftar_asnaf()
+        $masjidId = session()->get('masjid_id');
+        $start = $this->request->getGet('start_date') ?: date('Y-01-01');
+        $end   = $this->request->getGet('end_date') ?: date('Y-m-d');
+
+        $db = \Config\Database::connect();
+
+        // Masuk: donasi zakat lunas, per jenis.
+        $terkumpul = $db->table('masjid_donations')
+            ->select('zakat_type, COUNT(*) AS jml, COALESCE(SUM(amount),0) AS total')
+            ->where('masjid_id', $masjidId)
+            ->where('status', 'success')
+            ->where('zakat_type IS NOT NULL')
+            ->where('paid_at >=', $start . ' 00:00:00')
+            ->where('paid_at <=', $end . ' 23:59:59')
+            ->groupBy('zakat_type')
+            ->get()->getResultArray();
+
+        // Keluar: penyaluran ke mustahik, per asnaf (NULL = belum diklasifikasi).
+        $tersalur = $db->table('masjid_mustahik_distributions d')
+            ->select('m.asnaf, COUNT(*) AS jml, COALESCE(SUM(d.amount),0) AS total')
+            ->join('masjid_mustahik m', 'm.id = d.mustahik_id', 'left')
+            ->where('d.masjid_id', $masjidId)
+            ->where('d.date >=', $start)
+            ->where('d.date <=', $end)
+            ->groupBy('m.asnaf')
+            ->get()->getResultArray();
+
+        // Petakan hasil ke daftar lengkap agar jenis/asnaf yang nol tetap tampil.
+        $jenisLabel = ['maal' => 'Zakat Maal', 'penghasilan' => 'Zakat Penghasilan', 'fitrah' => 'Zakat Fitrah'];
+        $masukPer = array_fill_keys(array_keys($jenisLabel), ['jml' => 0, 'total' => 0.0]);
+        foreach ($terkumpul as $r) {
+            if (isset($masukPer[$r['zakat_type']])) {
+                $masukPer[$r['zakat_type']] = ['jml' => (int) $r['jml'], 'total' => (float) $r['total']];
+            }
+        }
+
+        $asnafLabel = daftar_asnaf();
+        $keluarPer = [];
+        foreach ($asnafLabel as $k => $lbl) {
+            $keluarPer[$k] = ['jml' => 0, 'total' => 0.0];
+        }
+        $keluarBelum = ['jml' => 0, 'total' => 0.0];
+        foreach ($tersalur as $r) {
+            $key = $r['asnaf'] ?? '';
+            if ($key !== '' && isset($keluarPer[$key])) {
+                $keluarPer[$key] = ['jml' => (int) $r['jml'], 'total' => (float) $r['total']];
+            } else {
+                $keluarBelum['jml']   += (int) $r['jml'];
+                $keluarBelum['total'] += (float) $r['total'];
+            }
+        }
+
+        $totalMasuk  = array_sum(array_column($masukPer, 'total'));
+        $totalKeluar = array_sum(array_column($keluarPer, 'total')) + $keluarBelum['total'];
+
+        return view('dashboard/reports/zakat_view', [
+            'masjid'      => (new \App\Models\MasjidModel())->find($masjidId),
+            'startDate'   => $start,
+            'endDate'     => $end,
+            'jenisLabel'  => $jenisLabel,
+            'masukPer'    => $masukPer,
+            'asnafLabel'  => $asnafLabel,
+            'keluarPer'   => $keluarPer,
+            'keluarBelum' => $keluarBelum,
+            'totalMasuk'  => $totalMasuk,
+            'totalKeluar' => $totalKeluar,
+        ]);
+    }
+
     public function generateProgramReport()
     {
         $masjidId = session()->get('masjid_id');

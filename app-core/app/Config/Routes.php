@@ -157,6 +157,7 @@ $routes->get('dashboard/reports', 'Admin::reports');
 $routes->get('dashboard/reports/finance', 'Admin::generateFinanceReport');
 $routes->get('dashboard/reports/program', 'Admin::generateProgramReport');
 $routes->get('dashboard/reports/inventory', 'Admin::generateInventoryReport');
+$routes->get('dashboard/reports/zakat', 'Admin::generateZakatReport');
 $routes->get('dashboard/reports/ai-generator', 'Admin::aiReportGenerator');
 $routes->post('dashboard/reports/ai-generate', 'Admin::generateAiReport');
 $routes->post('dashboard/reports/ai-publish', 'Admin::publishAiReport');
