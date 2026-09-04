@@ -11,9 +11,25 @@
                     Kembali ke Profil
                 </a>
                 <h1 class="text-4xl font-black text-[#111816] dark:text-white tracking-tight">Laporan Transparansi</h1>
-                <p class="text-[#608a7e] text-lg">Periode: <?= date('d M Y', strtotime($filters['start'])) ?> - <?= date('d M Y', strtotime($filters['end'])) ?></p>
+                <p class="text-[#608a7e] text-lg">
+                    <?php if (($bulanDipilih ?? '') === 'all'): ?>
+                        Periode: Seluruh Riwayat &ndash; s.d. <?= date('d M Y', strtotime($filters['end'])) ?>
+                    <?php else: ?>
+                        Periode: <?= date('d M Y', strtotime($filters['start'])) ?> &ndash; <?= date('d M Y', strtotime($filters['end'])) ?>
+                    <?php endif; ?>
+                </p>
             </div>
-            <div class="flex gap-2">
+            <div class="flex gap-2 items-center print:hidden">
+                <form method="get" id="periodeForm" class="relative">
+                    <select name="bulan" onchange="document.getElementById('periodeForm').submit()"
+                            class="appearance-none pl-4 pr-10 py-3 bg-white dark:bg-white/5 border border-[#dbe6e3] dark:border-white/10 rounded-xl font-bold text-sm cursor-pointer hover:border-primary transition-all focus:outline-none focus:ring-2 focus:ring-primary/30">
+                        <?php foreach ($daftarBulan as $b): ?>
+                            <option value="<?= esc($b['value'], 'attr') ?>" <?= ($bulanDipilih === $b['value']) ? 'selected' : '' ?>><?= esc($b['label']) ?></option>
+                        <?php endforeach; ?>
+                        <option value="all" <?= ($bulanDipilih === 'all') ? 'selected' : '' ?>>Seluruh Periode</option>
+                    </select>
+                    <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-[#608a7e] pointer-events-none text-lg">expand_more</span>
+                </form>
                 <button onclick="window.print()" class="px-5 py-3 bg-white dark:bg-white/5 border border-[#dbe6e3] dark:border-white/10 rounded-xl font-bold flex items-center gap-2 hover:bg-slate-50 transition-all">
                     <span class="material-symbols-outlined text-sm">print</span>
                     Cetak

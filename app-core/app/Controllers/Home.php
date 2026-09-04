@@ -382,9 +382,21 @@ class Home extends BaseController
         $financeModel = new \App\Models\MasjidFinanceTransactionModel();
         $programModel = new \App\Models\MasjidProgramModel();
         
-        // Get filters from GET
-        $start = $this->request->getGet('start_date') ?: date('Y-m-01');
-        $end = $this->request->getGet('end_date') ?: date('Y-m-d');
+        // Pilihan periode. 'bulan' (YYYY-MM) adalah cara utama pengunjung
+        // menjelajah laporan per bulan; 'bulan=all' menampilkan seluruh riwayat.
+        // start_date/end_date tetap didukung agar tautan lama tak putus.
+        $bulan = $this->request->getGet('bulan');
+        if ($bulan === 'all') {
+            $start = '2000-01-01';
+            $end   = date('Y-m-d');
+        } elseif ($bulan && preg_match('/^\d{4}-\d{2}$/', $bulan)) {
+            $start = $bulan . '-01';
+            $end   = date('Y-m-t', strtotime($start)); // akhir bulan
+        } else {
+            $start = $this->request->getGet('start_date') ?: date('Y-m-01');
+            $end   = $this->request->getGet('end_date') ?: date('Y-m-d');
+            $bulan = date('Y-m', strtotime($start)); // untuk menyorot pilihan di UI
+        }
 
         $query = $financeModel->select('masjid_finance_transactions.*, masjid_finance_categories.name as category_name, masjid_programs.title as program_title')
             ->join('masjid_finance_categories', 'masjid_finance_categories.id = masjid_finance_transactions.category_id', 'left')
@@ -435,6 +447,21 @@ class Home extends BaseController
             ->get()
             ->getResultArray();
 
+        // Daftar bulan untuk pemilih: dari bulan berdirinya masjid s.d. bulan ini
+        // (maks 24, terbaru dulu). Bulan tanpa transaksi tetap ditawarkan —
+        // "kosong" pun bagian dari transparansi.
+        $namaBulan = [1=>'Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+        $awalMasjid = ! empty($masjid['created_at']) ? strtotime(date('Y-m-01', strtotime($masjid['created_at']))) : strtotime(date('Y-m-01', strtotime('-11 months')));
+        $daftarBulan = [];
+        $kursor = strtotime(date('Y-m-01'));
+        while ($kursor >= $awalMasjid && count($daftarBulan) < 24) {
+            $daftarBulan[] = [
+                'value' => date('Y-m', $kursor),
+                'label' => $namaBulan[(int) date('n', $kursor)] . ' ' . date('Y', $kursor),
+            ];
+            $kursor = strtotime('-1 month', $kursor);
+        }
+
         return view('public/finance_report', [
             'title'            => 'Laporan Amanah - ' . esc($masjid['name']),
             'masjid'           => $masjid,
@@ -444,6 +471,8 @@ class Home extends BaseController
             'recentDonations'  => $recentDonations,
             'distributions'    => $distributions,
             'filters'          => ['start' => $start, 'end' => $end],
+            'daftarBulan'      => $daftarBulan,
+            'bulanDipilih'     => $bulan,
             'storage'          => new \App\Libraries\Storage()
         ]);
     }

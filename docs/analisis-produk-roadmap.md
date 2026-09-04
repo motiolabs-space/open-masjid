@@ -36,13 +36,13 @@ keuangan → naik ke program yang berdampak bagi masyarakat sekitar dan luas.**
 | Prioritas | Item | Catatan |
 |-----------|------|---------|
 | 🔴 | **Email selamat datang, verifikasi registrasi, laporan rutin mingguan** | Fondasi `Mailer` sudah ada; tinggal template + pemicu. (Sempat direncanakan, belum jadi.) |
-| 🔴 | **Kwitansi/tanda terima donasi otomatis** (PDF + kirim WA/email) | Penutup lingkaran kepercayaan donatur. |
+| ✅ | ~~**Kwitansi donasi otomatis**~~ | Selesai Sep 2026 — lihat Tahap 1. |
 | 🟠 | **Modul Zakat** | Kalkulator zakat maal/penghasilan/fitrah + nishab + penyaluran 8 asnaf terstruktur + laporan zakat terpisah. Saat ini hanya mustahik/distribusi generik. |
-| 🟠 | **QRIS statis per masjid / kiosk donasi** | Donasi tanpa fee gateway; paling relevan untuk jamaah di lokasi. |
 | 🟠 | **Laporan Dampak program** | Penerima manfaat, sebelum/sesudah, bukti foto — mengubah "program" jadi "dampak". |
 | 🟠 | **RSVP kegiatan + absensi** | Jamaah konfirmasi hadir; pengurus lihat perkiraan & kehadiran. |
 | 🟢 | **PWA + Web Push** (adzan, pengumuman, program) | Installable, notifikasi tanpa app store. |
-| 🟢 | **Dinding Transparansi real-time** | Feed donasi masuk + jejak penyaluran, publik. |
+| ✅ | ~~**Dinding Transparansi**~~ | Selesai Sep 2026 — feed donasi + penyaluran & bukti di `/{username}/laporan`. |
+| 🟢 | Kiosk donasi (perangkat fisik di masjid) | QRIS statis sudah ada; kiosk khusus opsional. |
 | 🟢 | **Donasi rutin/terjadwal** (recurring infaq) | Pendapatan berulang & kebiasaan beramal. |
 | 🟢 | **Sertifikat & poin relawan** | Retensi komunitas. |
 | 🟢 | Live streaming kajian, multi-bahasa (EN/AR) | Jangkauan. |
@@ -82,13 +82,18 @@ Sumber:
 
 ## 3. Roadmap berjenjang (sesuai arah: transparansi → dampak)
 
-### Tahap 1 — Transparansi & Kepercayaan _(fondasi)_
-1. **Kwitansi donasi otomatis** (PDF, kirim WA/email) — bukti setiap rupiah.
-2. **Dinding Transparansi publik** — rantai terhubung: _donasi → program →
-   penyaluran → bukti_. Jamaah bisa telusuri sendiri.
-3. **Laporan keuangan publik otomatis per bulan** (ringkasan visual + unduh PDF)
-   — perkuat halaman transparansi yang sudah ada.
-4. **QRIS statis per masjid** — kemudahan beramal tanpa fee gateway.
+### Tahap 1 — Transparansi & Kepercayaan _(fondasi)_ — ✅ SELESAI Sep 2026
+1. ✅ **Kwitansi donasi otomatis** — halaman `donation/kwitansi/{invoice}`,
+   cetak/Simpan-PDF (tanpa pustaka), nominal + terbilang, ditautkan dari halaman
+   sukses & pesan WhatsApp. Hanya donasi lunas terbit kwitansi sah.
+2. ✅ **Dinding Transparansi publik** — di `/{username}/laporan`: _Donasi Terbaru_
+   (feed masuk, anonim → "Hamba Allah") + _Penyaluran & Bukti_ (foto bukti dari
+   `masjid_distributions`), menutup rantai _donasi → penyaluran → bukti_.
+3. ✅ **Laporan bulanan** — pemilih bulan (per bulan berdiri s.d. kini) +
+   "Seluruh Periode" di halaman transparansi; tombol Cetak = unduh PDF.
+4. ✅ **QRIS statis per masjid** — _ternyata sudah ada_: unggah di Setelan
+   Pembayaran (`masjid_payments.qris_image`) & tampil ke donatur di halaman
+   pembayaran manual. Tidak perlu dibangun ulang.
 
 ### Tahap 2 — Kemudahan Beramal
 5. **Modul Zakat** (kalkulator + penyaluran 8 asnaf + laporan terpisah).
