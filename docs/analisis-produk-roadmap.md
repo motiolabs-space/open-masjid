@@ -120,8 +120,12 @@ Sumber:
    publik (nama/WA/jumlah orang) di halaman program (dedup per nomor, kuota
    ditegakkan); pengurus lihat daftar + ringkasan (pendaftar/tamu/hadir/absen) &
    tandai hadir di `dashboard/program/kehadiran/{id}`. Tabel `masjid_program_rsvps`.
-10. **Relawan**: rekrut → peran → poin partisipasi → sertifikat.
-11. **PWA + Web Push** untuk pengumuman/adzan/program.
+10. ✅ **Relawan** — SELESAI Sep 2026: registry relawan (rekrut, peran, status),
+    poin partisipasi (award + log ber-alasan; total relawan disegarkan dari
+    jumlah log), dan sertifikat penghargaan cetak (A4 landscape). Menu Relawan
+    baru menggantikan modul lama berbasis tag `#relawan`. Tabel
+    `masjid_volunteers` + `masjid_volunteer_points`.
+11. **PWA + Web Push** untuk pengumuman/adzan/program. _(belum)_
 
 ### Tahap 4 — Jangkauan Luas
 12. **Discovery antar-masjid** (cari & donasi lintas masjid).

@@ -126,6 +126,11 @@ $routes->get('dashboard/warga/edit/(:num)', 'Admin::editWarga/$1');
 $routes->post('dashboard/warga/save', 'Admin::saveWarga');
 $routes->get('dashboard/warga/delete/(:num)', 'Admin::deleteWarga/$1', ['filter' => 'masjidAdmin']);
 $routes->get('dashboard/volunteers', 'Admin::volunteers');
+$routes->get('dashboard/relawan', 'Relawan::index');
+$routes->post('dashboard/relawan/save', 'Relawan::save');
+$routes->get('dashboard/relawan/delete/(:num)', 'Relawan::delete/$1', ['filter' => 'masjidAdmin']);
+$routes->post('dashboard/relawan/points', 'Relawan::awardPoints');
+$routes->get('dashboard/relawan/sertifikat/(:num)', 'Relawan::certificate/$1');
 
 // Broadcast Newsletter
 $routes->get('dashboard/subscribers', 'Admin::subscribers');

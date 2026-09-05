@@ -53,9 +53,9 @@
                 <span class="material-symbols-outlined text-xl">diversity_3</span>
                 <span class="text-sm font-medium">Daftar Pengikut</span>
             </a>
-            <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg <?= ($uri == 'dashboard/volunteers') ? $activeClass : $inactiveClass ?>" href="<?= base_url('dashboard/volunteers') ?>">
-                <span class="material-symbols-outlined text-xl">person_pin</span>
-                <span class="text-sm font-medium">Relawan & Piket</span>
+            <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg <?= (str_contains($uri, 'dashboard/relawan')) ? $activeClass : $inactiveClass ?>" href="<?= base_url('dashboard/relawan') ?>">
+                <span class="material-symbols-outlined text-xl">diversity_3</span>
+                <span class="text-sm font-medium">Relawan</span>
             </a>
 <?php else: ?>
 <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg <?= ($uri == 'dashboard/cari-masjid') ? $activeClass : $inactiveClass ?>" href="<?= base_url('dashboard/cari-masjid') ?>">
