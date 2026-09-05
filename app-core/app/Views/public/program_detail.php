@@ -139,8 +139,45 @@
                                 Daftar Sekarang
                             </a>
                         <?php else: ?>
-                            <div class="w-full p-4 bg-emerald-50 dark:bg-primary/10 border border-primary/20 rounded-2xl text-center mb-4">
-                                <p class="text-xs font-bold text-primary italic">Pendaftaran langsung di lokasi kegiatan.</p>
+                            <?php
+                                $kuota = (int) ($program['quota'] ?? 0);
+                                $tamu  = (int) ($rsvpTamu ?? 0);
+                                $penuh = $kuota > 0 && $tamu >= $kuota;
+                            ?>
+                            <div class="w-full p-5 bg-emerald-50/60 dark:bg-primary/10 border border-primary/20 rounded-2xl mb-4">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <span class="material-symbols-outlined text-primary">how_to_reg</span>
+                                    <h4 class="font-black text-[#111816] dark:text-white">Konfirmasi Kehadiran</h4>
+                                </div>
+
+                                <p class="text-sm text-[#608a7e] mb-3">
+                                    <strong class="text-primary"><?= number_format($tamu, 0, ',', '.') ?></strong> orang akan hadir<?= $kuota > 0 ? ' dari kuota ' . number_format($kuota, 0, ',', '.') : '' ?>.
+                                </p>
+
+                                <?php if (session()->getFlashdata('rsvp_ok')): ?>
+                                    <div class="bg-white dark:bg-white/10 border border-emerald-200 text-emerald-700 rounded-xl p-3 text-sm font-medium mb-3"><?= esc(session()->getFlashdata('rsvp_ok')) ?></div>
+                                <?php endif; ?>
+                                <?php if (session()->getFlashdata('rsvp_error')): ?>
+                                    <div class="bg-white dark:bg-white/10 border border-rose-200 text-rose-600 rounded-xl p-3 text-sm font-medium mb-3"><?= esc(session()->getFlashdata('rsvp_error')) ?></div>
+                                <?php endif; ?>
+
+                                <?php if ($penuh): ?>
+                                    <div class="text-center py-2 text-sm font-bold text-rose-500">Kuota telah penuh.</div>
+                                <?php else: ?>
+                                    <form action="<?= base_url('program-rsvp/simpan') ?>" method="post" class="space-y-2">
+                                        <?= csrf_field() ?>
+                                        <input type="hidden" name="masjid_id" value="<?= $masjid['id'] ?>">
+                                        <input type="hidden" name="program_id" value="<?= $program['id'] ?>">
+                                        <input type="text" name="name" required placeholder="Nama Anda" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:bg-white/5 dark:border-white/10 text-sm">
+                                        <div class="flex gap-2">
+                                            <input type="tel" name="phone" required placeholder="No. WhatsApp" class="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 dark:bg-white/5 dark:border-white/10 text-sm">
+                                            <input type="number" name="guests" min="1" value="1" title="Jumlah orang" class="w-20 px-3 py-2.5 rounded-xl border border-gray-200 dark:bg-white/5 dark:border-white/10 text-sm text-center">
+                                        </div>
+                                        <button type="submit" class="w-full h-12 bg-primary text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-emerald-900 transition-all">
+                                            <span class="material-symbols-outlined text-base">event_available</span> Saya Akan Hadir
+                                        </button>
+                                    </form>
+                                <?php endif; ?>
                             </div>
                         <?php endif; ?>
 

@@ -92,6 +92,9 @@
                                     <a href="<?= base_url('dashboard/program/edit/' . $item['id']) ?>" class="size-10 bg-primary/5 text-primary rounded-xl flex items-center justify-center hover:bg-primary hover:text-white transition-all">
                                         <span class="material-symbols-outlined">edit</span>
                                     </a>
+                                    <a href="<?= base_url('dashboard/program/kehadiran/' . $item['id']) ?>" title="Kehadiran (RSVP)" class="size-10 bg-sky-50 text-sky-600 rounded-xl flex items-center justify-center hover:bg-sky-600 hover:text-white transition-all">
+                                        <span class="material-symbols-outlined">how_to_reg</span>
+                                    </a>
                                     <a href="<?= base_url('dashboard/program/dampak/' . $item['id']) ?>" title="Laporan Dampak" class="size-10 bg-teal-50 text-teal-600 rounded-xl flex items-center justify-center hover:bg-teal-600 hover:text-white transition-all relative">
                                         <span class="material-symbols-outlined">volunteer_activism</span>
                                         <?php if (!empty($item['impact_published'])): ?><span class="absolute -top-1 -right-1 size-3 bg-teal-500 rounded-full border-2 border-white dark:border-slate-900"></span><?php endif; ?>

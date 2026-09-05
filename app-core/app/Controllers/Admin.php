@@ -1257,6 +1257,46 @@ class Admin extends BaseController
         return redirect()->to('dashboard/program/dampak/' . $photo['program_id'])->with('success', 'Foto dihapus.');
     }
 
+    // -------------------------------------------------------------------------
+    // RSVP & ABSENSI KEGIATAN
+    // -------------------------------------------------------------------------
+
+    public function programAttendance($id)
+    {
+        $masjidId = session()->get('masjid_id');
+        $program = (new \App\Models\MasjidProgramModel())->where(['id' => $id, 'masjid_id' => $masjidId])->first();
+        if (! $program) {
+            return redirect()->to('dashboard/program')->with('error', 'Program tidak ditemukan.');
+        }
+
+        $rsvpModel = new \App\Models\MasjidProgramRsvpModel();
+        return view('dashboard/program/attendance', [
+            'title'     => 'Kehadiran - ' . $program['title'],
+            'program'   => $program,
+            'rsvps'     => $rsvpModel->where(['program_id' => $id, 'masjid_id' => $masjidId])->orderBy('created_at', 'ASC')->findAll(),
+            'ringkasan' => $rsvpModel->ringkasan((int) $id),
+        ]);
+    }
+
+    public function markAttendance()
+    {
+        $masjidId = session()->get('masjid_id');
+        $rsvpId = $this->request->getPost('rsvp_id');
+        $status = $this->request->getPost('status');
+        if (! in_array($status, ['attended', 'no_show', 'registered'], true)) {
+            $status = 'registered';
+        }
+
+        $rsvpModel = new \App\Models\MasjidProgramRsvpModel();
+        // Kepemilikan diperiksa sebelum ubah (cegah menandai RSVP masjid lain).
+        $rsvp = $rsvpModel->where(['id' => $rsvpId, 'masjid_id' => $masjidId])->first();
+        if (! $rsvp) {
+            return redirect()->to('dashboard/program')->with('error', 'Data tidak ditemukan.');
+        }
+        $rsvpModel->update($rsvpId, ['status' => $status]);
+        return redirect()->to('dashboard/program/kehadiran/' . $rsvp['program_id']);
+    }
+
     public function saveProgramCategory()
     {
         $masjidId = session()->get('masjid_id');

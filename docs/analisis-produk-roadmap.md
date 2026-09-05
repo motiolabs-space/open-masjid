@@ -116,7 +116,10 @@ Sumber:
    `dashboard/program/dampak/{id}`, tampil di halaman publik program bila
    dipublikasikan. Kolom pada `masjid_programs` + tabel
    `masjid_program_impact_photos`.
-9. **RSVP + absensi kegiatan.** _(belum)_
+9. ✅ **RSVP + absensi kegiatan** — SELESAI Sep 2026: jamaah konfirmasi kehadiran
+   publik (nama/WA/jumlah orang) di halaman program (dedup per nomor, kuota
+   ditegakkan); pengurus lihat daftar + ringkasan (pendaftar/tamu/hadir/absen) &
+   tandai hadir di `dashboard/program/kehadiran/{id}`. Tabel `masjid_program_rsvps`.
 10. **Relawan**: rekrut → peran → poin partisipasi → sertifikat.
 11. **PWA + Web Push** untuk pengumuman/adzan/program.
 

@@ -391,11 +391,15 @@ class Home extends BaseController
                 ->orderBy('id', 'ASC')->findAll();
         }
 
+        // Kehadiran terkonfirmasi (untuk RSVP publik & cek kuota).
+        $rsvpTamu = (new \App\Models\MasjidProgramRsvpModel())->totalTamu((int) $program['id']);
+
         return view('public/program_detail', [
             'title'        => esc($program['title']) . ' - ' . esc($masjid['name']),
             'masjid'       => $masjid,
             'program'      => $program,
             'impactPhotos' => $impactPhotos,
+            'rsvpTamu'     => $rsvpTamu,
             'storage'      => new \App\Libraries\Storage()
         ]);
     }
@@ -444,6 +448,58 @@ class Home extends BaseController
             'programs' => $programs,
             'storage'  => new \App\Libraries\Storage(),
         ]);
+    }
+
+    /**
+     * Konfirmasi kehadiran (RSVP) publik untuk sebuah program. Tanpa login —
+     * cukup nama + WA + jumlah orang. Nomor WA yang sama dianggap satu
+     * pendaftaran (diperbarui, bukan diduplikasi). Kuota ditegakkan bila diisi.
+     */
+    public function simpanRsvp()
+    {
+        $masjidId  = (int) $this->request->getPost('masjid_id');
+        $programId = (int) $this->request->getPost('program_id');
+
+        $program = (new \App\Models\MasjidProgramModel())
+            ->where(['id' => $programId, 'masjid_id' => $masjidId, 'status' => 'published'])->first();
+        if (! $program) {
+            return redirect()->to('/')->with('error', 'Program tidak ditemukan.');
+        }
+        $masjid = (new \App\Models\MasjidModel())->find($masjidId);
+        $kembali = base_url($masjid['username'] . '/program/' . $program['slug']);
+
+        $nama   = trim((string) $this->request->getPost('name'));
+        $telp   = trim((string) $this->request->getPost('phone'));
+        $guests = max(1, (int) $this->request->getPost('guests'));
+        if ($nama === '' || $telp === '') {
+            return redirect()->to($kembali)->with('rsvp_error', 'Nama dan nomor WhatsApp wajib diisi.');
+        }
+
+        $rsvpModel = new \App\Models\MasjidProgramRsvpModel();
+        $existing  = $rsvpModel->where(['program_id' => $programId, 'phone' => $telp])->first();
+
+        // Kuota (bila diisi): hitung tamu terkonfirmasi TANPA menghitung
+        // pendaftaran nomor ini (agar pembaruan tak menuduh dirinya sendiri).
+        if (! empty($program['quota']) && $program['quota'] > 0) {
+            $terpakai = $rsvpModel->totalTamu($programId) - (int) ($existing['guests'] ?? 0);
+            if ($terpakai + $guests > $program['quota']) {
+                $sisa = max(0, $program['quota'] - $terpakai);
+                return redirect()->to($kembali)->with('rsvp_error',
+                    'Maaf, kuota hampir penuh. Sisa tempat: ' . $sisa . '.');
+            }
+        }
+
+        if ($existing) {
+            $rsvpModel->update($existing['id'], ['name' => $nama, 'guests' => $guests, 'status' => 'registered']);
+        } else {
+            $rsvpModel->insert([
+                'masjid_id' => $masjidId, 'program_id' => $programId,
+                'name' => $nama, 'phone' => $telp, 'guests' => $guests, 'status' => 'registered',
+            ]);
+        }
+
+        return redirect()->to($kembali)->with('rsvp_ok',
+            'Terima kasih, ' . esc($nama) . '! Kehadiran Anda tercatat. Sampai jumpa di acara.');
     }
 
     public function simpanDonasiRutin()

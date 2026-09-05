@@ -98,6 +98,8 @@ $routes->get('dashboard/program/delete/(:num)', 'Admin::deleteProgram/$1', ['fil
 $routes->get('dashboard/program/dampak/(:num)', 'Admin::programImpact/$1');
 $routes->post('dashboard/program/dampak/save', 'Admin::saveProgramImpact');
 $routes->post('dashboard/program/dampak/photo/delete/(:num)', 'Admin::deleteImpactPhoto/$1');
+$routes->get('dashboard/program/kehadiran/(:num)', 'Admin::programAttendance/$1');
+$routes->post('dashboard/program/kehadiran/mark', 'Admin::markAttendance');
 $routes->post('dashboard/program/category/save', 'Admin::saveProgramCategory');
 $routes->post('dashboard/program/category/delete', 'Admin::deleteProgramCategory', ['filter' => 'masjidAdmin']);
 
@@ -237,6 +239,7 @@ $routes->get('donation/(:segment)/form', 'Donation::create/$1');
 $routes->get('donation/(:segment)/form/(:segment)', 'Donation::create/$1/$2'); // With Program Slug
 $routes->post('donation/process', 'Donation::store');
 $routes->post('donasi-rutin/simpan', 'Home::simpanDonasiRutin');
+$routes->post('program-rsvp/simpan', 'Home::simpanRsvp');
 // Nomor invoice wajib tanpa garis miring (lihat Donation::store) agar utuh
 // dalam satu segmen di sini.
 $routes->get('donation/manual/(:segment)', 'Donation::manual/$1'); // Manual Payment Instruction
