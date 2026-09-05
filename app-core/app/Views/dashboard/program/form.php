@@ -101,6 +101,12 @@
                         </div>
 
                         <div>
+                            <label class="block text-sm font-bold mb-2">Link Live Streaming (Opsional)</label>
+                            <input type="url" name="stream_url" value="<?= old('stream_url', $program['stream_url'] ?? '') ?>" placeholder="https://youtube.com/watch?v=..." class="w-full bg-[#f0f5f3] dark:bg-white/5 border-none rounded-xl text-xs focus:ring-2 focus:ring-primary p-3">
+                            <p class="text-[11px] text-[#608a7e] mt-1">Tautan YouTube kajian; akan tampil tertanam di halaman program.</p>
+                        </div>
+
+                        <div>
                             <label class="block text-sm font-bold mb-2">Kuota (Opsional)</label>
                             <input type="number" name="quota" value="<?= old('quota', $program['quota'] ?? '') ?>" placeholder="Contoh: 100" class="w-full bg-[#f0f5f3] dark:bg-white/5 border-none rounded-xl text-xs focus:ring-2 focus:ring-primary p-3">
                         </div>

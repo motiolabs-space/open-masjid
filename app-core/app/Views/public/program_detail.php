@@ -54,6 +54,32 @@
             <?php endif; ?>
 
             <!-- Description -->
+            <?php
+                $streamUrl = $program['stream_url'] ?? '';
+                $streamEmbed = null;
+                if ($streamUrl && preg_match('~(?:youtu\.be/|youtube\.com/(?:watch\?v=|live/|embed/|shorts/))([\w-]{11})~', $streamUrl, $mm)) {
+                    $streamEmbed = 'https://www.youtube.com/embed/' . $mm[1];
+                }
+            ?>
+            <?php if ($streamUrl): ?>
+                <div class="mb-10">
+                    <h3 class="text-2xl font-black mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-red-500">live_tv</span> Live Streaming
+                    </h3>
+                    <?php if ($streamEmbed): ?>
+                        <div class="aspect-video rounded-2xl overflow-hidden border border-[#dbe6e3] dark:border-white/10 shadow-lg">
+                            <iframe src="<?= esc($streamEmbed, 'attr') ?>" class="w-full h-full" title="Live Streaming" frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                        </div>
+                    <?php else: ?>
+                        <a href="<?= esc($streamUrl, 'attr') ?>" target="_blank" rel="noopener"
+                           class="inline-flex items-center gap-2 px-6 py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition-all">
+                            <span class="material-symbols-outlined">play_circle</span> Tonton Siaran
+                        </a>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
+
             <div class="article-content prose prose-lg dark:prose-invert max-w-none prose-headings:font-black prose-p:text-[#4a5568] dark:prose-p:text-gray-300 prose-a:text-primary animate-in fade-in slide-in-from-bottom-8 duration-1000">
                 <h3 class="text-2xl font-black mb-4">Tentang Kegiatan</h3>
                 <?= $program['description'] ?>

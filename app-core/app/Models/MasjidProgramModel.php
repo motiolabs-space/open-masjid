@@ -14,7 +14,7 @@ class MasjidProgramModel extends Model
     protected $protectFields    = true;
     protected $allowedFields    = [
         'masjid_id', 'category_id', 'title', 'slug', 'description', 'thumbnail',
-        'date_start', 'date_end', 'location', 'registration_link',
+        'date_start', 'date_end', 'location', 'registration_link', 'stream_url',
         'quota', 'target_donation', 'status',
         'beneficiaries_count', 'impact_narrative', 'impact_published',
     ];

@@ -1122,6 +1122,7 @@ class Admin extends BaseController
             'date_end'          => $this->request->getPost('date_end') ?: null,
             'location'          => $this->request->getPost('location'),
             'registration_link' => $this->request->getPost('registration_link'),
+            'stream_url'        => $this->request->getPost('stream_url') ?: null,
             'quota'             => $this->request->getPost('quota') ?: null,
             'target_donation'   => $this->request->getPost('target_donation') ? str_replace(['.', ','], ['', '.'], $this->request->getPost('target_donation')) : null,
             'status'            => $this->request->getPost('status') ?: 'published'
