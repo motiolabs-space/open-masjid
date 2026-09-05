@@ -247,12 +247,17 @@ Anda dapat membantu melalui:
 - Membuat panduan instalasi untuk shared hosting, VPS, atau localhost.
 
 Silakan fork repository ini dan kirim Pull Request.
+
+Ingin berkolaborasi lebih lanjut — kemitraan, implementasi di masjid Anda, atau
+sekadar diskusi arah produk? DM Instagram [@novrand](https://instagram.com/novrand).
+
 ## Community & Social Media
 
 Follow perkembangan Open Masjid dan gerakan digitalisasi masjid Indonesia:
 
 - Instagram: [@webmasjid](https://instagram.com/webmasjid)
 - LinkedIn: [Portal Masjid](https://www.linkedin.com/company/portal-masjid/)
+- Kontak langsung maintainer: DM Instagram [@novrand](https://instagram.com/novrand)
 
 Kami membuka kolaborasi dengan:
 - DKM / Takmir Masjid
