@@ -143,8 +143,14 @@ Sumber:
     (cari nama/kota, saring provinsi), peta lokasi (Leaflet/OpenStreetMap, hanya
     masjid berkoordinat), tiap kartu tautan Kunjungi + Donasi lintas masjid.
     Tautan "Jelajah Masjid" di navbar publik.
-13. **Peta sebaran manfaat**, live streaming, multi-bahasa. _(sebagian; peta
-    lokasi masjid sudah ada di Jelajah — sisanya menyusul)_
+13. **Peta sebaran manfaat**, live streaming, multi-bahasa:
+    - ✅ **Live streaming** — SELESAI Sep 2026: `stream_url` per program, pemutar
+      YouTube tertanam di halaman publik (non-YouTube → tombol "Tonton Siaran").
+    - ◐ **Peta sebaran manfaat** — sebagian: peta lokasi masjid sudah ada di
+      Jelajah; peta khusus titik penyaluran menyusul (data koordinat masih tipis).
+    - ⛔ **Multi-bahasa** — ditunda: i18n menyeluruh adalah pekerjaan besar dengan
+      ROI rendah untuk produk fokus Indonesia. Dikerjakan bila ada kebutuhan
+      jangkauan non-Indonesia.
 
 ---
 
