@@ -436,6 +436,58 @@ class Home extends BaseController
      * scope, dan ikon mengikuti base_url — di lokal aplikasi di /masjid/, di
      * produksi di root. Berkas statis tak bisa menyesuaikan keduanya.
      */
+    /**
+     * Jelajah Masjid — direktori publik: cari masjid & temukan untuk berdonasi
+     * lintas masjid. Pencarian nama/username/kota + saring provinsi. Peta hanya
+     * menampilkan masjid yang punya koordinat (sisanya tetap muncul di daftar).
+     */
+    public function jelajah(): string
+    {
+        $masjidModel = new \App\Models\MasjidModel();
+        $q    = trim((string) $this->request->getGet('q'));
+        $prov = trim((string) $this->request->getGet('provinsi'));
+
+        $builder = $masjidModel->where('status', 'active');
+        if ($q !== '') {
+            $builder->groupStart()
+                ->like('name', $q)->orLike('username', $q)
+                ->orLike('kabupaten', $q)->orLike('kecamatan', $q)
+                ->groupEnd();
+        }
+        if ($prov !== '') {
+            $builder->where('provinsi', $prov);
+        }
+        $masjids = $builder->orderBy('name', 'ASC')->findAll();
+
+        // Daftar provinsi untuk penyaring (hanya yang terisi).
+        $provinsiList = $masjidModel->distinct()->select('provinsi')
+            ->where('provinsi IS NOT NULL')->where('provinsi !=', '')
+            ->orderBy('provinsi', 'ASC')->findAll();
+
+        // Titik peta dari hasil saring yang berkoordinat.
+        $pins = [];
+        foreach ($masjids as $m) {
+            if (! empty($m['latitude']) && ! empty($m['longitude'])) {
+                $pins[] = [
+                    'nama'  => $m['name'],
+                    'url'   => base_url($m['username']),
+                    'lat'   => (float) $m['latitude'],
+                    'lng'   => (float) $m['longitude'],
+                    'kota'  => $m['kabupaten'] ?? '',
+                ];
+            }
+        }
+
+        return view('public/jelajah', [
+            'title'        => 'Jelajah Masjid - Masj.id',
+            'masjids'      => $masjids,
+            'provinsiList' => $provinsiList,
+            'filter'       => ['q' => $q, 'provinsi' => $prov],
+            'pins'         => $pins,
+            'storage'      => new \App\Libraries\Storage(),
+        ]);
+    }
+
     public function manifest()
     {
         $data = [

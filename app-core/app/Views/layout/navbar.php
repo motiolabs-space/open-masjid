@@ -5,6 +5,7 @@
         </a>
         <nav class="hidden md:flex items-center gap-8">
             <a class="text-sm font-medium hover:text-primary transition-colors" href="<?= base_url() ?>">Beranda</a>
+            <a class="text-sm font-medium hover:text-primary transition-colors" href="<?= base_url('jelajah') ?>">Jelajah Masjid</a>
             <a class="text-sm font-medium hover:text-primary transition-colors" href="<?= base_url('fitur') ?>">Fitur</a>
             <a class="text-sm font-medium hover:text-primary transition-colors" href="<?= base_url('kebaikan') ?>">Program Kebaikan</a>
             <a class="text-sm font-medium hover:text-primary transition-colors" href="<?= base_url('tentang') ?>">Tentang Kami</a>

@@ -14,6 +14,7 @@ $routes->get('bantuan', 'Home::panduan');
 $routes->get('kontak', 'Home::kontak');
 $routes->get('privacy-policy', 'Home::privacy');
 $routes->get('manifest.webmanifest', 'Home::manifest');
+$routes->get('jelajah', 'Home::jelajah');
 $routes->get('term', 'Home::term');
 $routes->get('/login', 'Home::login');
 $routes->post('/login', 'Auth::login');

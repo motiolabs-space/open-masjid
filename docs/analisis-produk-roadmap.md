@@ -139,8 +139,12 @@ Sumber:
       kunci VAPID di `.env` + uji di perangkat asli** (tak dapat diuji lokal).
 
 ### Tahap 4 — Jangkauan Luas
-12. **Discovery antar-masjid** (cari & donasi lintas masjid).
-13. **Peta sebaran manfaat**, live streaming, multi-bahasa.
+12. ✅ **Discovery antar-masjid** — SELESAI Sep 2026: direktori publik `/jelajah`
+    (cari nama/kota, saring provinsi), peta lokasi (Leaflet/OpenStreetMap, hanya
+    masjid berkoordinat), tiap kartu tautan Kunjungi + Donasi lintas masjid.
+    Tautan "Jelajah Masjid" di navbar publik.
+13. **Peta sebaran manfaat**, live streaming, multi-bahasa. _(sebagian; peta
+    lokasi masjid sudah ada di Jelajah — sisanya menyusul)_
 
 ---
 
