@@ -58,6 +58,37 @@
                 <h3 class="text-2xl font-black mb-4">Tentang Kegiatan</h3>
                 <?= $program['description'] ?>
             </div>
+
+            <?php if (!empty($program['impact_published'])): ?>
+                <div class="mt-12 bg-primary/[0.04] border border-primary/15 rounded-3xl p-6 md:p-8">
+                    <div class="flex items-center gap-2 mb-5">
+                        <span class="material-symbols-outlined text-primary">volunteer_activism</span>
+                        <h3 class="text-2xl font-black text-[#111816] dark:text-white">Dampak Program</h3>
+                    </div>
+
+                    <?php if (!empty($program['beneficiaries_count'])): ?>
+                        <div class="inline-flex items-baseline gap-2 bg-white dark:bg-white/5 rounded-2xl px-5 py-3 mb-5 border border-primary/10">
+                            <span class="text-3xl font-black text-primary"><?= number_format($program['beneficiaries_count'], 0, ',', '.') ?></span>
+                            <span class="text-sm font-bold text-[#608a7e]">penerima manfaat</span>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if (!empty($program['impact_narrative'])): ?>
+                        <p class="text-[#4a5568] dark:text-gray-300 leading-relaxed whitespace-pre-line mb-6"><?= esc($program['impact_narrative']) ?></p>
+                    <?php endif; ?>
+
+                    <?php if (!empty($impactPhotos)): ?>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            <?php foreach ($impactPhotos as $ph): ?>
+                                <a href="<?= esc($storage->url($ph['photo']), 'attr') ?>" target="_blank" class="aspect-square rounded-2xl overflow-hidden border border-primary/10 group">
+                                    <img src="<?= esc($storage->url($ph['photo']), 'attr') ?>" loading="lazy" alt="Bukti dampak"
+                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                </a>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
         </div>
 
         <!-- Sidebar Info -->

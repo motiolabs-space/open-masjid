@@ -111,9 +111,12 @@ Sumber:
    periode lalu memajukan jadwal.
 
 ### Tahap 3 — Program Berdampak & Komunitas
-8. **Laporan Dampak program** — penerima manfaat, indikator, bukti foto,
-   sebelum/sesudah.
-9. **RSVP + absensi kegiatan.**
+8. ✅ **Laporan Dampak program** — SELESAI Sep 2026: jumlah penerima manfaat,
+   cerita dampak, foto bukti (banyak) per program; diisi pengurus di
+   `dashboard/program/dampak/{id}`, tampil di halaman publik program bila
+   dipublikasikan. Kolom pada `masjid_programs` + tabel
+   `masjid_program_impact_photos`.
+9. **RSVP + absensi kegiatan.** _(belum)_
 10. **Relawan**: rekrut → peran → poin partisipasi → sertifikat.
 11. **PWA + Web Push** untuk pengumuman/adzan/program.
 

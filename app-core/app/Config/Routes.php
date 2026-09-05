@@ -95,6 +95,9 @@ $routes->get('dashboard/program/create', 'Admin::createProgram');
 $routes->get('dashboard/program/edit/(:num)', 'Admin::editProgram/$1');
 $routes->post('dashboard/program/save', 'Admin::saveProgram');
 $routes->get('dashboard/program/delete/(:num)', 'Admin::deleteProgram/$1', ['filter' => 'masjidAdmin']);
+$routes->get('dashboard/program/dampak/(:num)', 'Admin::programImpact/$1');
+$routes->post('dashboard/program/dampak/save', 'Admin::saveProgramImpact');
+$routes->post('dashboard/program/dampak/photo/delete/(:num)', 'Admin::deleteImpactPhoto/$1');
 $routes->post('dashboard/program/category/save', 'Admin::saveProgramCategory');
 $routes->post('dashboard/program/category/delete', 'Admin::deleteProgramCategory', ['filter' => 'masjidAdmin']);
 

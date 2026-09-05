@@ -1180,6 +1180,83 @@ class Admin extends BaseController
         return redirect()->to('dashboard/program')->with('error', 'Program tidak ditemukan.');
     }
 
+    // -------------------------------------------------------------------------
+    // LAPORAN DAMPAK PROGRAM
+    // -------------------------------------------------------------------------
+
+    public function programImpact($id)
+    {
+        $masjidId = session()->get('masjid_id');
+        $program = (new \App\Models\MasjidProgramModel())->where(['id' => $id, 'masjid_id' => $masjidId])->first();
+        if (! $program) {
+            return redirect()->to('dashboard/program')->with('error', 'Program tidak ditemukan.');
+        }
+
+        $photos = (new \App\Models\MasjidProgramImpactPhotoModel())
+            ->where(['program_id' => $id, 'masjid_id' => $masjidId])->orderBy('id', 'ASC')->findAll();
+
+        return view('dashboard/program/impact_form', [
+            'title'   => 'Laporan Dampak - ' . $program['title'],
+            'program' => $program,
+            'photos'  => $photos,
+            'storage' => new Storage(),
+        ]);
+    }
+
+    public function saveProgramImpact()
+    {
+        $masjidId = session()->get('masjid_id');
+        $id = $this->request->getPost('program_id');
+
+        // Kepemilikan diperiksa SEBELUM apa pun ditulis: id dari POST tak dipercaya.
+        $programModel = new \App\Models\MasjidProgramModel();
+        $program = $programModel->where(['id' => $id, 'masjid_id' => $masjidId])->first();
+        if (! $program) {
+            return redirect()->to('dashboard/program')->with('error', 'Program tidak ditemukan.');
+        }
+
+        helper('custom');
+        $penerima = (int) parse_rupiah($this->request->getPost('beneficiaries_count'));
+        $data = [
+            'beneficiaries_count' => $penerima > 0 ? $penerima : null,
+            'impact_narrative'    => $this->request->getPost('impact_narrative') ?: null,
+            'impact_published'    => $this->request->getPost('impact_published') ? 1 : 0,
+        ];
+
+        if (! $programModel->update($id, $data)) {
+            return redirect()->back()->withInput()
+                ->with('error', 'Gagal menyimpan: ' . implode(' ', $programModel->errors()));
+        }
+
+        // Foto bukti (banyak). Kegagalan simpan DB tidak dihitung berhasil.
+        $photoModel = new \App\Models\MasjidProgramImpactPhotoModel();
+        $storage = new Storage();
+        foreach (($this->request->getFileMultiple('photos') ?? []) as $file) {
+            if ($file && $file->isValid() && ! $file->hasMoved()) {
+                $path = $storage->upload($file, 'dampak');
+                if ($path) {
+                    $photoModel->insert(['masjid_id' => $masjidId, 'program_id' => $id, 'photo' => $path, 'caption' => null]);
+                }
+            }
+        }
+
+        return redirect()->to('dashboard/program/dampak/' . $id)->with('success', 'Laporan dampak tersimpan.');
+    }
+
+    public function deleteImpactPhoto($photoId)
+    {
+        $masjidId = session()->get('masjid_id');
+        $photoModel = new \App\Models\MasjidProgramImpactPhotoModel();
+        // Kepemilikan diperiksa sebelum hapus (cegah IDOR lintas-masjid).
+        $photo = $photoModel->where(['id' => $photoId, 'masjid_id' => $masjidId])->first();
+        if (! $photo) {
+            return redirect()->to('dashboard/program')->with('error', 'Foto tidak ditemukan.');
+        }
+        (new Storage())->delete($photo['photo']);
+        $photoModel->delete($photoId);
+        return redirect()->to('dashboard/program/dampak/' . $photo['program_id'])->with('success', 'Foto dihapus.');
+    }
+
     public function saveProgramCategory()
     {
         $masjidId = session()->get('masjid_id');

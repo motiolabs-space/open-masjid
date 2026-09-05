@@ -383,11 +383,20 @@ class Home extends BaseController
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Program tidak ditemukan.");
         }
 
+        // Foto bukti dampak hanya diambil bila laporan dampaknya dipublikasikan.
+        $impactPhotos = [];
+        if (! empty($program['impact_published'])) {
+            $impactPhotos = (new \App\Models\MasjidProgramImpactPhotoModel())
+                ->where(['program_id' => $program['id'], 'masjid_id' => $masjid['id']])
+                ->orderBy('id', 'ASC')->findAll();
+        }
+
         return view('public/program_detail', [
-            'title'   => esc($program['title']) . ' - ' . esc($masjid['name']),
-            'masjid'  => $masjid,
-            'program' => $program,
-            'storage' => new \App\Libraries\Storage()
+            'title'        => esc($program['title']) . ' - ' . esc($masjid['name']),
+            'masjid'       => $masjid,
+            'program'      => $program,
+            'impactPhotos' => $impactPhotos,
+            'storage'      => new \App\Libraries\Storage()
         ]);
     }
 
