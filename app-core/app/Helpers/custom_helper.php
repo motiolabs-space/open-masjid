@@ -252,3 +252,27 @@ if (!function_exists('terbilang')) {
         return $satuan[0];
     }
 }
+
+if (!function_exists('tautan_aman')) {
+    /**
+     * Saring URL yang diisi pengurus sebelum dipakai sebagai href/src.
+     *
+     * esc($url, 'attr') hanya membuat teksnya aman DI DALAM atribut — ia tidak
+     * peduli pada skemanya. `javascript:alert(1)` lolos utuh dan jalan saat
+     * diklik pengunjung. Karena pengisi tautan (pengurus masjid mana pun) dan
+     * yang mengklik (publik) adalah pihak berbeda, skema wajib dibatasi di sini.
+     *
+     * @return string URL asli bila http/https, atau '' bila tidak (pemanggil
+     *                memperlakukan '' sebagai "tidak ada tautan").
+     */
+    function tautan_aman(?string $url): string
+    {
+        $url = trim((string) $url);
+        if ($url === '') {
+            return '';
+        }
+        $skema = strtolower((string) parse_url($url, PHP_URL_SCHEME));
+
+        return in_array($skema, ['http', 'https'], true) ? $url : '';
+    }
+}

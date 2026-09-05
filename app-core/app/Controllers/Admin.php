@@ -1112,6 +1112,19 @@ class Admin extends BaseController
             }
         }
 
+        // Tautan yang diisi pengurus dipasang sebagai href di halaman publik.
+        // `type="url"` di form hanya penjaga sisi klien — skema wajib dibatasi
+        // di sini agar `javascript:` tak pernah sampai ke pengunjung.
+        $tautan = [];
+        foreach (['registration_link', 'stream_url'] as $kolom) {
+            $isi = trim((string) $this->request->getPost($kolom));
+            if ($isi !== '' && tautan_aman($isi) === '') {
+                return redirect()->back()->withInput()
+                    ->with('error', 'Tautan harus diawali http:// atau https://.');
+            }
+            $tautan[$kolom] = $isi ?: null;
+        }
+
         $data = [
             'masjid_id'         => $masjidId,
             'category_id'       => $categoryId,
@@ -1121,8 +1134,8 @@ class Admin extends BaseController
             'date_start'        => $this->request->getPost('date_start'),
             'date_end'          => $this->request->getPost('date_end') ?: null,
             'location'          => $this->request->getPost('location'),
-            'registration_link' => $this->request->getPost('registration_link'),
-            'stream_url'        => $this->request->getPost('stream_url') ?: null,
+            'registration_link' => $tautan['registration_link'],
+            'stream_url'        => $tautan['stream_url'],
             'quota'             => $this->request->getPost('quota') ?: null,
             'target_donation'   => $this->request->getPost('target_donation') ? str_replace(['.', ','], ['', '.'], $this->request->getPost('target_donation')) : null,
             'status'            => $this->request->getPost('status') ?: 'published'

@@ -67,6 +67,46 @@ class WebPush
     }
 
     /**
+     * Host push service yang sah. Endpoint langganan datang dari browser dan
+     * disimpan lewat endpoint publik, jadi tak boleh dipercaya begitu saja.
+     */
+    private const HOST_SAH = [
+        'fcm.googleapis.com',                 // Chrome / Chromium
+        'updates.push.services.mozilla.com',  // Firefox
+        'web.push.apple.com',                 // Safari
+        '.notify.windows.com',                // Edge (wns2-*.notify.windows.com)
+        '.push.services.mozilla.com',
+    ];
+
+    /**
+     * Apakah endpoint benar-benar milik layanan push browser?
+     *
+     * Tanpa pemeriksaan ini, siapa pun bisa mendaftarkan endpoint sembarang
+     * (mis. http://127.0.0.1:8080/… atau alamat internal) lalu memancing server
+     * mengirim permintaan ke sana saat pengurus menekan broadcast — server
+     * dipakai sebagai perantara ke jaringan dalam (SSRF).
+     */
+    public static function endpointSah(string $endpoint): bool
+    {
+        $parts = parse_url($endpoint);
+        if (! is_array($parts) || ($parts['scheme'] ?? '') !== 'https' || empty($parts['host'])) {
+            return false;
+        }
+        $host = strtolower($parts['host']);
+
+        foreach (self::HOST_SAH as $sah) {
+            $cocok = $sah[0] === '.'
+                ? str_ends_with($host, $sah)   // subdomain
+                : $host === $sah;              // host persis
+            if ($cocok) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Kirim "ketukan" push payloadless ke satu langganan.
      *
      * @return int Kode HTTP push service (201 = diterima). 0/4xx/5xx = gagal.
@@ -74,7 +114,7 @@ class WebPush
      */
     public function kirim(string $endpoint, int $ttl = 2419200): int
     {
-        if (! $this->siap()) {
+        if (! $this->siap() || ! self::endpointSah($endpoint)) {
             return 0;
         }
 

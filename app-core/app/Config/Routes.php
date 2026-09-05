@@ -130,7 +130,7 @@ $routes->get('dashboard/warga/delete/(:num)', 'Admin::deleteWarga/$1', ['filter'
 $routes->get('dashboard/volunteers', 'Admin::volunteers');
 $routes->get('dashboard/relawan', 'Relawan::index');
 $routes->post('dashboard/relawan/save', 'Relawan::save');
-$routes->get('dashboard/relawan/delete/(:num)', 'Relawan::delete/$1', ['filter' => 'masjidAdmin']);
+$routes->post('dashboard/relawan/delete', 'Relawan::delete', ['filter' => 'masjidAdmin']);
 $routes->post('dashboard/relawan/points', 'Relawan::awardPoints');
 $routes->get('dashboard/relawan/sertifikat/(:num)', 'Relawan::certificate/$1');
 

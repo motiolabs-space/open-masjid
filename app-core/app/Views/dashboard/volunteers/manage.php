@@ -58,11 +58,15 @@
                                 </td>
                                 <td class="px-4 sm:px-6 py-3">
                                     <div class="flex gap-1 justify-end">
-                                        <button onclick='beriPoin(<?= (int) $v['id'] ?>, <?= json_encode($v['name']) ?>)' title="Beri Poin" class="size-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center hover:bg-amber-500 hover:text-white"><span class="material-symbols-outlined text-base">add_circle</span></button>
+                                        <button onclick='beriPoin(<?= (int) $v['id'] ?>, <?= json_encode($v['name'], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>)' title="Beri Poin" class="size-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center hover:bg-amber-500 hover:text-white"><span class="material-symbols-outlined text-base">add_circle</span></button>
                                         <a href="<?= base_url('dashboard/relawan/sertifikat/' . $v['id']) ?>" target="_blank" title="Sertifikat" class="size-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center hover:bg-teal-600 hover:text-white"><span class="material-symbols-outlined text-base">workspace_premium</span></a>
-                                        <button onclick='editRelawan(<?= json_encode($v) ?>)' title="Ubah" class="size-8 rounded-lg bg-primary/5 text-primary flex items-center justify-center hover:bg-primary hover:text-white"><span class="material-symbols-outlined text-base">edit</span></button>
+                                        <button onclick='editRelawan(<?= json_encode($v, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>)' title="Ubah" class="size-8 rounded-lg bg-primary/5 text-primary flex items-center justify-center hover:bg-primary hover:text-white"><span class="material-symbols-outlined text-base">edit</span></button>
                                         <?php if ($isAdmin): ?>
-                                            <a href="<?= base_url('dashboard/relawan/delete/' . $v['id']) ?>" onclick="return confirm('Hapus relawan ini?')" title="Hapus" class="size-8 rounded-lg bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white"><span class="material-symbols-outlined text-base">delete</span></a>
+                                            <form action="<?= base_url('dashboard/relawan/delete') ?>" method="post" onsubmit="return confirm('Hapus relawan ini?')" class="inline">
+                                                <?= csrf_field() ?>
+                                                <input type="hidden" name="id" value="<?= (int) $v['id'] ?>">
+                                                <button type="submit" title="Hapus" class="size-8 rounded-lg bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white"><span class="material-symbols-outlined text-base">delete</span></button>
+                                            </form>
                                         <?php endif; ?>
                                     </div>
                                 </td>

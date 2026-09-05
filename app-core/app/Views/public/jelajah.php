@@ -34,7 +34,7 @@
             <div id="petaMasjid" class="w-full h-[320px] rounded-3xl overflow-hidden border border-[#dbe6e3] dark:border-white/10 mb-10 z-0"></div>
         <?php endif; ?>
 
-        <p class="text-sm text-[#608a7e] mb-6"><strong class="text-[#111816] dark:text-white"><?= count($masjids) ?></strong> masjid ditemukan<?= $filter['q'] !== '' ? ' untuk "' . esc($filter['q']) . '"' : '' ?>.</p>
+        <p class="text-sm text-[#608a7e] mb-6"><strong class="text-[#111816] dark:text-white"><?= $total ?></strong> masjid ditemukan<?= $filter['q'] !== '' ? ' untuk "' . esc($filter['q']) . '"' : '' ?>.</p>
 
         <?php if (empty($masjids)): ?>
             <div class="text-center py-20">
@@ -69,6 +69,35 @@
                     </div>
                 <?php endforeach; ?>
             </div>
+
+            <?php if ($pager->getPageCount() > 1): ?>
+                <?php
+                    // Penyaring dipertahankan saat berpindah halaman, jika tidak
+                    // halaman 2 akan mengembalikan seluruh masjid.
+                    $tautanHalaman = static function (int $n) use ($filter): string {
+                        $params = array_filter([
+                            'q'        => $filter['q'],
+                            'provinsi' => $filter['provinsi'],
+                            'page'     => $n > 1 ? $n : null,
+                        ], static fn ($v) => $v !== null && $v !== '');
+
+                        return base_url('jelajah') . ($params ? '?' . http_build_query($params) : '');
+                    };
+                    $hal    = $pager->getCurrentPage();
+                    $jumlah = $pager->getPageCount();
+                ?>
+                <nav class="mt-10 flex items-center justify-center gap-3" aria-label="Navigasi halaman">
+                    <?php if ($hal > 1): ?>
+                        <a href="<?= esc($tautanHalaman($hal - 1), 'attr') ?>" rel="prev"
+                           class="px-5 py-2.5 rounded-xl border border-[#dbe6e3] dark:border-white/10 font-bold text-sm hover:border-primary hover:text-primary transition-all">Sebelumnya</a>
+                    <?php endif; ?>
+                    <span class="text-sm text-[#608a7e]">Halaman <strong class="text-[#111816] dark:text-white"><?= $hal ?></strong> dari <?= $jumlah ?></span>
+                    <?php if ($hal < $jumlah): ?>
+                        <a href="<?= esc($tautanHalaman($hal + 1), 'attr') ?>" rel="next"
+                           class="px-5 py-2.5 rounded-xl border border-[#dbe6e3] dark:border-white/10 font-bold text-sm hover:border-primary hover:text-primary transition-all">Berikutnya</a>
+                    <?php endif; ?>
+                </nav>
+            <?php endif; ?>
         <?php endif; ?>
     </div>
 </section>
@@ -77,7 +106,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
     (function () {
-        const pins = <?= json_encode($pins) ?>;
+        // Bendera HEX: nama masjid diisi bebas saat pendaftaran, sehingga sebuah
+        // nama berisi "</script>" bisa memutus blok skrip ini bila tak dikodekan.
+        const pins = <?= json_encode($pins, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
         const map = L.map('petaMasjid', { scrollWheelZoom: false });
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap', maxZoom: 18,
@@ -85,7 +116,25 @@
         const grup = [];
         pins.forEach(function (p) {
             const mk = L.marker([p.lat, p.lng]).addTo(map);
-            mk.bindPopup('<strong>' + p.nama + '</strong>' + (p.kota ? '<br>' + p.kota : '') + '<br><a href="' + p.url + '">Kunjungi &raquo;</a>');
+
+            // Isi popup dibangun sebagai simpul DOM, bukan rangkaian string HTML:
+            // nama & kota masjid adalah masukan pengurus, jadi harus masuk sebagai
+            // TEKS (textContent) agar markup di dalamnya tak pernah dieksekusi.
+            const isi = document.createElement('div');
+            const judul = document.createElement('strong');
+            judul.textContent = p.nama;
+            isi.appendChild(judul);
+            if (p.kota) {
+                isi.appendChild(document.createElement('br'));
+                isi.appendChild(document.createTextNode(p.kota));
+            }
+            isi.appendChild(document.createElement('br'));
+            const tautan = document.createElement('a');
+            tautan.href = p.url;
+            tautan.textContent = 'Kunjungi »';
+            isi.appendChild(tautan);
+            mk.bindPopup(isi);
+
             grup.push([p.lat, p.lng]);
         });
         if (grup.length === 1) { map.setView(grup[0], 14); }

@@ -4,6 +4,12 @@ namespace App\Controllers;
 
 class Home extends BaseController
 {
+    /** Kartu masjid per halaman di direktori Jelajah. */
+    private const JELAJAH_PER_HALAMAN = 24;
+
+    /** Batas atas jumlah orang per satu konfirmasi kehadiran (RSVP). */
+    private const RSVP_TAMU_MAKS = 50;
+
     public function index(): string
     {
         $masjidModel = new \App\Models\MasjidModel();
@@ -457,25 +463,43 @@ class Home extends BaseController
         if ($prov !== '') {
             $builder->where('provinsi', $prov);
         }
-        $masjids = $builder->orderBy('name', 'ASC')->findAll();
 
-        // Daftar provinsi untuk penyaring (hanya yang terisi).
+        // Dipaginasi: direktori ini tumbuh seiring masjid yang mendaftar, dan
+        // memuat seluruh baris + seluruh penanda peta dalam satu halaman akan
+        // memberat seiring waktu.
+        $masjids = $builder->orderBy('name', 'ASC')->paginate(self::JELAJAH_PER_HALAMAN);
+        $pager   = $masjidModel->pager;
+
+        // Daftar provinsi untuk penyaring — dibatasi masjid aktif saja, sama
+        // seperti daftarnya; provinsi milik masjid non-aktif hanya akan
+        // menghasilkan 0 hasil bila dipilih.
         $provinsiList = $masjidModel->distinct()->select('provinsi')
+            ->where('status', 'active')
             ->where('provinsi IS NOT NULL')->where('provinsi !=', '')
             ->orderBy('provinsi', 'ASC')->findAll();
 
-        // Titik peta dari hasil saring yang berkoordinat.
+        // Titik peta dari hasil saring yang berkoordinat (halaman ini saja, agar
+        // peta selalu menggambarkan daftar yang sedang tampil).
         $pins = [];
         foreach ($masjids as $m) {
-            if (! empty($m['latitude']) && ! empty($m['longitude'])) {
-                $pins[] = [
-                    'nama'  => $m['name'],
-                    'url'   => base_url($m['username']),
-                    'lat'   => (float) $m['latitude'],
-                    'lng'   => (float) $m['longitude'],
-                    'kota'  => $m['kabupaten'] ?? '',
-                ];
+            $lat = (float) ($m['latitude'] ?? 0);
+            $lng = (float) ($m['longitude'] ?? 0);
+
+            // 0,0 adalah nilai bawaan kolom yang belum benar-benar diisi, bukan
+            // sebuah lokasi. Diloloskan, ia menaruh penanda di Teluk Guinea dan
+            // memaksa fitBounds() memperlihatkan separuh dunia — masjid yang
+            // koordinatnya benar jadi ikut tak terbaca.
+            if ($lat === 0.0 || $lng === 0.0 || abs($lat) > 90 || abs($lng) > 180) {
+                continue;
             }
+
+            $pins[] = [
+                'nama'  => $m['name'],
+                'url'   => base_url($m['username']),
+                'lat'   => $lat,
+                'lng'   => $lng,
+                'kota'  => $m['kabupaten'] ?? '',
+            ];
         }
 
         return view('public/jelajah', [
@@ -484,6 +508,8 @@ class Home extends BaseController
             'provinsiList' => $provinsiList,
             'filter'       => ['q' => $q, 'provinsi' => $prov],
             'pins'         => $pins,
+            'pager'        => $pager,
+            'total'        => $pager->getTotal(),
             'storage'      => new \App\Libraries\Storage(),
         ]);
     }
@@ -518,6 +544,12 @@ class Home extends BaseController
      */
     public function pushSubscribe()
     {
+        // Rute ini publik DAN dikecualikan dari CSRF (lihat Config\Filters),
+        // jadi pembatas laju adalah satu-satunya rem yang tersisa.
+        if (! $this->lolosBatasLaju('push-subscribe', 10)) {
+            return $this->response->setStatusCode(429)->setJSON(['ok' => false, 'error' => 'Terlalu banyak permintaan.']);
+        }
+
         $body = json_decode($this->request->getBody(), true) ?: [];
         $masjidId = (int) ($body['masjid_id'] ?? 0);
         $sub      = $body['subscription'] ?? [];
@@ -527,6 +559,11 @@ class Home extends BaseController
 
         if (! $masjidId || $endpoint === '' || $p256dh === '' || $auth === '') {
             return $this->response->setStatusCode(400)->setJSON(['ok' => false, 'error' => 'Data langganan tidak lengkap.']);
+        }
+        // Endpoint disaring SEBELUM disimpan: baris di tabel ini kelak menjadi
+        // alamat tujuan curl saat broadcast, dan rute ini publik + bebas CSRF.
+        if (! \App\Libraries\WebPush::endpointSah($endpoint)) {
+            return $this->response->setStatusCode(422)->setJSON(['ok' => false, 'error' => 'Endpoint langganan tidak dikenali.']);
         }
         if (! (new \App\Models\MasjidModel())->find($masjidId)) {
             return $this->response->setStatusCode(404)->setJSON(['ok' => false, 'error' => 'Masjid tidak ditemukan.']);
@@ -583,12 +620,33 @@ class Home extends BaseController
     }
 
     /**
+     * Pembatas laju untuk form publik tanpa login.
+     *
+     * Rute-rute ini menulis ke basis data tanpa autentikasi apa pun, jadi tanpa
+     * pembatas satu skrip bisa membanjiri tabel (dan menghabiskan kuota acara)
+     * secepat jaringan mengizinkan.
+     *
+     * @return bool false bila jatah alamat IP ini sudah habis.
+     */
+    private function lolosBatasLaju(string $aksi, int $maks = 5, int $detik = MINUTE): bool
+    {
+        $kunci = 'publik-' . $aksi . '-' . md5((string) $this->request->getIPAddress());
+
+        return \Config\Services::throttler()->check($kunci, $maks, $detik) !== false;
+    }
+
+    /**
      * Konfirmasi kehadiran (RSVP) publik untuk sebuah program. Tanpa login —
      * cukup nama + WA + jumlah orang. Nomor WA yang sama dianggap satu
      * pendaftaran (diperbarui, bukan diduplikasi). Kuota ditegakkan bila diisi.
      */
     public function simpanRsvp()
     {
+        if (! $this->lolosBatasLaju('rsvp')) {
+            return redirect()->back()->with('rsvp_error',
+                'Terlalu banyak pengiriman dari perangkat ini. Coba lagi sebentar lagi.');
+        }
+
         $masjidId  = (int) $this->request->getPost('masjid_id');
         $programId = (int) $this->request->getPost('program_id');
 
@@ -598,11 +656,16 @@ class Home extends BaseController
             return redirect()->to('/')->with('error', 'Program tidak ditemukan.');
         }
         $masjid = (new \App\Models\MasjidModel())->find($masjidId);
+        if (! $masjid) {
+            return redirect()->to('/')->with('error', 'Masjid tidak ditemukan.');
+        }
         $kembali = base_url($masjid['username'] . '/program/' . $program['slug']);
 
         $nama   = trim((string) $this->request->getPost('name'));
         $telp   = trim((string) $this->request->getPost('phone'));
-        $guests = max(1, (int) $this->request->getPost('guests'));
+        // Dibatasi atas juga: tanpa batas, satu kiriman berisi jutaan tamu bisa
+        // memborong seluruh kuota acara.
+        $guests = min(self::RSVP_TAMU_MAKS, max(1, (int) $this->request->getPost('guests')));
         if ($nama === '' || $telp === '') {
             return redirect()->to($kembali)->with('rsvp_error', 'Nama dan nomor WhatsApp wajib diisi.');
         }
@@ -630,12 +693,19 @@ class Home extends BaseController
             ]);
         }
 
+        // Tanpa esc(): view yang menampilkan flashdata ini sudah meng-esc(), dan
+        // meloloskannya dua kali membuat nama ber-apostrof tampil sebagai &#039;.
         return redirect()->to($kembali)->with('rsvp_ok',
-            'Terima kasih, ' . esc($nama) . '! Kehadiran Anda tercatat. Sampai jumpa di acara.');
+            'Terima kasih, ' . $nama . '! Kehadiran Anda tercatat. Sampai jumpa di acara.');
     }
 
     public function simpanDonasiRutin()
     {
+        if (! $this->lolosBatasLaju('donasi-rutin')) {
+            return redirect()->back()->withInput()
+                ->with('error', 'Terlalu banyak pengiriman dari perangkat ini. Coba lagi sebentar lagi.');
+        }
+
         $masjidId = (int) $this->request->getPost('masjid_id');
         $masjid   = (new \App\Models\MasjidModel())->find($masjidId);
         if (! $masjid) {

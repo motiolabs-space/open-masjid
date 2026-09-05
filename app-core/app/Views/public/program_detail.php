@@ -55,7 +55,12 @@
 
             <!-- Description -->
             <?php
-                $streamUrl = $program['stream_url'] ?? '';
+                // tautan_aman(): tautan diisi pengurus & dipasang sebagai href ke
+                // pengunjung, jadi skema non-http(s) (mis. javascript:) dibuang di
+                // sini juga — baris lama bisa saja tersimpan sebelum penyaringan
+                // di sisi penyimpanan dipasang.
+                $streamUrl   = tautan_aman($program['stream_url'] ?? '');
+                $daftarUrl   = tautan_aman($program['registration_link'] ?? '');
                 $streamEmbed = null;
                 if ($streamUrl && preg_match('~(?:youtu\.be/|youtube\.com/(?:watch\?v=|live/|embed/|shorts/))([\w-]{11})~', $streamUrl, $mm)) {
                     $streamEmbed = 'https://www.youtube.com/embed/' . $mm[1];
@@ -159,8 +164,8 @@
                             <?php endif; ?>
                         </div>
 
-                        <?php if (!empty($program['registration_link'])): ?>
-                            <a href="<?= esc($program['registration_link']) ?>" target="_blank" class="w-full h-16 bg-primary text-white rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-emerald-900 transition-all shadow-lg shadow-primary/20 mb-4">
+                        <?php if ($daftarUrl !== ''): ?>
+                            <a href="<?= esc($daftarUrl, 'attr') ?>" target="_blank" rel="noopener noreferrer" class="w-full h-16 bg-primary text-white rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-emerald-900 transition-all shadow-lg shadow-primary/20 mb-4">
                                 <span class="material-symbols-outlined text-sm">how_to_reg</span>
                                 Daftar Sekarang
                             </a>

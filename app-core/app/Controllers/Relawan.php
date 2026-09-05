@@ -71,9 +71,15 @@ class Relawan extends BaseController
         return redirect()->to('dashboard/relawan')->with('success', 'Data relawan tersimpan.');
     }
 
-    public function delete($id)
+    /**
+     * Hapus relawan. Lewat POST (bukan GET) + token CSRF: tautan GET yang
+     * merusak data bisa dipicu diam-diam dari halaman lain selama pengurus
+     * masih login.
+     */
+    public function delete()
     {
         $masjidId = session()->get('masjid_id');
+        $id = (int) $this->request->getPost('id');
         $model = new MasjidVolunteerModel();
         $vol = $model->where(['id' => $id, 'masjid_id' => $masjidId])->first();
         if ($vol) {
@@ -117,7 +123,9 @@ class Relawan extends BaseController
         $row = $pointModel->selectSum('points')->where(['volunteer_id' => $volId, 'masjid_id' => $masjidId])->get()->getRow();
         $model->update($volId, ['points' => (int) ($row->points ?? 0)]);
 
-        return redirect()->to('dashboard/relawan')->with('success', 'Poin diberikan kepada ' . esc($vol['name']) . '.');
+        // Tanpa esc(): view meng-esc() flashdata saat menampilkannya, dan
+        // meloloskan dua kali membuat nama ber-apostrof tampil sebagai &#039;.
+        return redirect()->to('dashboard/relawan')->with('success', 'Poin diberikan kepada ' . $vol['name'] . '.');
     }
 
     public function certificate($id)

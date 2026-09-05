@@ -160,9 +160,32 @@ Sumber:
 |---------|--------|----------|
 | 🔴 | **Deploy key SSH bocor** di riwayat publik (`f7923d2:github_deploy_key`) | Cabut di GitHub + `authorized_keys` server, terbitkan kunci baru. (di [go-live-checklist](go-live-checklist.md) A1) |
 | 🔴 | **`CI_ENVIRONMENT = development` di server** | Set `production` — debug toolbar membocorkan path/query/konfigurasi. (checklist A2) |
-| 🟠 | **Tidak ada rate limiting sama sekali** | Login rawan brute-force; endpoint tulis `api/v1/*` rawan penyalahgunaan (kini bisa hapus data). Pasang `Throttler` CI4 di login & per-token pada API tulis. |
+| 🟠 | **Rate limiting belum menyeluruh** | Form publik sudah dibatasi (lihat di bawah), tapi **login masih rawan brute-force** dan endpoint tulis `api/v1/*` belum dibatasi per-token. Pasang `Throttler` CI4 di keduanya. |
 | 🟠 | **Token API/MCP tanpa masa berlaku & tanpa alert** | Audit log sudah mencatat penolakan, tapi tak ada notifikasi saat lonjakan penolakan (indikasi token bocor). Tambah alert (Telegram) ke pengurus + opsi kedaluwarsa/rotasi token. |
 | 🟢 | Sudah baik | IDOR/tenant scoping banyak diperbaiki, CSRF aktif, cek kepemilikan pada API tulis, MasjidWriter memusatkan aturan tenant. |
+
+### Sudah diperbaiki (Sep 2026)
+
+Hasil review kode Tahap 3–4, seluruhnya diuji ulang di lingkungan lokal:
+
+| Temuan | Perbaikan |
+|--------|-----------|
+| 🔴 **Stored XSS di peta Jelajah** — nama masjid (isian bebas saat pendaftaran) dirangkai sebagai string HTML ke `bindPopup`, dan `json_encode` polos di dalam `<script>` bisa diputus oleh nama berisi `</script>`. | Popup dibangun sebagai simpul DOM (`textContent`), `json_encode` memakai `JSON_HEX_*`. Diuji dengan muatan `</script><img src=x onerror=…>`: tak ada tag mentah yang lolos. |
+| 🟠 **SSRF lewat `push/subscribe`** — endpoint langganan disimpan apa adanya lalu jadi tujuan `curl` saat broadcast; alamat internal (`127.0.0.1`, `169.254.169.254`) bisa didaftarkan siapa saja. | `WebPush::endpointSah()` — wajib `https` + allowlist host layanan push (FCM/Mozilla/Apple/WNS), diperiksa saat menyimpan **dan** saat mengirim. 13 kasus uji lulus, termasuk upaya `fcm.googleapis.com.evil.com`. |
+| 🟠 **`stream_url` & `registration_link` tanpa validasi skema** — `esc($url, 'attr')` tidak menyaring `javascript:`, sehingga pengurus bisa menanam skrip di halaman publik program. | Helper `tautan_aman()` (hanya http/https), dipakai saat menyimpan (ditolak dengan pesan) **dan** saat merender (menjaga baris lama). |
+| 🟠 **Form publik tanpa rate limit** — RSVP, donasi rutin, dan langganan push bisa dibanjiri skrip. | `Throttler` CI4 per alamat IP: 5/menit untuk RSVP & donasi rutin, 10/menit untuk langganan push. Diuji: 8 kiriman → 5 masuk, 3 ditolak. |
+| 🟠 **Kuota RSVP bisa diborong** — `guests` tak dibatasi atas. | Dibatasi 50 orang per kiriman. Diuji: `guests=999999` tersimpan sebagai 50. |
+| 🟢 **Hapus relawan lewat GET** | Dipindah ke POST + `csrf_field()`. |
+| 🟢 **XSS atribut di dashboard relawan** — `json_encode` polos di dalam `onclick='…'`; nama ber-apostrof memutus atribut. | `JSON_HEX_APOS`/`HEX_QUOT`/`HEX_TAG`/`HEX_AMP`. |
+| 🟢 **Escape ganda** pada pesan RSVP & poin relawan | `esc()` dilepas dari controller; view sudah meng-`esc()`. |
+| 🟢 **Penanda peta di koordinat 0,0** — 3 dari 5 masjid berkoordinat kosong tampil di Teluk Guinea, memaksa `fitBounds()` menampilkan separuh dunia. | 0,0 dan koordinat di luar rentang diperlakukan sebagai "belum ada lokasi". |
+| 🟢 **Jelajah memuat seluruh masjid dalam satu halaman** | Dipaginasi 24/halaman; penyaring `q`/`provinsi` dipertahankan saat berpindah halaman. |
+| 🟢 **Penyaring provinsi memuat masjid non-aktif** | Kueri provinsi ikut dibatasi `status = active`. |
+
+**Sisa yang diketahui:** dedup RSVP memakai nomor WA tanpa verifikasi, jadi orang
+yang tahu nomor pendaftar lain masih bisa menimpa nama/jumlah tamunya. Menutup
+ini butuh OTP WhatsApp — ditunda sampai ada kebutuhan nyata; sementara ini
+pembatas laju menahan penyalahgunaan massal.
 
 ---
 
