@@ -13,6 +13,7 @@ $routes->get('laporan', 'Home::laporan');
 $routes->get('bantuan', 'Home::panduan');
 $routes->get('kontak', 'Home::kontak');
 $routes->get('privacy-policy', 'Home::privacy');
+$routes->get('manifest.webmanifest', 'Home::manifest');
 $routes->get('term', 'Home::term');
 $routes->get('/login', 'Home::login');
 $routes->post('/login', 'Auth::login');
@@ -245,6 +246,10 @@ $routes->get('donation/(:segment)/form/(:segment)', 'Donation::create/$1/$2'); /
 $routes->post('donation/process', 'Donation::store');
 $routes->post('donasi-rutin/simpan', 'Home::simpanDonasiRutin');
 $routes->post('program-rsvp/simpan', 'Home::simpanRsvp');
+$routes->post('push/subscribe', 'Home::pushSubscribe');
+$routes->get('push/latest', 'Home::pushLatest');
+$routes->get('dashboard/notifikasi', 'Admin::pushForm');
+$routes->post('dashboard/notifikasi/kirim', 'Admin::sendPush');
 // Nomor invoice wajib tanpa garis miring (lihat Donation::store) agar utuh
 // dalam satu segmen di sini.
 $routes->get('donation/manual/(:segment)', 'Donation::manual/$1'); // Manual Payment Instruction

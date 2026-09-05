@@ -125,7 +125,18 @@ Sumber:
     jumlah log), dan sertifikat penghargaan cetak (A4 landscape). Menu Relawan
     baru menggantikan modul lama berbasis tag `#relawan`. Tabel
     `masjid_volunteers` + `masjid_volunteer_points`.
-11. **PWA + Web Push** untuk pengumuman/adzan/program. _(belum)_
+11. ✅ **PWA + Web Push** — SELESAI Sep 2026:
+    - **PWA**: manifest (disajikan PHP agar adaptif lokal/produksi), service
+      worker (`sw.js` di web root) dengan halaman offline, terdaftar di semua
+      layout → aplikasi installable. Aset terverifikasi tersaji; registrasi SW
+      jalan di browser asli (browser otomasi tak bisa mendaftarkan SW).
+    - **Web Push self-hosted VAPID** (tanpa pihak ketiga, payloadless): library
+      `WebPush` (ES256 JWT + kirim payloadless; crypto diverifikasi valid),
+      command `php spark push:vapid`, langganan (`masjid_push_subscriptions`,
+      idempoten per endpoint) via tombol "Aktifkan Notifikasi" di profil masjid,
+      dan halaman **Notifikasi** dashboard untuk broadcast. SW mengambil isi
+      terbaru (`push/latest`) saat "ketukan" tiba. **Pengiriman nyata perlu
+      kunci VAPID di `.env` + uji di perangkat asli** (tak dapat diuji lokal).
 
 ### Tahap 4 — Jangkauan Luas
 12. **Discovery antar-masjid** (cari & donasi lintas masjid).

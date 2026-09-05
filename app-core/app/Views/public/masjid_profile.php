@@ -556,6 +556,7 @@
                         <span class="material-symbols-outlined">calculate</span>
                         Kalkulator Zakat
                     </a>
+                    <?= view('partials/push_subscribe') ?>
                 </div>
             </div>
             <div class="bg-primary px-8 py-6 rounded-[2rem] text-white shadow-2xl shadow-primary/20">

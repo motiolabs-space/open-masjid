@@ -1297,6 +1297,66 @@ class Admin extends BaseController
         return redirect()->to('dashboard/program/kehadiran/' . $rsvp['program_id']);
     }
 
+    // -------------------------------------------------------------------------
+    // NOTIFIKASI (WEB PUSH)
+    // -------------------------------------------------------------------------
+
+    public function pushForm()
+    {
+        $masjidId = session()->get('masjid_id');
+        return view('dashboard/notifikasi', [
+            'title'       => 'Kirim Notifikasi - Masj.id',
+            'jumlahSub'   => (new \App\Models\MasjidPushSubscriptionModel())->where('masjid_id', $masjidId)->countAllResults(),
+            'vapidSiap'   => (new \App\Libraries\WebPush())->siap(),
+            'terakhir'    => (new \App\Models\MasjidPushMessageModel())->where('masjid_id', $masjidId)->orderBy('id', 'DESC')->findAll(5),
+        ]);
+    }
+
+    public function sendPush()
+    {
+        $masjidId = session()->get('masjid_id');
+        $title = trim((string) $this->request->getPost('title'));
+        $body  = trim((string) $this->request->getPost('body'));
+        $url   = trim((string) $this->request->getPost('url'));
+
+        if ($title === '') {
+            return redirect()->back()->withInput()->with('error', 'Judul notifikasi wajib diisi.');
+        }
+
+        // Pesan disimpan lebih dulu: service worker mengambilnya saat push tiba
+        // (payloadless), jadi ia harus ada sebelum "ketukan" dikirim.
+        (new \App\Models\MasjidPushMessageModel())->insert([
+            'masjid_id' => $masjidId,
+            'title'     => $title,
+            'body'      => $body ?: null,
+            'url'       => $url ?: null,
+        ]);
+
+        $webPush = new \App\Libraries\WebPush();
+        if (! $webPush->siap()) {
+            return redirect()->to('dashboard/notifikasi')
+                ->with('error', 'Pesan tersimpan, tetapi kunci VAPID belum diatur di server (.env) sehingga belum terkirim. Jalankan "php spark push:vapid".');
+        }
+
+        $subModel = new \App\Models\MasjidPushSubscriptionModel();
+        $subs = $subModel->where('masjid_id', $masjidId)->findAll();
+        $kirim = 0;
+        $mati  = 0;
+        foreach ($subs as $s) {
+            $code = $webPush->kirim($s['endpoint']);
+            if ($code >= 200 && $code < 300) {
+                $kirim++;
+            } elseif (in_array($code, [404, 410], true)) {
+                // Langganan mati (browser mencabut) — bersihkan.
+                $subModel->delete($s['id']);
+                $mati++;
+            }
+        }
+
+        return redirect()->to('dashboard/notifikasi')
+            ->with('success', "Notifikasi terkirim ke {$kirim} perangkat." . ($mati > 0 ? " {$mati} langganan mati dibersihkan." : ''));
+    }
+
     public function saveProgramCategory()
     {
         $masjidId = session()->get('masjid_id');

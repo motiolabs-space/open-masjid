@@ -57,6 +57,10 @@
                 <span class="material-symbols-outlined text-xl">diversity_3</span>
                 <span class="text-sm font-medium">Relawan</span>
             </a>
+            <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg <?= (str_contains($uri, 'dashboard/notifikasi')) ? $activeClass : $inactiveClass ?>" href="<?= base_url('dashboard/notifikasi') ?>">
+                <span class="material-symbols-outlined text-xl">notifications_active</span>
+                <span class="text-sm font-medium">Notifikasi</span>
+            </a>
 <?php else: ?>
 <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg <?= ($uri == 'dashboard/cari-masjid') ? $activeClass : $inactiveClass ?>" href="<?= base_url('dashboard/cari-masjid') ?>">
 <span class="material-symbols-outlined text-xl">search</span>

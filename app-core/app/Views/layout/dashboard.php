@@ -4,6 +4,7 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title><?= $title ?? env('seo.title') ?></title>
 <link rel="icon" type="image/png" href="<?= asset_url('ico_masjid.png') ?>">
+<?= view('partials/pwa') ?>
 <meta name="description" content="<?= env('seo.description') ?>">
 <meta name="author" content="<?= env('seo.author') ?>">
 <meta name="robots" content="noindex, nofollow">

@@ -431,6 +431,86 @@ class Home extends BaseController
      * sistem mengirim pengingat berkala. Bukan auto-charge — pembayaran tetap
      * manual/QRIS lewat tautan yang dikirim saat pengingat.
      */
+    /**
+     * Manifest PWA disajikan lewat PHP (bukan berkas statis) agar start_url,
+     * scope, dan ikon mengikuti base_url — di lokal aplikasi di /masjid/, di
+     * produksi di root. Berkas statis tak bisa menyesuaikan keduanya.
+     */
+    public function manifest()
+    {
+        $data = [
+            'name'             => 'Masj.id — Kelola Masjid',
+            'short_name'       => 'Masj.id',
+            'description'      => 'Kelola masjid dengan transparan & mudah: keuangan, program, donasi, jadwal sholat.',
+            'start_url'        => base_url('/'),
+            'scope'            => base_url('/'),
+            'display'          => 'standalone',
+            'orientation'      => 'portrait',
+            'background_color' => '#f4f7f5',
+            'theme_color'      => '#065f46',
+            'lang'             => 'id',
+            'icons'            => [
+                ['src' => asset_url('logo_masjid_200.png'), 'sizes' => '192x192', 'type' => 'image/png', 'purpose' => 'any'],
+                ['src' => asset_url('logo_masjid_200.png'), 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'any'],
+                ['src' => asset_url('logo_masjid_200.png'), 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'maskable'],
+            ],
+        ];
+        return $this->response
+            ->setContentType('application/manifest+json')
+            ->setBody(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+    }
+
+    /**
+     * Simpan langganan Web Push (dikirim JS setelah izin diberikan). Idempoten
+     * berdasarkan hash endpoint: langganan yang sama diperbarui, bukan dobel.
+     */
+    public function pushSubscribe()
+    {
+        $body = json_decode($this->request->getBody(), true) ?: [];
+        $masjidId = (int) ($body['masjid_id'] ?? 0);
+        $sub      = $body['subscription'] ?? [];
+        $endpoint = $sub['endpoint'] ?? '';
+        $p256dh   = $sub['keys']['p256dh'] ?? '';
+        $auth     = $sub['keys']['auth'] ?? '';
+
+        if (! $masjidId || $endpoint === '' || $p256dh === '' || $auth === '') {
+            return $this->response->setStatusCode(400)->setJSON(['ok' => false, 'error' => 'Data langganan tidak lengkap.']);
+        }
+        if (! (new \App\Models\MasjidModel())->find($masjidId)) {
+            return $this->response->setStatusCode(404)->setJSON(['ok' => false, 'error' => 'Masjid tidak ditemukan.']);
+        }
+
+        $model = new \App\Models\MasjidPushSubscriptionModel();
+        $hash  = hash('sha256', $endpoint);
+        $ada   = $model->where('endpoint_hash', $hash)->first();
+        $data  = ['masjid_id' => $masjidId, 'endpoint' => $endpoint, 'p256dh' => $p256dh, 'auth' => $auth, 'endpoint_hash' => $hash];
+
+        $ada ? $model->update($ada['id'], $data) : $model->insert($data);
+
+        return $this->response->setJSON(['ok' => true]);
+    }
+
+    /**
+     * Isi notifikasi terbaru sebuah masjid — diambil service worker saat push
+     * payloadless tiba. Tanpa data pribadi; hanya judul/isi/url publik.
+     */
+    public function pushLatest()
+    {
+        $masjidId = (int) $this->request->getGet('masjid');
+        $msg = (new \App\Models\MasjidPushMessageModel())
+            ->where('masjid_id', $masjidId)
+            ->orderBy('created_at', 'DESC')->orderBy('id', 'DESC')->first();
+
+        if (! $msg) {
+            return $this->response->setJSON(['title' => 'Masj.id', 'body' => 'Ada pembaruan dari masjid Anda.', 'url' => base_url('/')]);
+        }
+        return $this->response->setJSON([
+            'title' => $msg['title'],
+            'body'  => $msg['body'] ?? '',
+            'url'   => $msg['url'] ?: base_url('/'),
+        ]);
+    }
+
     public function donasiRutin($username): string
     {
         $masjid = (new \App\Models\MasjidModel())->where('username', $username)->first();
