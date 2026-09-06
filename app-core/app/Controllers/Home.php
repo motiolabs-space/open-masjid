@@ -252,7 +252,14 @@ class Home extends BaseController
         $newsModel = new \App\Models\MasjidNewsModel();
         $news = $newsModel->select('masjid_news.*, masjid_news_categories.name as category_name')
             ->join('masjid_news_categories', 'masjid_news_categories.id = masjid_news.category_id', 'left')
-            ->where(['masjid_news.slug' => $slug, 'masjid_news.masjid_id' => $masjid['id']])
+            // Sama seperti program: daftar sudah menyaring 'published', tapi
+            // halaman detailnya dulu tidak — berita draf terbaca publik lewat
+            // slug, dan pembacaannya bahkan ikut menaikkan penghitung views.
+            ->where([
+                'masjid_news.slug'      => $slug,
+                'masjid_news.masjid_id' => $masjid['id'],
+                'masjid_news.status'    => 'published',
+            ])
             ->first();
 
         if (!$news) {
@@ -382,7 +389,14 @@ class Home extends BaseController
         $programModel = new \App\Models\MasjidProgramModel();
         $program = $programModel->select('masjid_programs.*, masjid_program_categories.name as category_name')
             ->join('masjid_program_categories', 'masjid_program_categories.id = masjid_programs.category_id', 'left')
-            ->where(['masjid_programs.masjid_id' => $masjid['id'], 'masjid_programs.slug' => $slug])
+            // status disaring di sini juga, bukan hanya di daftar: tanpa ini
+            // program yang masih draf terbaca publik oleh siapa pun yang tahu
+            // slug-nya, padahal pengurus mengira belum terbit.
+            ->where([
+                'masjid_programs.masjid_id' => $masjid['id'],
+                'masjid_programs.slug'      => $slug,
+                'masjid_programs.status'    => 'published',
+            ])
             ->first();
 
         if (!$program) {

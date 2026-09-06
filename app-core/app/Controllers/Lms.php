@@ -4,6 +4,19 @@ namespace App\Controllers;
 
 class Lms extends BaseController
 {
+    /**
+     * Bolehkah pengguna ini melihat modul yang belum terbit?
+     *
+     * Daftar modul memang menyaring `status = published`, tetapi halaman modul
+     * dan materi dulu tidak — sehingga draf yang belum siap tetap terbuka bagi
+     * siapa pun yang menebak slug atau id-nya. Superadmin tetap boleh, supaya
+     * ia bisa meninjau sebelum menerbitkan.
+     */
+    private function bolehLihatDraf(): bool
+    {
+        return session()->get('role') === 'superadmin';
+    }
+
     public function index()
     {
         $moduleModel = new \App\Models\LmsModuleModel();
@@ -33,6 +46,7 @@ class Lms extends BaseController
                 $mod['first_material_id'] = $materials[0]['id'];
             }
         }
+        unset($mod); // lepas referensi; tanpa ini elemen terakhir rawan tertimpa
 
         $data = [
             'title' => 'E-Learning (LMS) - Masj.id',
@@ -51,7 +65,9 @@ class Lms extends BaseController
         $userId = session()->get('user_id');
         
         $module = $moduleModel->where('slug', $slug)->first();
-        if (!$module) return redirect()->to('dashboard/lms')->with('error', 'Modul tidak ditemukan.');
+        if (!$module || ($module['status'] !== 'published' && ! $this->bolehLihatDraf())) {
+            return redirect()->to('dashboard/lms')->with('error', 'Modul tidak ditemukan.');
+        }
 
         $masjidModel = new \App\Models\MasjidModel();
         if (is_numeric($module['lembaga_pemateri'])) {
@@ -99,7 +115,12 @@ class Lms extends BaseController
         $material = $materialModel->find($id);
         if (!$material) return redirect()->to('dashboard/lms')->with('error', 'Materi tidak ditemukan.');
 
+        // Materi ikut status modul induknya — tanpa ini draf bocor lewat id
+        // materi meski halaman modulnya sudah tertutup.
         $module = $moduleModel->find($material['module_id']);
+        if (!$module || ($module['status'] !== 'published' && ! $this->bolehLihatDraf())) {
+            return redirect()->to('dashboard/lms')->with('error', 'Materi tidak ditemukan.');
+        }
         
         $masjidModel = new \App\Models\MasjidModel();
         if (is_numeric($module['lembaga_pemateri'])) {
@@ -132,18 +153,24 @@ class Lms extends BaseController
         $material = $materialModel->find($id);
         if (!$material) return redirect()->back()->with('error', 'Materi tidak ditemukan.');
 
+        $moduleModel = new \App\Models\LmsModuleModel();
+        $module = $moduleModel->find($material['module_id']);
+        if (!$module || ($module['status'] !== 'published' && ! $this->bolehLihatDraf())) {
+            return redirect()->to('dashboard/lms')->with('error', 'Materi tidak ditemukan.');
+        }
+
         $exists = $progressModel->where(['user_id' => $userId, 'material_id' => $id])->first();
         if (!$exists) {
             $progressModel->insert([
-                'user_id' => $userId,
-                'masjid_id' => $masjidId,
-                'material_id' => $id,
-                'completed_at' => date('Y-m-d H:i:s')
+                'user_id'   => $userId,
+                // LMS milik platform, progres melekat pada PENGGUNA. Jamaah yang
+                // belum memilih masjid tak punya masjid_id, dan memaksakannya
+                // dulu membuat tombol ini gagal 500 bagi mereka.
+                'masjid_id' => $masjidId ?: null,
+                'material_id'  => $id,
+                'completed_at' => date('Y-m-d H:i:s'),
             ]);
         }
-
-        $moduleModel = new \App\Models\LmsModuleModel();
-        $module = $moduleModel->find($material['module_id']);
 
         return redirect()->to("dashboard/lms/module/{$module['slug']}")->with('success', 'Materi ditandai selesai.');
     }
