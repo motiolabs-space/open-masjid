@@ -16,6 +16,7 @@ dari [analisis-produk-roadmap.md](analisis-produk-roadmap.md).
 
 | Dokumen | Isi |
 |---------|-----|
+| [keuangan.md](keuangan.md) | Kategori & transaksi, **dua jalur impor CSV**, kategorisasi AI, generator narasi laporan, Virtual Auditor |
 | [transparansi-donasi.md](transparansi-donasi.md) | Kwitansi otomatis, Dinding Transparansi, laporan bulanan, QRIS, donasi rutin |
 | [zakat.md](zakat.md) | Kalkulator zakat, `zakat_type` pada donasi, 8 asnaf pada mustahik, laporan zakat |
 | [program-kegiatan.md](program-kegiatan.md) | Kampanye donasi, RSVP + absensi, laporan dampak, live streaming |
