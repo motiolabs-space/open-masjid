@@ -23,6 +23,12 @@ class Payment extends BaseController
      */
     public function simulation($invoice)
     {
+        // Alat bantu pengembangan; tak pernah ditautkan dari alur donasi mana
+        // pun. Ditutup di produksi bersama jalur callback-nya.
+        if (ENVIRONMENT === 'production') {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+        }
+
         // Decode invoice if needed, or lookup in DB
         $donation = $this->donationModel->where('invoice_number', $invoice)->first();
 
@@ -54,7 +60,22 @@ class Payment extends BaseController
             return $this->handleMultipayCallback($signature);
         }
 
-        // 2. Fallback to Dummy Simulation (Form POST)
+        // 2. Jalur simulasi (POST formulir biasa) — HANYA di luar produksi.
+        //
+        // Rute ini dikecualikan dari CSRF karena memang harus bisa dipanggil
+        // server payment gateway. Selama jalur di bawah menerima POST polos,
+        // siapa pun yang tahu nomor invoice bisa menandai donasi LUNAS tanpa
+        // membayar: donasi masuk buku kas, muncul di dinding transparansi, dan
+        // kwitansi sah ikut terbit. Pada produk yang menjual transparansi, itu
+        // merusak justru bagian yang dijualnya.
+        //
+        // Tak ada yang hilang dengan menutupnya: `payment_mode` hanya mengenal
+        // 'manual' dan 'multipay' — tak ada mode simulasi — dan tidak satu pun
+        // halaman menautkan ke sini. Ini sisa alat bantu pengembangan.
+        if (ENVIRONMENT === 'production') {
+            return $this->response->setStatusCode(401)->setBody('Signature required');
+        }
+
         $invoice = $this->request->getPost('invoice_number');
         $status  = $this->request->getPost('status'); // success or failed
 

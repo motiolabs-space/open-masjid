@@ -86,3 +86,20 @@ karena ada masalah.
 Aturannya ditafsirkan di satu tempat saja, helper `masjid_aktif()`. Tombol yang
 disembunyikan di tampilan hanyalah kerapian; **penjaganya ada di controller**,
 sebab `masjid_id` datang dari formulir dan bisa dikirim langsung.
+
+
+## Callback pembayaran
+
+`POST payment/callback` **dikecualikan dari CSRF** — memang harus, sebab yang
+memanggilnya adalah server payment gateway, bukan browser jamaah. Konsekuensinya
+setiap jalur di dalamnya wajib punya pembuktian sendiri:
+
+- **Multipay**: header `X-Api-Signature` + `X-Api-Timestamp` diverifikasi HMAC
+  terhadap `multipay_secret_key` milik masjid yang bersangkutan. Gagal → 401.
+- **Simulasi** (POST formulir tanpa tanda tangan): **hanya hidup di luar
+  produksi**. Ini alat bantu pengembangan; `payment_mode` hanya mengenal
+  `manual` dan `multipay`, dan tak ada halaman yang menautkannya.
+
+Jangan pernah menghidupkan kembali jalur tanpa tanda tangan di produksi: tanpa
+CSRF dan tanpa login, nomor invoice saja sudah cukup untuk menandai donasi lunas
+— lengkap dengan masuk buku kas dan terbitnya kwitansi sah.

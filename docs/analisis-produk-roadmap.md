@@ -217,6 +217,25 @@ pengurus admin maupun superadmin.
 
 Setelah perbaikan: sapuan diulang, **tidak ada 5xx** dan tak ada baris ERROR.
 
+### Sapuan ketiga — pembayaran, superadmin, lintas-tenant (Sep 2026)
+
+| Temuan | Perbaikan |
+|--------|-----------|
+| 🔴 **Donasi bisa ditandai LUNAS tanpa membayar.** `Payment::callback` punya jalur mundur "simulasi": bila header `X-Api-Signature` tak ada, ia menerima POST formulir biasa berisi `invoice_number` + `status=success`. Rute itu **dikecualikan dari CSRF** (memang harus, agar bisa dipanggil payment gateway), jadi siapa pun tanpa login yang tahu nomor invoice bisa melunasi donasi orang lain. Dibuktikan: donasi Rp1.000.000 berubah `pending` → `success`, **masuk buku kas**, muncul di dinding transparansi, dan **kwitansi sah ikut terbit**. | Jalur simulasi (beserta halaman `payment/simulation`) ditutup di `ENVIRONMENT === 'production'`. Tak ada yang hilang: `payment_mode` hanya mengenal `manual` dan `multipay` — tak ada mode simulasi — dan tidak satu pun halaman menautkan ke sana. Diuji pada kedua lingkungan: produksi 401/404 dan donasi tetap `pending`; development tetap berfungsi sebagai alat bantu. |
+
+Yang diperiksa dan **tidak** bermasalah:
+
+- 12 rute GET superadmin — sehat, tanpa 5xx.
+- Area superadmin ditolak (404) bagi pengurus biasa.
+- **Lintas-tenant baca**: pengurus masjid A membuka program, laporan dampak,
+  daftar kehadiran, berita, warga, aset, dan sertifikat relawan milik masjid B —
+  ketujuhnya tertutup, tak ada data yang bocor.
+- **Lintas-tenant tulis**: enam percobaan mengubah dan empat percobaan menghapus
+  data masjid B — seluruhnya ditolak, tak satu baris pun berubah.
+
+Ini menguatkan baris "🟢 Sudah baik" di atas dengan bukti, bukan sekadar
+pembacaan kode.
+
 > **Perlu diperiksa di produksi.** Dump produksi (`dbtq71g8ngq2pa.sql`) juga tak
 > memuat ketiga kolom itu. Bila produksi memang belum punya, pendaftaran di sana
 > sedang mati dan `php spark migrate` akan memperbaikinya. Bila ternyata sudah
