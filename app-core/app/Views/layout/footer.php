@@ -24,9 +24,10 @@
     <div class="max-w-[1200px] mx-auto mt-16 pt-8 border-t border-[#dbe6e1] dark:border-[#1e3a2f] flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-[#3d5a4d]">
         <p>© <?= date('Y') ?> Masj.id - Dikelola secara amanah untuk kemajuan ummat.</p>
         <div class="flex gap-6">
-            <a class="hover:text-primary transition-colors" href="#">Instagram</a>
-            <a class="hover:text-primary transition-colors" href="#">Twitter</a>
-            <a class="hover:text-primary transition-colors" href="#">LinkedIn</a>
+            <?php // rel="noopener" wajib pada target="_blank": tanpa itu halaman
+                  // tujuan bisa menjangkau window pembukanya lewat window.opener. ?>
+            <a class="hover:text-primary transition-colors" href="https://instagram.com/webmasjid" target="_blank" rel="noopener noreferrer">Instagram</a>
+            <a class="hover:text-primary transition-colors" href="https://www.linkedin.com/company/portal-masjid/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
         </div>
     </div>
 </footer>
