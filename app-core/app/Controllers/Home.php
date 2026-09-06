@@ -709,6 +709,11 @@ class Home extends BaseController
         if (! $masjid) {
             return redirect()->to('/')->with('error', 'Masjid tidak ditemukan.');
         }
+        // Komitmen donasi rutin sama saja dengan menjadwalkan penerimaan dana.
+        if (! masjid_aktif($masjid)) {
+            return redirect()->to(base_url($masjid['username']))
+                ->with('error', 'Masjid ini sedang tidak menerima donasi untuk sementara. Halaman dan laporannya tetap dapat Anda lihat.');
+        }
 
         helper('custom'); // parse_rupiah
         $frekuensi = in_array($this->request->getPost('frequency'), ['mingguan', 'bulanan'], true)

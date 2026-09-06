@@ -276,3 +276,21 @@ if (!function_exists('tautan_aman')) {
         return in_array($skema, ['http', 'https'], true) ? $url : '';
     }
 }
+
+if (!function_exists('masjid_aktif')) {
+    /**
+     * Apakah masjid ini masih aktif (bukan disuspensi)?
+     *
+     * `masjid.status` bernilai 'active' atau 'suspended'. Suspensi TIDAK
+     * menyembunyikan halaman publik masjid — profil, program, berita, dan
+     * laporannya tetap terbaca supaya tautan yang sudah tersebar tidak mati dan
+     * jamaah tetap bisa melihat pertanggungjawaban yang sudah ada. Yang ditutup
+     * hanya PENERIMAAN DANA: menerima donasi atas nama masjid yang sedang
+     * disuspensi adalah hal yang paling sulit dibatalkan bila ternyata memang
+     * ada masalah.
+     */
+    function masjid_aktif(?array $masjid): bool
+    {
+        return ($masjid['status'] ?? 'active') === 'active';
+    }
+}

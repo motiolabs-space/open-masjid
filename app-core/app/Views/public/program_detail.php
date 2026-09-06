@@ -249,10 +249,12 @@
                         <div class="border-t border-dashed border-gray-200 pt-6 mt-2">
                             <h4 class="font-bold mb-3 text-center">Ingin Berkontribusi?</h4>
                             <p class="text-xs text-gray-500 text-center mb-4 px-4">Salurkan infaq terbaik Anda untuk mendukung program kegiatan ini.</p>
-                            <a href="<?= base_url('donation/' . $masjid['username'] . '/form/' . $program['slug']) ?>" class="w-full h-14 bg-white border-2 border-primary text-primary rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-primary hover:text-white transition-all">
+                            <?php if (masjid_aktif($masjid)): ?><a href="<?= base_url('donation/' . $masjid['username'] . '/form/' . $program['slug']) ?>" class="w-full h-14 bg-white border-2 border-primary text-primary rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-primary hover:text-white transition-all">
                                 <span class="material-symbols-outlined text-sm">volunteer_activism</span>
                                 Donasi Sekarang
-                            </a>
+                            </a><?php else: ?>
+                            <div class="w-full h-14 rounded-2xl border border-dashed border-[#dbe6e3] dark:border-white/20 flex items-center justify-center text-sm font-bold text-[#608a7e]">Donasi sedang ditutup</div>
+                        <?php endif; ?>
                         </div>
                     </div>
                 </div>

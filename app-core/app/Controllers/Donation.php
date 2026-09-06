@@ -35,6 +35,15 @@ class Donation extends BaseController
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
         }
 
+        // Masjid yang disuspensi tidak menerima dana. Halamannya sengaja TIDAK
+        // disembunyikan (lihat masjid_aktif()) — pengunjung dikembalikan ke
+        // profil masjid dengan penjelasan, bukan ke halaman 404 yang
+        // membingungkan.
+        if (! masjid_aktif($masjid)) {
+            return redirect()->to(base_url($masjid['username']))
+                ->with('error', 'Masjid ini sedang tidak menerima donasi untuk sementara. Halaman dan laporannya tetap dapat Anda lihat.');
+        }
+
         $program = null;
         if ($programSlug) {
             $program = $this->programModel->where([
@@ -70,6 +79,19 @@ class Donation extends BaseController
     {
         $masjidId = $this->request->getPost('masjid_id');
         $programId = $this->request->getPost('program_id');
+
+        // Penjaga sesungguhnya ada di sini, bukan di tampilan: masjid_id datang
+        // dari formulir, jadi menyembunyikan tombol saja tidak menutup apa pun.
+        // Masjid juga diperiksa keberadaannya — sebelum ini nilai POST dipakai
+        // apa adanya tanpa pernah dicocokkan ke basis data.
+        $masjidDonasi = (new \App\Models\MasjidModel())->find($masjidId);
+        if (! $masjidDonasi) {
+            return redirect()->to('/')->with('error', 'Masjid tidak ditemukan.');
+        }
+        if (! masjid_aktif($masjidDonasi)) {
+            return redirect()->to(base_url($masjidDonasi['username']))
+                ->with('error', 'Masjid ini sedang tidak menerima donasi untuk sementara. Halaman dan laporannya tetap dapat Anda lihat.');
+        }
         
         // Nomor invoice: INV-YYYYMMDD-RANDOM
         //

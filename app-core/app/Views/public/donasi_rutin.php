@@ -32,6 +32,16 @@
             <p>Ini adalah <strong>komitmen &amp; pengingat</strong>, bukan penarikan dana otomatis. Setiap periode kami mengingatkan lewat WhatsApp beserta tautan pembayaran — Anda tetap memegang kendali penuh.</p>
         </div>
 
+        <?php if (! masjid_aktif($masjid)): ?>
+            <?php // Komitmen donasi rutin = menjadwalkan penerimaan dana, jadi ikut
+                  // ditutup saat masjid disuspensi. Halamannya tetap terbaca agar
+                  // donatur yang sudah pernah berjanji mengerti apa yang terjadi. ?>
+            <div class="bg-white dark:bg-white/5 rounded-3xl border border-dashed border-[#dbe6e3] dark:border-white/10 p-8 text-center">
+                <span class="material-symbols-outlined text-4xl text-[#608a7e]/50 mb-3 block">pause_circle</span>
+                <p class="font-bold text-[#111816] dark:text-white">Pendaftaran donasi rutin sedang ditutup</p>
+                <p class="text-sm text-[#608a7e] mt-2">Masjid ini sementara tidak menerima donasi. Silakan kembali lagi nanti.</p>
+            </div>
+        <?php else: ?>
         <form action="<?= base_url('donasi-rutin/simpan') ?>" method="post" class="bg-white dark:bg-white/5 rounded-3xl border border-[#dbe6e3] dark:border-white/10 p-6 md:p-8 space-y-5">
             <?= csrf_field() ?>
             <input type="hidden" name="masjid_id" value="<?= $masjid['id'] ?>">
@@ -95,6 +105,7 @@
                 <span class="material-symbols-outlined">favorite</span> Mulai Donasi Rutin
             </button>
         </form>
+        <?php endif; ?>
     </div>
 </section>
 

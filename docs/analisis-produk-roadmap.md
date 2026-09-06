@@ -202,12 +202,29 @@ Satu pola yang berulang: halaman **daftar** menyaring status, halaman
 Sapuan **80 rute GET statis** sebagai pengurus admin: tidak ada 5xx, tak ada
 baris ERROR di log.
 
-**Belum diperbaiki — perlu keputusan produk:** status masjid `suspended` hampir
-tak berefek. `/jelajah` benar menyaring `active`, tetapi halaman publik masjid
-(`Home::masjid`) dan **formulir donasi** (`Donation::create`) tak memeriksa
-status sama sekali — masjid yang disuspensi masih bisa menerima donasi. Mana
-yang benar (sembunyikan seluruh halaman, atau tampilkan tanpa tombol donasi)
-adalah keputusan produk, bukan sekadar perbaikan kode.
+**Suspensi masjid — selesai (Sep 2026).** Sebelumnya status `suspended` hampir
+tak berefek: `/jelajah` benar menyaring `active`, tetapi halaman publik masjid
+dan formulir donasi tak memeriksanya sama sekali, sehingga masjid yang
+disuspensi masih bisa menerima dana.
+
+Keputusan yang diambil: **halaman tetap tampil, penerimaan dana yang ditutup.**
+Tautan yang sudah tersebar tidak mati dan laporan yang sudah ada tetap bisa
+dipertanggungjawabkan; yang berhenti hanya hal yang paling sulit dibatalkan bila
+ternyata memang ada masalah, yaitu uang masuk.
+
+- Helper `masjid_aktif()` jadi satu-satunya tempat aturan ini ditafsirkan.
+- Spanduk penjelasan di `layout/masjid_public` — muncul sekaligus di profil,
+  program, berita, laporan, zakat, dan donasi rutin.
+- Tombol donasi disembunyikan di profil & detail program; formulir donasi rutin
+  diganti keterangan.
+- **Penjaga sesungguhnya di controller**, bukan tampilan: `Donation::create`,
+  `Donation::store`, dan `Home::simpanDonasiRutin`. `store()` sekalian mulai
+  memvalidasi keberadaan masjid — sebelumnya `masjid_id` dari formulir dipakai
+  apa adanya tanpa pernah dicocokkan ke basis data.
+
+Diverifikasi dengan token CSRF sah: selagi aktif POST donasi tersimpan (kontrol),
+setelah disuspensi POST yang sama persis ditolak dan tak ada baris tersimpan;
+halaman tetap 200 dengan spanduk; setelah diaktifkan lagi semuanya normal.
 
 ### Pembatas laju — sudah menyeluruh (Sep 2026)
 

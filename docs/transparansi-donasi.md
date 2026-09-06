@@ -65,3 +65,24 @@ Formulir ini publik tanpa login, jadi dibatasi **5 kiriman/menit per IP**.
 Tabel `masjid_recurring_pledges`: `masjid_id`, `program_id`, `donor_name`,
 `donor_phone`, `donor_email`, `amount`, `frequency`, `next_reminder_date`,
 `active`, `last_reminded_at`.
+
+---
+
+## Masjid yang disuspensi
+
+`masjid.status` bernilai `active` atau `suspended`. Saat disuspensi:
+
+| Tetap jalan | Ditutup |
+|---|---|
+| Profil, program, berita, laporan, kalkulator zakat — semuanya tetap 200 | Formulir donasi (`Donation::create`) |
+| Spanduk penjelasan muncul di seluruh halaman publik masjid itu | Pemrosesan donasi (`Donation::store`) |
+| Kwitansi donasi lama tetap bisa dibuka | Pendaftaran donasi rutin (`Home::simpanDonasiRutin`) |
+
+Alasannya: tautan yang sudah tersebar tidak boleh mati dan laporan yang sudah
+terbit tetap harus bisa dipertanggungjawabkan. Yang dihentikan hanya penerimaan
+dana — satu-satunya hal yang sulit dibatalkan bila suspensinya ternyata memang
+karena ada masalah.
+
+Aturannya ditafsirkan di satu tempat saja, helper `masjid_aktif()`. Tombol yang
+disembunyikan di tampilan hanyalah kerapian; **penjaganya ada di controller**,
+sebab `masjid_id` datang dari formulir dan bisa dikirim langsung.

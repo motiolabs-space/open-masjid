@@ -51,7 +51,9 @@
                 </div>
             </div>
             <div class="flex flex-col gap-3">
-                <?php if ($masjid['action_button_active'] ?? 1): ?>
+                <?php // Tombol aksi utama biasanya mengarah ke donasi; disembunyikan
+                      // saat masjid disuspensi. Penjaga sebenarnya ada di controller. ?>
+                <?php if (($masjid['action_button_active'] ?? 1) && masjid_aktif($masjid)): ?>
                 <a href="<?= esc($masjid['action_button_url'] ?? '#donasi') ?>" class="btn-primary-lg flex items-center justify-center gap-2">
                     <span class="material-symbols-outlined">volunteer_activism</span>
                     <?= esc($masjid['action_button_text'] ?? 'Donasi Sekarang') ?>

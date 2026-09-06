@@ -61,6 +61,25 @@
     
     <?= $this->include('layout/navbar_masjid') ?>
 
+    <?php if (isset($masjid) && ! masjid_aktif($masjid)): ?>
+        <?php
+            // Halaman masjid yang disuspensi sengaja tetap terbaca — tautan yang
+            // sudah tersebar tidak mati dan laporan yang sudah ada tetap bisa
+            // dipertanggungjawabkan. Yang berhenti hanya penerimaan dana, dan itu
+            // dikatakan terus terang di sini supaya jamaah tak mengira sedang
+            // berdonasi ke masjid yang aktif.
+        ?>
+        <div class="bg-amber-50 dark:bg-amber-500/10 border-b border-amber-200 dark:border-amber-500/30">
+            <div class="max-w-6xl mx-auto px-6 py-3 flex items-start gap-3">
+                <span class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-xl shrink-0">info</span>
+                <p class="text-sm text-amber-900 dark:text-amber-200 leading-relaxed">
+                    <strong class="font-bold">Masjid ini sedang tidak menerima donasi.</strong>
+                    Profil, program, berita, dan laporannya tetap dapat Anda lihat seperti biasa.
+                </p>
+            </div>
+        </div>
+    <?php endif; ?>
+
     <!-- Flash Messages -->
     <?php if (session()->getFlashdata('success')): ?>
         <div id="flash-success" class="fixed top-24 right-6 z-50 bg-emerald-500 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-right duration-500">
