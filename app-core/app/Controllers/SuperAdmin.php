@@ -830,10 +830,20 @@ class SuperAdmin extends BaseController
     public function createLmsMaterial($moduleId)
     {
         $moduleModel = new \App\Models\LmsModuleModel();
+
+        // Hasil find() dulu diteruskan langsung ke view, sehingga id modul yang
+        // tak ada membuat halaman mati dengan "Trying to access array offset on
+        // value of type null" saat view membaca $module['title']. Dijaga sama
+        // seperti lmsMaterials() di atas.
+        $module = $moduleModel->find($moduleId);
+        if (! $module) {
+            return redirect()->to('superadmin/lms')->with('error', 'Modul tidak ditemukan.');
+        }
+
         return view('superadmin/lms/material_form', [
-            'title' => 'Tambah Materi Baru',
-            'module' => $moduleModel->find($moduleId),
-            'material' => null
+            'title'    => 'Tambah Materi Baru',
+            'module'   => $module,
+            'material' => null,
         ]);
     }
 

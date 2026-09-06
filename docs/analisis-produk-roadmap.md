@@ -202,6 +202,27 @@ Satu pola yang berulang: halaman **daftar** menyaring status, halaman
 Sapuan **80 rute GET statis** sebagai pengurus admin: tidak ada 5xx, tak ada
 baris ERROR di log.
 
+### Sapuan kedua — rute berparameter & superadmin (Sep 2026)
+
+Sapuan pertama hanya menyentuh rute tanpa parameter. Putaran kedua menyapu rute
+berparameter dengan **id tak ada**, **id nol**, dan **id nyata** (yang terakhir
+penting: hanya itu yang mengeksekusi jalur render sesungguhnya), sebagai
+pengurus admin maupun superadmin.
+
+| Temuan | Perbaikan |
+|--------|-----------|
+| 🔴 **Pendaftaran gagal total** — `users` tak punya kolom `register_ip`, `register_country`, `telegram_chat_id`. Ketiganya ada di `database.sql` dan di `UserModel::allowedFields`, tapi **tak pernah punya migrasi**, sehingga basis data yang dibangun dari dump lain tidak memilikinya. `Auth::registerMasjid`/`registerJamaah` menulis kolom itu → `Unknown column 'register_ip' in 'field list'` → **500**. Tak ada masjid maupun jamaah baru yang bisa mendaftar. | Migrasi `AddMissingUserColumns`, ditulis idempoten (`fieldExists`) agar aman pada basis data yang kolomnya sudah ada. Diuji: pendaftaran jamaah **dan** masjid kini 200, pengurus tertaut, halaman publik masjid barunya 200. |
+| 🟠 **`superadmin/users/analytics/{id}` mati** — view membaca `telegram_chat_id` yang tak ada di skema. | Ikut sembuh oleh migrasi yang sama. |
+| 🟠 **`superadmin/lms/{id}/materials/create` mati** — hasil `find()` diteruskan langsung ke view, sehingga id modul yang tak ada memicu "Trying to access array offset on value of type null". Method sebelahnya (`lmsMaterials`) sudah menjaga; yang ini terlewat. | Penjaga null ditambahkan, sama seperti method sebelahnya. |
+
+Setelah perbaikan: sapuan diulang, **tidak ada 5xx** dan tak ada baris ERROR.
+
+> **Perlu diperiksa di produksi.** Dump produksi (`dbtq71g8ngq2pa.sql`) juga tak
+> memuat ketiga kolom itu. Bila produksi memang belum punya, pendaftaran di sana
+> sedang mati dan `php spark migrate` akan memperbaikinya. Bila ternyata sudah
+> punya (kolomnya ditambahkan manual di luar migrasi), migrasi ini aman
+> dijalankan dan tidak mengubah apa pun.
+
 **Suspensi masjid — selesai (Sep 2026).** Sebelumnya status `suspended` hampir
 tak berefek: `/jelajah` benar menyaring `active`, tetapi halaman publik masjid
 dan formulir donasi tak memeriksanya sama sekali, sehingga masjid yang
