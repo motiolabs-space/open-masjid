@@ -15,22 +15,25 @@ keuangan → naik ke program yang berdampak bagi masyarakat sekitar dan luas.**
 
 | Domain | Modul |
 |--------|-------|
-| **Autentikasi** | Daftar masjid, daftar jamaah, login, Google OAuth, lupa/reset sandi, pilih masjid (multi-tenant) |
-| **Keuangan** | Kategori, transaksi masuk/keluar, saldo, impor CSV mutasi bank + pemetaan, **FinanceAI** (input bahasa natural), **Virtual Auditor** (audit AI) |
+| **Autentikasi** | Daftar masjid, daftar jamaah, login, Google OAuth, lupa/reset sandi, pilih masjid (multi-tenant), pembatas laju |
+| **Keuangan** | Kategori, transaksi masuk/keluar, saldo, **dua jalur impor CSV** (mutasi bank per-bank → program; CSV umum → kategori), kategorisasi AI, **Virtual Auditor** (audit AI). [Catatan modul](keuangan.md) |
 | **Transparansi & Laporan** | Halaman laporan transparansi publik, generator laporan keuangan/program/inventaris, **AI Report Generator** |
-| **Program Kebaikan** | Kategori, CRUD, halaman publik + detail program |
-| **Donasi** | Alur donasi, Payment (Midtrans), pembayaran manual, setelan pembayaran, simulasi |
+| **Program Kebaikan** | Kategori, CRUD, halaman publik + detail, kampanye donasi bertarget, RSVP + absensi, laporan dampak, live streaming. [Catatan modul](program-kegiatan.md) |
+| **Donasi** | Alur donasi, Payment (Midtrans), pembayaran manual, setelan pembayaran, simulasi, kwitansi otomatis, donasi rutin (janji + pengingat). [Catatan modul](transparansi-donasi.md) |
+| **Zakat** | Kalkulator per masjid, jenis zakat pada donasi, 8 asnaf pada mustahik, laporan zakat terpisah. [Catatan modul](zakat.md) |
 | **Distribusi/Penyaluran** | Mustahik, distribusi CRUD |
 | **Berita** | Kategori, CRUD, galeri |
 | **Jamaah/Warga** | Warga CRUD, dashboard jamaah, followers, subscribers |
 | **Pengurus & Peran** | Pengurus CRUD, **pembedaan admin vs pengurus** |
 | **Jadwal Sholat** | CRUD jadwal, koreksi menit, running text (papan digital) |
 | **Inventaris** | Aset masjid CRUD |
-| **Relawan** | Volunteers |
+| **Relawan** | Registry relawan, peran, poin partisipasi, sertifikat cetak. [Catatan modul](relawan.md) |
 | **Broadcast (5 tahap)** | Grup Telegram/WhatsApp, pengingat terjadwal, pengumuman AI, ringkas obrolan grup |
 | **LMS/Pelatihan** | Modul & materi (disusun superadmin) |
 | **API & MCP** | REST baca+tulis, 6 tool MCP, **audit log**, panduan, generate token |
 | **Superadmin** | Dashboard, kelola masjid/user, monitoring program, LMS, pemakaian AI, **Laporan GTM** |
+| **PWA & Notifikasi** | Aplikasi installable, Web Push VAPID self-hosted. [Catatan modul](pwa-web-push.md) |
+| **Discovery** | Direktori publik `/jelajah` + peta lintas masjid. [Catatan modul](jelajah-direktori.md) |
 | **Email** | Reset sandi |
 
 ### ⛔ Belum ada / parsial (peluang)
@@ -40,14 +43,15 @@ keuangan → naik ke program yang berdampak bagi masyarakat sekitar dan luas.**
 | 🔴 | **Email selamat datang, verifikasi registrasi, laporan rutin mingguan** | Fondasi `Mailer` sudah ada; tinggal template + pemicu. (Sempat direncanakan, belum jadi.) |
 | ✅ | ~~**Kwitansi donasi otomatis**~~ | Selesai Sep 2026 — lihat Tahap 1. |
 | ✅ | ~~**Modul Zakat**~~ | Selesai Sep 2026 — kalkulator, jenis zakat pada donasi, 8 asnaf pada mustahik, laporan zakat terpisah. Lihat Tahap 2. |
-| 🟠 | **Laporan Dampak program** | Penerima manfaat, sebelum/sesudah, bukti foto — mengubah "program" jadi "dampak". |
-| 🟠 | **RSVP kegiatan + absensi** | Jamaah konfirmasi hadir; pengurus lihat perkiraan & kehadiran. |
-| 🟢 | **PWA + Web Push** (adzan, pengumuman, program) | Installable, notifikasi tanpa app store. |
+| ✅ | ~~**Laporan Dampak program**~~ | Selesai Sep 2026 — penerima manfaat, cerita dampak, foto bukti, saklar publikasi. Lihat Tahap 3. |
+| ✅ | ~~**RSVP kegiatan + absensi**~~ | Selesai Sep 2026 — konfirmasi publik, kuota ditegakkan, tandai hadir/absen. Lihat Tahap 3. |
+| ✅ | ~~**PWA + Web Push**~~ | Selesai Sep 2026 — installable + push VAPID self-hosted. **Butuh kunci VAPID di `.env` server.** Lihat Tahap 3. |
 | ✅ | ~~**Dinding Transparansi**~~ | Selesai Sep 2026 — feed donasi + penyaluran & bukti di `/{username}/laporan`. |
 | 🟢 | Kiosk donasi (perangkat fisik di masjid) | QRIS statis sudah ada; kiosk khusus opsional. |
-| 🟢 | **Donasi rutin/terjadwal** (recurring infaq) | Pendapatan berulang & kebiasaan beramal. |
-| 🟢 | **Sertifikat & poin relawan** | Retensi komunitas. |
-| 🟢 | Live streaming kajian, multi-bahasa (EN/AR) | Jangkauan. |
+| 🟠 | **Catatan modul yang belum ditulis** | Payment gateway/Midtrans, penyiapan kanal broadcast (bot Telegram & WhatsApp), jadwal sholat & Display TV, pengurus & peran, distribusi/mustahik. Polanya: yang butuh kredensial atau pemasangan di server justru yang belum tercatat. Indeks: [docs/README.md](README.md). |
+| ✅ | ~~**Donasi rutin/terjadwal**~~ | Selesai Sep 2026 — janji + pengingat, bukan auto-charge. **Butuh cron.** Lihat Tahap 2. |
+| ✅ | ~~**Sertifikat & poin relawan**~~ | Selesai Sep 2026 — registry, poin ber-alasan, sertifikat cetak. Lihat Tahap 3. |
+| ◐ | Live streaming kajian, multi-bahasa (EN/AR) | Live streaming **selesai** Sep 2026 (`stream_url` per program). Multi-bahasa **ditunda** — ROI rendah untuk produk fokus Indonesia. |
 
 ---
 
