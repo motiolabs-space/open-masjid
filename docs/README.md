@@ -11,7 +11,8 @@ dari [analisis-produk-roadmap.md](analisis-produk-roadmap.md).
 | [analisis-produk-roadmap.md](analisis-produk-roadmap.md) | Inventaris modul, benchmark platform sejenis, roadmap Tahap 1–4, catatan keamanan |
 | [go-live-checklist.md](go-live-checklist.md) | Yang wajib beres sebelum dipakai sungguhan |
 | [gtm.md](gtm.md) | **Draf** bahan diskusi go-to-market: yang sudah & belum terukur, pertanyaan terbuka |
-| [seri-konten-sosmed.md](seri-konten-sosmed.md) | Naskah 5 tulisan sosial media + daftar tangkapan layar; tampilannya di `/digital` |
+| [seri-konten-sosmed.md](seri-konten-sosmed.md) | Naskah 5 tulisan sosial media + daftar tangkapan layar; tampilannya di `/seri` |
+| [masjid-contoh.md](masjid-contoh.md) | Masjid peraga di `/digital` dan **seeder**-nya (`php spark db:seed DemoMasjidSeeder`) |
 
 ## Modul
 
@@ -52,3 +53,4 @@ dashboard — masing-masing menunggu sesuatu yang dipasang di server:
 | Pengingat siaran & donasi rutin | Cron `php spark broadcast:reminders` — [caranya](pengingat-terjadwal.md) |
 | Web Push | Kunci VAPID di `.env` (`php spark push:vapid`) — [caranya](pwa-web-push.md) |
 | Laporan harian | Cron `php spark report:daily` |
+| Masjid contoh `/digital` | `php spark db:seed DemoMasjidSeeder` — [caranya](masjid-contoh.md) |

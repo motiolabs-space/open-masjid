@@ -536,7 +536,7 @@ class Home extends BaseController
      * Sudut pandangnya manfaat dan kemudahan, bukan daftar fitur — pembaca di
      * lini masa tidak sedang mencari spesifikasi produk.
      */
-    public function digital(): string
+    public function seri(): string
     {
         $seri = [
             [
@@ -550,6 +550,7 @@ class Home extends BaseController
                     'Ketika jawabannya sudah tersedia sebelum ditanyakan, tidak ada lagi yang perlu sungkan — dan tidak ada lagi yang merasa dicurigai.',
                 ],
                 'gambar'     => 'laporan',
+                'tautan'     => 'digital/laporan',
                 'gambar_alt' => 'Halaman laporan transparansi yang bisa dibuka siapa saja',
                 'penutup'    => 'Kepercayaan tidak dibangun dengan meyakinkan orang. Ia tumbuh sendiri ketika tidak ada lagi yang disembunyikan.',
                 'tagar'      => '#MasjidAmanah #TransparansiMasjid #DKM #Masjid',
@@ -565,6 +566,7 @@ class Home extends BaseController
                     'Donatur yang melihat akhir ceritanya akan kembali. Yang tidak, cukup sekali.',
                 ],
                 'gambar'     => 'dampak',
+                'tautan'     => 'digital/program/beasiswa-anak-yatim-binaan',
                 'gambar_alt' => 'Laporan dampak program: jumlah penerima manfaat, cerita, dan foto bukti',
                 'penutup'    => 'Laporan menjawab "berapa". Bukti menjawab "benarkah". Yang kedua jauh lebih menenangkan.',
                 'tagar'      => '#SedekahBerdampak #LaporanDampak #MasjidAmanah #Kebaikan',
@@ -580,6 +582,7 @@ class Home extends BaseController
                     'Dan ketika ada target yang sedang dikejar — renovasi tempat wudhu, misalnya — melihat batangnya bergerak membuat orang ingin ikut mendorong.',
                 ],
                 'gambar'     => 'kampanye',
+                'tautan'     => 'digital/program/renovasi-tempat-wudhu-toilet-jamaah',
                 'gambar_alt' => 'Halaman program dengan target donasi dan progres yang terlihat jamaah',
                 'penutup'    => 'Mempermudah orang berbuat baik adalah bentuk kebaikan tersendiri.',
                 'tagar'      => '#DonasiOnline #InfaqDigital #MasjidModern #QRIS',
@@ -595,6 +598,7 @@ class Home extends BaseController
                     'Laporannya pun sudah siap dibagikan ke grup WhatsApp tanpa perlu disusun dari nol setiap bulan.',
                 ],
                 'gambar'     => 'dashboard',
+                'tautan'     => null,
                 'gambar_alt' => 'Halaman keuangan pengurus: saldo, riwayat transaksi, impor mutasi bank',
                 'penutup'    => 'Teknologi yang baik tidak menambah pekerjaan pengurus. Ia mengembalikan waktu mereka.',
                 'tagar'      => '#PengurusMasjid #DKM #ManajemenMasjid #LaporanKeuangan',
@@ -610,13 +614,14 @@ class Home extends BaseController
                     'Dari satu masjid yang terbuka, biasanya menyusul masjid tetangga. Begitu seterusnya.',
                 ],
                 'gambar'     => 'jelajah',
+                'tautan'     => 'jelajah',
                 'gambar_alt' => 'Direktori masjid: pencarian, peta lokasi, dan tautan donasi lintas masjid',
                 'penutup'    => 'Masjid yang mudah ditemukan akan lebih mudah dimakmurkan.',
                 'tagar'      => '#Masjid #DigitalisasiMasjid #Jamaah #Komunitas',
             ],
         ];
 
-        return view('public/digital', [
+        return view('public/seri', [
             'title' => 'Seri Tulisan: Masjid yang Amanah - Masj.id',
             'seri'  => $seri,
         ]);

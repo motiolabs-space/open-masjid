@@ -15,9 +15,9 @@ $routes->get('kontak', 'Home::kontak');
 $routes->get('privacy-policy', 'Home::privacy');
 $routes->get('manifest.webmanifest', 'Home::manifest');
 $routes->get('jelajah', 'Home::jelajah');
-// Catatan: rute ini mendahului catch-all '(:any)', jadi slug masjid 'digital'
-// tidak lagi mengarah ke halaman masjid itu.
-$routes->get('digital', 'Home::digital');
+// Seri tulisan sosial media. TIDAK boleh memakai slug 'digital' — slug itu milik
+// masjid contoh (lihat DemoMasjidSeeder) dan halaman masjidnya harus tetap hidup.
+$routes->get('seri', 'Home::seri');
 $routes->get('term', 'Home::term');
 $routes->get('/login', 'Home::login');
 $routes->post('/login', 'Auth::login');

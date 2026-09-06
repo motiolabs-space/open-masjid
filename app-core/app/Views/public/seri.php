@@ -74,7 +74,12 @@
                     </div>
                     <figcaption class="text-xs text-[#608a7e] mt-3 flex items-start gap-2">
                         <span class="material-symbols-outlined text-sm shrink-0">info</span>
-                        <span><?= esc($t['gambar_alt']) ?> — <em>tampilan asli aplikasi, data pada gambar hanya contoh.</em></span>
+                        <span>
+                            <?= esc($t['gambar_alt']) ?> — <em>tampilan asli aplikasi, data pada gambar hanya contoh.</em>
+                            <?php if (! empty($t['tautan'])): ?>
+                                <a href="<?= esc(base_url($t['tautan']), 'attr') ?>" class="text-primary font-bold hover:underline">Lihat versi hidupnya &raquo;</a>
+                            <?php endif; ?>
+                        </span>
                     </figcaption>
                 </figure>
 
@@ -97,8 +102,11 @@
             </p>
             <div class="mt-7 flex flex-col sm:flex-row gap-3 justify-center">
                 <a href="<?= base_url('register') ?>" class="px-7 py-3.5 bg-primary text-white rounded-2xl font-bold hover:-translate-y-0.5 transition-all">Daftarkan Masjid</a>
-                <a href="<?= base_url('jelajah') ?>" class="px-7 py-3.5 border border-[#dbe6e3] dark:border-white/10 rounded-2xl font-bold hover:border-primary hover:text-primary transition-all">Lihat Masjid Lain</a>
+                <a href="<?= base_url('digital') ?>" class="px-7 py-3.5 border border-[#dbe6e3] dark:border-white/10 rounded-2xl font-bold hover:border-primary hover:text-primary transition-all">Lihat Halaman Contoh</a>
             </div>
+            <p class="text-xs text-[#608a7e] mt-4">
+                Halaman contoh berisi data peraga, bukan masjid sungguhan.
+            </p>
         </div>
     </div>
 </section>

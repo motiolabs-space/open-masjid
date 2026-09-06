@@ -1,7 +1,10 @@
 # Seri Konten Sosial Media — 5 Tulisan
 
-Naskah siap salin-tempel. Versi tampilannya ada di **[masj.id/digital](https://masj.id/digital)**
-(`Home::digital`, naskah tersimpan di controller — ubah di sana, halaman ikut berubah).
+Naskah siap salin-tempel. Versi tampilannya ada di **[masj.id/seri](https://masj.id/seri)**
+(`Home::seri`, naskah tersimpan di controller — ubah di sana, halaman ikut berubah).
+
+Tiap tangkapan layar di halaman itu menautkan **versi hidupnya** di masjid contoh
+[masj.id/digital](https://masj.id/digital) — lihat [masjid-contoh.md](masjid-contoh.md).
 
 **Sudut pandang yang dipakai:** manfaat dan kemudahan, bukan daftar fitur. Orang
 di lini masa tidak sedang mencari spesifikasi produk; mereka berhenti pada
@@ -161,11 +164,11 @@ seterusnya.
 ## Tentang tangkapan layarnya
 
 Sembilan gambar di `public/img/digital/` adalah **tampilan asli aplikasi**, bukan
-mockup. Yang dibuat-buat hanya isinya: nama donatur, nominal, dan nama program
-diisi sebagai contoh pada masjid demo, lalu datanya dihapus lagi setelah gambar
-diambil.
+mockup. Yang dibuat-buat hanya isinya — dan isinya itu kini permanen di masjid
+contoh, dibuat ulang kapan saja lewat `php spark db:seed DemoMasjidSeeder`
+(lihat [masjid-contoh.md](masjid-contoh.md)).
 
-Karena itu setiap gambar di halaman `/digital` diberi keterangan
+Karena itu setiap gambar di halaman `/seri` diberi keterangan
 _"data pada gambar hanya contoh"_. **Pertahankan keterangan itu** bila gambarnya
 dipakai ulang — angka keuangan yang tampak nyata padahal karangan adalah hal
 terakhir yang boleh beredar dari produk yang menjual transparansi.
