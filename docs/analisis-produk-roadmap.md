@@ -187,6 +187,28 @@ Hasil review kode Tahap 3–4, seluruhnya diuji ulang di lingkungan lokal:
 | 🟢 **Jelajah memuat seluruh masjid dalam satu halaman** | Dipaginasi 24/halaman; penyaring `q`/`provinsi` dipertahankan saat berpindah halaman. |
 | 🟢 **Penyaring provinsi memuat masjid non-aktif** | Kueri provinsi ikut dibatasi `status = active`. |
 
+### Review ulang seluruh modul (Sep 2026)
+
+Satu pola yang berulang: halaman **daftar** menyaring status, halaman
+**detail**-nya tidak.
+
+| Temuan | Perbaikan |
+|--------|-----------|
+| 🔴 **Draf terbaca publik** — `Home::programDetail` & `Home::newsDetail` menyaring masjid dan slug tapi **tidak menyaring `status`**. Program & berita draf terbuka bagi siapa pun **tanpa login** yang tahu slug-nya; membaca berita draf bahkan menaikkan penghitung `views`. | `status = published` ditambahkan pada kedua kueri. Diuji tanpa login: draf 404, judul tak bocor, `views` tak naik; jalur terbit tetap 200. |
+| 🔴 **LMS galat 500** — `lms_progress.masjid_id` NOT NULL, sedangkan rute LMS ada di daftar izin jamaah pada `DashboardGuard`. Jamaah yang belum memilih masjid menekan "Tandai Selesai" mendapat `Column 'masjid_id' cannot be null`. | Kolom dibuat nullable (migrasi `MakeLmsProgressMasjidNullable`) — LMS milik platform, progres melekat pada PENGGUNA. Diuji: jamaah kini 200, progres tersimpan ber-`masjid_id` NULL. |
+| 🟠 **Modul & materi LMS draf bocor** — `Lms::module()`/`material()`/`markCompleted()` tak menyaring status. | Penjaga `bolehLihatDraf()`; hanya superadmin boleh meninjau draf. Ditutup lewat slug modul **maupun** id materi — materi ikut status modul induknya. |
+| 🟢 **Referensi menggantung** — `foreach ($modules as &$mod)` tanpa `unset()` di `Lms::index`. | `unset($mod)` ditambahkan. |
+
+Sapuan **80 rute GET statis** sebagai pengurus admin: tidak ada 5xx, tak ada
+baris ERROR di log.
+
+**Belum diperbaiki — perlu keputusan produk:** status masjid `suspended` hampir
+tak berefek. `/jelajah` benar menyaring `active`, tetapi halaman publik masjid
+(`Home::masjid`) dan **formulir donasi** (`Donation::create`) tak memeriksa
+status sama sekali — masjid yang disuspensi masih bisa menerima donasi. Mana
+yang benar (sembunyikan seluruh halaman, atau tampilkan tanpa tombol donasi)
+adalah keputusan produk, bukan sekadar perbaikan kode.
+
 ### Pembatas laju — sudah menyeluruh (Sep 2026)
 
 `Throttler` CI4 (cache berkas) lewat `BaseController::lolosBatasLaju()`.
