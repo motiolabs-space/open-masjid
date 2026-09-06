@@ -32,6 +32,7 @@ class DemoMasjidSeeder extends Seeder
         'masjid_program_impact_photos',
         'masjid_finance_transactions',
         'masjid_donations',
+        'masjid_mustahik_distributions',
         'masjid_distributions',
         'masjid_mustahik',
         'masjid_warga',
@@ -40,6 +41,7 @@ class DemoMasjidSeeder extends Seeder
         'masjid_program_categories',
         'masjid_finance_categories',
         'masjid_news',
+        'masjid_news_categories',
     ];
 
     /**
@@ -81,13 +83,14 @@ class DemoMasjidSeeder extends Seeder
         $prog = $this->program($db, $id);
         $don  = $this->donasi($db, $id, $prog);
         $this->fotoDampak($db, $id, $prog);
-        $sal  = $this->penyaluran($db, $id);
-        $this->berita($db, $id);
+        $mus  = $this->mustahik($db, $id);
+        $sal  = $this->penyaluran($db, $id, $mus);
+        $ber  = $this->berita($db, $id);
         $jad  = $this->jadwal($db, $id);
 
         $this->pesan(sprintf(
-            'Masjid contoh terisi: %d transaksi, %d program, %d donasi, %d penyaluran, %d jadwal. Buka: /%s',
-            $trx, count($prog), $don, $sal, $jad, self::USERNAME
+            'Masjid contoh terisi: %d transaksi, %d program, %d donasi, %d mustahik, %d penyaluran, %d berita, %d jadwal. Buka: /%s',
+            $trx, count($prog), $don, count($mus), $sal, $ber, $jad, self::USERNAME
         ));
     }
 
@@ -294,28 +297,111 @@ class DemoMasjidSeeder extends Seeder
 
     // ── Penyaluran & penerima ────────────────────────────────────────────
 
-    private function penyaluran($db, int $id): int
+    /**
+     * Mustahik lengkap dengan profil ekonominya — halaman mustahik di dashboard
+     * menampilkan penghasilan, tanggungan, status rumah, dan skor kelayakan,
+     * jadi bila kolom itu kosong halamannya tampak setengah jadi.
+     *
+     * @return list<array{id:int,nama:string}>
+     */
+    private function mustahik($db, int $id): array
     {
-        $warga = [];
-        foreach ([['Ibu S.', 'fakir'], ['Bapak K.', 'miskin'], ['Keluarga Alm. Bapak S.', 'fakir'], ['Ibu W.', 'gharim']] as [$nama, $asnaf]) {
+        $daftar = [
+            ['Ibu Sumiyati', 'fakir', 900000, 3, 'ngontrak', 9,
+             'Janda dengan tiga anak usia sekolah, berjualan gorengan keliling. Penghasilan jauh di bawah UMR dan masih menanggung biaya kontrakan.'],
+            ['Bapak Karjo', 'miskin', 1600000, 4, 'milik_sendiri', 7,
+             'Buruh serabutan, penghasilan tidak tetap. Rumah milik sendiri tetapi tanggungan empat orang termasuk satu anggota keluarga sakit menahun.'],
+            ['Keluarga Alm. Bapak Slamet', 'fakir', 600000, 5, 'numpang', 10,
+             'Kepala keluarga wafat tahun lalu. Ibu bekerja paruh waktu, lima tanggungan, saat ini menumpang di rumah kerabat.'],
+            ['Ibu Warsini', 'gharim', 2100000, 2, 'ngontrak', 6,
+             'Terlilit utang biaya pengobatan suami. Masih berpenghasilan, namun sebagian besar habis untuk cicilan.'],
+            ['Bapak Hamdan', 'ibnu_sabil', 0, 0, 'lainnya', 5,
+             'Musafir yang kehabisan bekal dalam perjalanan pulang. Bantuan bersifat sekali, untuk ongkos dan makan.'],
+            ['Ibu Ratmi', 'miskin', 1400000, 3, 'ngontrak', 8,
+             'Pekerja cuci harian. Tiga anak, dua di antaranya masih SD. Kontrakan jatuh tempo tiap tiga bulan.'],
+        ];
+
+        $mus = [];
+        foreach ($daftar as $i => [$nama, $asnaf, $penghasilan, $tanggungan, $rumah, $skor, $alasan]) {
             $db->table('masjid_mustahik')->insert([
-                'masjid_id' => $id, 'name' => $nama, 'asnaf' => $asnaf, 'status' => 'aktif',
+                'masjid_id'        => $id,
+                'name'             => $nama,
+                'phone'            => '08120000' . str_pad((string) ($i + 10), 4, '0', STR_PAD_LEFT),
+                'address'          => 'RT 0' . ($i % 4 + 1) . ' RW 02, Kel. Sukamaju',
+                'income_per_month' => $penghasilan,
+                'dependents_count' => $tanggungan,
+                'house_ownership'  => $rumah,
+                'asnaf'            => $asnaf,
+                // enum kolom ini 'active'/'inactive' — bukan 'aktif'.
+                'status'           => 'active',
+                'ai_score'         => $skor,
+                'ai_reasoning'     => $alasan,
                 'created_at' => date('Y-m-d H:i:s'), 'updated_at' => date('Y-m-d H:i:s'),
             ]);
-            // Penyaluran menautkan warga (bukan mustahik) lewat warga_id.
+            $mus[] = ['id' => (int) $db->insertID(), 'nama' => $nama];
+        }
+
+        return $mus;
+    }
+
+    /**
+     * Penyaluran ditulis ke DUA tabel yang berbeda, dan keduanya memang dipakai:
+     *
+     *  - masjid_mustahik_distributions -> menu "Penyaluran Bantuan" di dashboard,
+     *    tertaut ke mustahik beserta profil kelayakannya.
+     *  - masjid_distributions          -> "Bantuan Warga", dan inilah yang tampil
+     *    sebagai "Penyaluran & Bukti" di halaman transparansi publik (punya
+     *    kolom foto bukti).
+     *
+     * Mengisi salah satu saja membuat separuh peraga kosong.
+     */
+    private function penyaluran($db, int $id, array $mus): int
+    {
+        $n = 0;
+
+        // 1. Penyaluran ke mustahik (tampil di dashboard pengurus).
+        $keMustahik = [
+            [0, 750000,  'Santunan bulanan — Januari s.d. bulan berjalan'],
+            [1, 500000,  'Bantuan biaya sekolah anak'],
+            [2, 1200000, 'Santunan keluarga ditinggal wafat + paket sembako'],
+            [3, 1500000, 'Bantuan pelunasan sebagian utang pengobatan'],
+            [4, 350000,  'Bantuan ongkos perjalanan dan bekal'],
+            [5, 600000,  'Bantuan biaya kontrakan jatuh tempo'],
+            [0, 750000,  'Santunan bulanan periode berikutnya'],
+            [2, 800000,  'Paket sembako bulanan'],
+        ];
+        foreach ($keMustahik as $k => [$idx, $jumlah, $ket]) {
+            if (! isset($mus[$idx])) {
+                continue;
+            }
+            $db->table('masjid_mustahik_distributions')->insert([
+                'masjid_id'   => $id,
+                'mustahik_id' => $mus[$idx]['id'],
+                'date'        => date('Y-m-d', strtotime('-' . (7 + $k * 9) . ' days')),
+                'amount'      => $jumlah,
+                'description' => $ket,
+                'created_at'  => date('Y-m-d H:i:s'), 'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+            $n++;
+        }
+
+        // 2. Bantuan warga berbukti foto (tampil di halaman transparansi publik).
+        $warga = [];
+        foreach (array_slice($mus, 0, 4) as $m) {
             $db->table('masjid_warga')->insert([
-                'masjid_id' => $id, 'name' => $nama,
+                'masjid_id' => $id, 'name' => $m['nama'],
                 'created_at' => date('Y-m-d H:i:s'), 'updated_at' => date('Y-m-d H:i:s'),
             ]);
             $warga[] = (int) $db->insertID();
         }
 
-        $daftar = [
+        $berbukti = [
             ['Santunan bulanan untuk 4 keluarga prasejahtera', 4000000],
             ['Bantuan biaya berobat jamaah lansia', 1750000],
             ['Paket sembako untuk warga terdampak banjir RT 04', 6200000],
+            ['Santunan anak yatim menjelang tahun ajaran baru', 5400000],
         ];
-        foreach ($daftar as $i => [$ket, $jumlah]) {
+        foreach ($berbukti as $i => [$ket, $jumlah]) {
             $db->table('masjid_distributions')->insert([
                 'masjid_id' => $id,
                 'warga_id'  => $warga[$i] ?? null,
@@ -326,32 +412,58 @@ class DemoMasjidSeeder extends Seeder
                 'evidence_photo' => self::GAMBAR[($i + 2) % count(self::GAMBAR)],
                 'created_at' => date('Y-m-d H:i:s'), 'updated_at' => date('Y-m-d H:i:s'),
             ]);
+            $n++;
         }
 
-        return count($daftar);
+        return $n;
     }
 
     // ── Berita & jadwal ──────────────────────────────────────────────────
 
-    private function berita($db, int $id): void
+    private function berita($db, int $id): int
     {
+        // Kategori berita ikut diisi — daftar berita di dashboard menampilkan
+        // kolom kategori, dan tanpa ini kolomnya kosong semua.
+        $kat = [];
+        foreach (['Pengumuman', 'Kegiatan', 'Laporan'] as $nama) {
+            $db->table('masjid_news_categories')->insert([
+                'masjid_id' => $id, 'name' => $nama, 'slug' => url_title($nama, '-', true),
+                'created_at' => date('Y-m-d H:i:s'), 'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+            $kat[$nama] = (int) $db->insertID();
+        }
+
         $daftar = [
-            ['Laporan Keuangan Bulan Ini Sudah Terbit', 'Rekap pemasukan, pengeluaran, dan saldo akhir bulan ini dapat dilihat jamaah kapan saja lewat halaman laporan masjid.'],
-            ['Renovasi Tempat Wudhu Memasuki Tahap Kedua', 'Pengerjaan lantai anti-slip selesai. Tahap berikutnya pemasangan delapan titik keran baru.'],
+            ['Laporan Keuangan Bulan Ini Sudah Terbit', 'Laporan',
+             'Rekap pemasukan, pengeluaran, dan saldo akhir bulan ini sudah dapat dilihat jamaah kapan saja lewat halaman laporan masjid. Tidak perlu menunggu diumumkan di mimbar, dan tidak perlu bertanya kepada pengurus.'],
+            ['Renovasi Tempat Wudhu Memasuki Tahap Kedua', 'Kegiatan',
+             'Pengerjaan lantai anti-slip telah selesai. Tahap berikutnya adalah pemasangan delapan titik keran baru dan jalur khusus bagi jamaah lansia. Terima kasih kepada seluruh donatur yang telah menitipkan amanahnya.'],
+            ['Kajian Rutin Ahad Pagi Kembali Dibuka', 'Pengumuman',
+             'Kajian rutin Ahad pagi kembali digelar mulai pekan depan, pukul 06.30 hingga selesai, terbuka untuk umum. Bagi yang berhalangan hadir, rekamannya akan ditayangkan pada halaman program.'],
+            ['Penyaluran Beasiswa Semester Ini Telah Selesai', 'Laporan',
+             'Tiga puluh dua anak binaan telah menerima seragam, sepatu, dan biaya SPP satu semester. Penyaluran disaksikan perwakilan RT dan orang tua asuh. Rincian penerima manfaat dapat dilihat pada halaman program.'],
+            ['Jadwal Imam & Khatib Jumat Empat Pekan ke Depan', 'Pengumuman',
+             'Jadwal petugas Jumat untuk empat pekan ke depan sudah ditetapkan dan dapat dilihat pada halaman beranda masjid. Bagi petugas yang berhalangan, mohon mengabari pengurus paling lambat Rabu.'],
+            ['Dapur Jumat Berkah Menembus 1.600 Porsi', 'Kegiatan',
+             'Sejak dimulai empat bulan lalu, Dapur Jumat Berkah telah membagikan 1.600 porsi makanan matang. Penerima terbanyak adalah pekerja harian di pasar sebelah yang sebelumnya melewatkan makan siang saat Jumat.'],
         ];
-        foreach ($daftar as $i => [$judul, $isi]) {
+
+        foreach ($daftar as $i => [$judul, $namaKat, $isi]) {
             $db->table('masjid_news')->insert([
-                'masjid_id' => $id,
-                'title'     => $judul,
-                'slug'      => url_title($judul, '-', true),
-                'content'   => '<p>' . $isi . '</p>',
-                'thumbnail' => self::GAMBAR[($i + 3) % count(self::GAMBAR)],
-                'status'    => 'published',
-                'views'     => 40 + $i * 37,
-                'created_at' => date('Y-m-d H:i:s', strtotime('-' . ($i * 4 + 2) . ' days')),
-                'updated_at' => date('Y-m-d H:i:s'),
+                'masjid_id'   => $id,
+                'category_id' => $kat[$namaKat] ?? null,
+                'title'       => $judul,
+                'slug'        => url_title($judul, '-', true),
+                'content'     => '<p>' . $isi . '</p>',
+                'thumbnail'   => self::GAMBAR[$i % count(self::GAMBAR)],
+                'status'      => 'published',
+                'views'       => 37 + $i * 23,
+                'created_at'  => date('Y-m-d H:i:s', strtotime('-' . ($i * 5 + 2) . ' days')),
+                'updated_at'  => date('Y-m-d H:i:s'),
             ]);
         }
+
+        return count($daftar);
     }
 
     private function jadwal($db, int $id): int

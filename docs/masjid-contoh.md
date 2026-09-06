@@ -43,9 +43,26 @@ biasa, baru jalankan seeder.
 | Program | 3 program: satu berkampanye dengan target, dua dengan laporan dampak |
 | Donasi | 18 donasi lunas, sebagian anonim, sebagian tertaut ke program |
 | Dampak | 3 foto bukti pada laporan dampak |
-| Penyaluran | 3 penyaluran berbukti + 4 mustahik/warga penerima |
-| Berita | 2 berita terbit |
+| Mustahik | **6 penerima** berprofil lengkap: penghasilan, tanggungan, status rumah, asnaf, skor kelayakan + alasannya |
+| Penyaluran | **8 penyaluran ke mustahik** (dashboard) + **4 bantuan warga berbukti foto** (halaman transparansi publik) |
+| Berita | **6 berita terbit** dalam 3 kategori (Pengumuman, Kegiatan, Laporan) |
 | Jadwal | 4 jadwal Jumat ke depan (imam, khatib, muadzin) |
+
+### Dua tabel penyaluran, keduanya diisi
+
+Mudah tertukar, dan mengisi salah satu saja membuat separuh peraga kosong:
+
+| Tabel | Muncul di | Ciri |
+|-------|-----------|------|
+| `masjid_mustahik_distributions` | Dashboard › **Penyaluran Bantuan** | tertaut ke mustahik beserta skor kelayakannya |
+| `masjid_distributions` | Halaman transparansi publik, bagian **Penyaluran & Bukti** | tertaut ke warga, punya kolom foto bukti |
+
+### Untuk memperagakan sisi pengurus
+
+Konten mustahik, berita, program, dan keuangan sengaja diisi agar halaman di
+balik login juga tidak kosong saat diperagakan. Masuk dengan akun pengurus
+masjid contoh, lalu buka **Penyaluran Bantuan**, **Berita**, **Program &
+Kegiatan**, dan **Keuangan**.
 
 Angka transaksinya dibuat dari benih acak tetap, jadi tampilannya konsisten
 setiap kali seeder dijalankan — bukan berubah-ubah acak.
