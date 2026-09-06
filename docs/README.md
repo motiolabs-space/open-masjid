@@ -11,6 +11,7 @@ dari [analisis-produk-roadmap.md](analisis-produk-roadmap.md).
 | [analisis-produk-roadmap.md](analisis-produk-roadmap.md) | Inventaris modul, benchmark platform sejenis, roadmap Tahap 1–4, catatan keamanan |
 | [go-live-checklist.md](go-live-checklist.md) | Yang wajib beres sebelum dipakai sungguhan |
 | [gtm.md](gtm.md) | **Draf** bahan diskusi go-to-market: yang sudah & belum terukur, pertanyaan terbuka |
+| [seri-konten-sosmed.md](seri-konten-sosmed.md) | Naskah 5 tulisan sosial media + daftar tangkapan layar; tampilannya di `/digital` |
 
 ## Modul
 

@@ -528,6 +528,100 @@ class Home extends BaseController
         ]);
     }
 
+    /**
+     * Seri tulisan untuk sosial media — halaman contoh di /digital.
+     *
+     * Naskahnya sengaja disimpan di sini, bukan di basis data: ini materi
+     * pemasaran yang berubah lewat commit, bukan konten yang diisi pengurus.
+     * Sudut pandangnya manfaat dan kemudahan, bukan daftar fitur — pembaca di
+     * lini masa tidak sedang mencari spesifikasi produk.
+     */
+    public function digital(): string
+    {
+        $seri = [
+            [
+                'label' => 'Pekan 1 · Kepercayaan',
+                'judul' => 'Pertanyaan yang Paling Sering Ditahan Jamaah',
+                'hook'  => '"Uangnya ke mana, ya?" — jarang ditanyakan, tapi hampir selalu terpikir.',
+                'isi'   => [
+                    'Bukan karena jamaah menaruh curiga. Justru sebaliknya: mereka sungkan. Bertanya soal uang di masjid terasa seperti menuduh orang-orang yang sudah bekerja tanpa dibayar.',
+                    'Maka pertanyaan itu disimpan. Tidak hilang, hanya mengendap. Dan sesuatu yang mengendap lama akan pelan-pelan berubah menjadi jarak.',
+                    'Yang sebenarnya dibutuhkan bukan penjelasan panjang di mimbar, melainkan satu halaman yang bisa dibuka sendiri, kapan saja, tanpa perlu meminta izin siapa pun. Pemasukan bulan ini, pengeluarannya untuk apa, sisa kasnya berapa.',
+                    'Ketika jawabannya sudah tersedia sebelum ditanyakan, tidak ada lagi yang perlu sungkan — dan tidak ada lagi yang merasa dicurigai.',
+                ],
+                'gambar'     => 'laporan',
+                'gambar_alt' => 'Halaman laporan transparansi yang bisa dibuka siapa saja',
+                'penutup'    => 'Kepercayaan tidak dibangun dengan meyakinkan orang. Ia tumbuh sendiri ketika tidak ada lagi yang disembunyikan.',
+                'tagar'      => '#MasjidAmanah #TransparansiMasjid #DKM #Masjid',
+            ],
+            [
+                'label' => 'Pekan 2 · Bukti',
+                'judul' => 'Sedekah yang Selesai Ceritanya',
+                'hook'  => 'Kebanyakan sedekah berhenti di notifikasi "transfer berhasil".',
+                'isi'   => [
+                    'Setelah itu sunyi. Uang berpindah, lalu ceritanya putus. Donatur tidak pernah tahu apakah niat baiknya benar-benar mendarat di tempat yang ia bayangkan.',
+                    'Padahal bagian paling menggerakkan dari bersedekah bukan saat mengirim, melainkan saat tahu itu sampai. Nama-namanya, jumlah keluarganya, foto saat diterimanya.',
+                    'Sebuah program yang jujur menutup rantainya sampai habis: dana masuk, dipakai untuk apa, siapa yang menerima, dan bukti bahwa itu benar terjadi. Bukan angka di akhir tahun, tapi cerita yang bisa dilihat sekarang.',
+                    'Donatur yang melihat akhir ceritanya akan kembali. Yang tidak, cukup sekali.',
+                ],
+                'gambar'     => 'dampak',
+                'gambar_alt' => 'Laporan dampak program: jumlah penerima manfaat, cerita, dan foto bukti',
+                'penutup'    => 'Laporan menjawab "berapa". Bukti menjawab "benarkah". Yang kedua jauh lebih menenangkan.',
+                'tagar'      => '#SedekahBerdampak #LaporanDampak #MasjidAmanah #Kebaikan',
+            ],
+            [
+                'label' => 'Pekan 3 · Kemudahan',
+                'judul' => 'Kotak Amal yang Tidak Pernah Tutup',
+                'hook'  => 'Kotak amal hanya bekerja pada orang yang kebetulan lewat.',
+                'isi'   => [
+                    'Jamaah yang merantau, yang sedang sakit, yang pindah kota, atau yang teringat masjidnya pukul dua pagi — semuanya berada di luar jangkauan kotak kayu di dekat pintu.',
+                    'Padahal niat baik jarang datang di waktu yang rapi. Ia muncul saat sedang membaca kabar, saat teringat orang tua, saat merasa cukup dan ingin berbagi. Kalau saat itu tidak ada jalan, niatnya lewat begitu saja.',
+                    'Menyediakan jalan yang selalu terbuka mengubah hal itu: tautan yang bisa dibagikan di grup, nominal yang tinggal dipilih, dan tanda terima yang datang sendiri tanpa perlu diminta.',
+                    'Dan ketika ada target yang sedang dikejar — renovasi tempat wudhu, misalnya — melihat batangnya bergerak membuat orang ingin ikut mendorong.',
+                ],
+                'gambar'     => 'kampanye',
+                'gambar_alt' => 'Halaman program dengan target donasi dan progres yang terlihat jamaah',
+                'penutup'    => 'Mempermudah orang berbuat baik adalah bentuk kebaikan tersendiri.',
+                'tagar'      => '#DonasiOnline #InfaqDigital #MasjidModern #QRIS',
+            ],
+            [
+                'label' => 'Pekan 4 · Waktu Pengurus',
+                'judul' => 'Bendahara Masjid Bukan Tukang Rekap',
+                'hook'  => 'Malam Jumat, dan beliau masih menyalin mutasi bank satu per satu.',
+                'isi'   => [
+                    'Orang-orang yang mengurus masjid hampir selalu punya pekerjaan lain. Waktu yang mereka sisihkan sedikit dan mahal. Sayangnya, sebagian besar habis untuk hal yang paling tidak membutuhkan mereka: menyalin, mengelompokkan, dan merapikan angka.',
+                    'Padahal rekap bukan alasan seseorang bersedia menjadi pengurus. Yang membuatnya bertahan adalah bertemu jamaah, menyiapkan kajian, menengok yang sakit.',
+                    'Pekerjaan menyalin itu bisa diambil alih. Unggah mutasi banknya, biarkan sistem mengelompokkan sendiri, lalu pengurus tinggal memeriksa dan menyetujui — bukan mengetik ulang.',
+                    'Laporannya pun sudah siap dibagikan ke grup WhatsApp tanpa perlu disusun dari nol setiap bulan.',
+                ],
+                'gambar'     => 'dashboard',
+                'gambar_alt' => 'Halaman keuangan pengurus: saldo, riwayat transaksi, impor mutasi bank',
+                'penutup'    => 'Teknologi yang baik tidak menambah pekerjaan pengurus. Ia mengembalikan waktu mereka.',
+                'tagar'      => '#PengurusMasjid #DKM #ManajemenMasjid #LaporanKeuangan',
+            ],
+            [
+                'label' => 'Pekan 5 · Jangkauan',
+                'judul' => 'Masjid yang Mudah Ditemukan',
+                'hook'  => 'Orang baru pindah ke sebuah kota. Ia mencari masjid — dan tidak menemukan apa-apa.',
+                'isi'   => [
+                    'Bukan karena masjidnya tidak ada. Melainkan karena masjid itu tidak punya jejak yang bisa ditemukan: tidak ada halaman, tidak ada jadwal kajian, tidak ada cara menghubungi.',
+                    'Padahal masjid bukan hanya milik orang yang rumahnya berdekatan. Ada perantau yang ingin tetap terhubung dengan kampungnya, ada donatur dari kota lain, ada anak muda yang mencari kajian.',
+                    'Memiliki halaman sendiri membuat masjid bisa ditemukan, dibagikan, dan diikuti. Programnya terlihat, laporannya terbuka, dan kabarnya bisa sampai langsung ke genggaman jamaah.',
+                    'Dari satu masjid yang terbuka, biasanya menyusul masjid tetangga. Begitu seterusnya.',
+                ],
+                'gambar'     => 'jelajah',
+                'gambar_alt' => 'Direktori masjid: pencarian, peta lokasi, dan tautan donasi lintas masjid',
+                'penutup'    => 'Masjid yang mudah ditemukan akan lebih mudah dimakmurkan.',
+                'tagar'      => '#Masjid #DigitalisasiMasjid #Jamaah #Komunitas',
+            ],
+        ];
+
+        return view('public/digital', [
+            'title' => 'Seri Tulisan: Masjid yang Amanah - Masj.id',
+            'seri'  => $seri,
+        ]);
+    }
+
     public function manifest()
     {
         $data = [

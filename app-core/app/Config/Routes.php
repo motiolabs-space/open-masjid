@@ -15,6 +15,9 @@ $routes->get('kontak', 'Home::kontak');
 $routes->get('privacy-policy', 'Home::privacy');
 $routes->get('manifest.webmanifest', 'Home::manifest');
 $routes->get('jelajah', 'Home::jelajah');
+// Catatan: rute ini mendahului catch-all '(:any)', jadi slug masjid 'digital'
+// tidak lagi mengarah ke halaman masjid itu.
+$routes->get('digital', 'Home::digital');
 $routes->get('term', 'Home::term');
 $routes->get('/login', 'Home::login');
 $routes->post('/login', 'Auth::login');
