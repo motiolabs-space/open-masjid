@@ -88,5 +88,6 @@
         });
     });
     </script>
+    <?= $this->include('partials/hapus_post') ?>
     <?= $this->renderSection('scripts') ?>
 </body></html>

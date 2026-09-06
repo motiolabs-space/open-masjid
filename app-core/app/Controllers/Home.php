@@ -620,22 +620,6 @@ class Home extends BaseController
     }
 
     /**
-     * Pembatas laju untuk form publik tanpa login.
-     *
-     * Rute-rute ini menulis ke basis data tanpa autentikasi apa pun, jadi tanpa
-     * pembatas satu skrip bisa membanjiri tabel (dan menghabiskan kuota acara)
-     * secepat jaringan mengizinkan.
-     *
-     * @return bool false bila jatah alamat IP ini sudah habis.
-     */
-    private function lolosBatasLaju(string $aksi, int $maks = 5, int $detik = MINUTE): bool
-    {
-        $kunci = 'publik-' . $aksi . '-' . md5((string) $this->request->getIPAddress());
-
-        return \Config\Services::throttler()->check($kunci, $maks, $detik) !== false;
-    }
-
-    /**
      * Konfirmasi kehadiran (RSVP) publik untuk sebuah program. Tanpa login —
      * cukup nama + WA + jumlah orang. Nomor WA yang sama dianggap satu
      * pendaftaran (diperbarui, bukan diduplikasi). Kuota ditegakkan bila diisi.

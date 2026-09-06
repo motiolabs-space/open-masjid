@@ -210,7 +210,13 @@ MYSQL_PASSWORD=open_masjid_secret
 
 - `app-core/`: Berisi logika inti aplikasi (MVC CodeIgniter 4).
 - `public/`: Direktori publik untuk aset dan index utama.
+- `docs/`: Catatan per modul, peta jalan produk, dan panduan operasional —
+  mulai dari [docs/README.md](docs/README.md).
 - `.htaccess`: Konfigurasi routing server.
+
+> Beberapa modul menunggu pemasangan di sisi server sebelum benar-benar
+> berjalan: pengingat siaran & donasi rutin butuh **cron**, Web Push butuh
+> **kunci VAPID** di `.env`. Rinciannya di [docs/README.md](docs/README.md).
 
 ## A Movement for Better Mosque Management
 

@@ -102,8 +102,8 @@
                                             </a>
                                         <?php endif; ?>
                                         <?php if ($isAdminMasjid): ?>
-                                            <a href="<?= base_url('dashboard/broadcast/groups/delete/' . $g['id']) ?>"
-                                               onclick="return confirm('Hapus grup <?= esc($g['name'], 'js') ?> dari daftar tujuan siaran?')"
+                                            <a href="#"
+                                               onclick="return hapusLewatPost('<?= base_url('dashboard/broadcast/groups/delete/' . $g['id']) ?>', 'Hapus grup <?= esc($g['name'], 'js') ?> dari daftar tujuan siaran?')"
                                                class="text-[#608a7e] hover:text-red-500" title="Hapus">
                                                 <span class="material-symbols-outlined text-xl">delete</span>
                                             </a>

@@ -12,6 +12,11 @@ class Auth extends BaseController
 {
     public function registerMasjid()
     {
+        if (! $this->lolosBatasLaju('daftar-masjid', 3, 10 * MINUTE)) {
+            return redirect()->back()->withInput()->with('error',
+                'Terlalu banyak pendaftaran dari perangkat ini. Silakan tunggu beberapa menit.');
+        }
+
         $userModel = new UserModel();
         $masjidModel = new MasjidModel();
         $pengurusModel = new MasjidPengurusModel();
@@ -119,12 +124,28 @@ class Auth extends BaseController
     public function login()
     {
         $userModel = new UserModel();
-        $email = $this->request->getPost('email');
+        $email = trim((string) $this->request->getPost('email'));
         $password = $this->request->getPost('password');
+
+        // Dua jatah sekaligus, karena keduanya menutup celah yang berbeda:
+        // per-IP menahan satu mesin menyapu banyak akun, per-email menahan satu
+        // akun digempur dari banyak alamat (mis. lewat proxy). Keduanya baru
+        // diperiksa saat kata sandi hendak dicocokkan.
+        $lolosIp    = $this->lolosBatasLaju('login-ip', 10, MINUTE);
+        $lolosEmail = $this->lolosBatasLaju('login-email', 5, 5 * MINUTE, strtolower($email));
+        if (! $lolosIp || ! $lolosEmail) {
+            return redirect()->back()->withInput()->with('error',
+                'Terlalu banyak percobaan masuk. Silakan tunggu beberapa menit lalu coba lagi.');
+        }
 
         $user = $userModel->where('email', $email)->first();
 
         if ($user && password_verify($password, $user['password_hash'])) {
+            // Jatah dikembalikan setelah berhasil: pengguna sah yang sempat
+            // salah ketik tak boleh ikut terkunci oleh jatah penebak.
+            $this->resetBatasLaju('login-ip');
+            $this->resetBatasLaju('login-email', strtolower($email));
+
             return $this->processLogin($user);
         }
 
@@ -133,6 +154,11 @@ class Auth extends BaseController
 
     public function registerJamaah()
     {
+        if (! $this->lolosBatasLaju('daftar-jamaah', 3, 10 * MINUTE)) {
+            return redirect()->back()->withInput()->with('error',
+                'Terlalu banyak pendaftaran dari perangkat ini. Silakan tunggu beberapa menit.');
+        }
+
         $userModel = new UserModel();
 
         $ip = $this->request->getIPAddress();
@@ -428,6 +454,15 @@ class Auth extends BaseController
         $email = trim((string) $this->request->getPost('email'));
         $pesanNetral = 'Bila email tersebut terdaftar, kami telah mengirim tautan reset. Silakan cek kotak masuk (dan folder spam).';
 
+        // Tanpa pembatas, rute ini adalah alat pengirim email massal: siapa pun
+        // bisa membanjiri kotak masuk orang lain dengan tautan reset.
+        if (! $this->lolosBatasLaju('lupa-sandi', 3, 10 * MINUTE)
+            || ! $this->lolosBatasLaju('lupa-sandi-email', 3, HOUR, strtolower($email))) {
+            // Tetap pesan netral: membedakan balasan di sini akan membocorkan
+            // email mana yang terdaftar — hal yang justru dijaga rute ini.
+            return redirect()->back()->with('success', $pesanNetral);
+        }
+
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return redirect()->back()->withInput()->with('error', 'Masukkan alamat email yang sah.');
         }
@@ -483,6 +518,11 @@ class Auth extends BaseController
 
     public function doResetPassword()
     {
+        if (! $this->lolosBatasLaju('reset-sandi', 10, 10 * MINUTE)) {
+            return redirect()->to('forgot-password')->with('error',
+                'Terlalu banyak percobaan. Silakan tunggu beberapa menit lalu coba lagi.');
+        }
+
         $token = (string) $this->request->getPost('token');
         $pass  = (string) $this->request->getPost('password');
         $pass2 = (string) $this->request->getPost('password_confirm');

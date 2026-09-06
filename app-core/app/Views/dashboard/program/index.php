@@ -197,9 +197,9 @@
     }
 
     function confirmDelete(id) {
-        if (confirm('Apakah Anda yakin ingin menghapus program ini?')) {
-            window.location.href = '<?= base_url('dashboard/program/delete/') ?>' + id;
-        }
+        // Lewat POST + token CSRF (lihat partials/hapus_post).
+        hapusLewatPost('<?= base_url('dashboard/program/delete/') ?>' + id,
+            'Apakah Anda yakin ingin menghapus program ini?');
     }
 </script>
 <?= $this->endSection() ?>

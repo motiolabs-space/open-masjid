@@ -83,8 +83,8 @@
                                                class="text-xs font-bold <?= $r['is_active'] ? 'text-slate-400 hover:text-slate-600' : 'text-green-600' ?>">
                                                 <?= $r['is_active'] ? 'Nonaktifkan' : 'Aktifkan' ?>
                                             </a>
-                                            <a href="<?= base_url('dashboard/broadcast/reminders/delete/' . $r['id']) ?>"
-                                               onclick="return confirm('Hapus pengingat ini?')"
+                                            <a href="#"
+                                               onclick="return hapusLewatPost('<?= base_url('dashboard/broadcast/reminders/delete/' . $r['id']) ?>', 'Hapus pengingat ini?')"
                                                class="text-[#608a7e] hover:text-red-500" title="Hapus">
                                                 <span class="material-symbols-outlined text-xl">delete</span>
                                             </a>

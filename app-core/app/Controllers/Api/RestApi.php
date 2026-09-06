@@ -26,6 +26,15 @@ use App\Libraries\MasjidData;
  */
 class RestApi extends BaseController
 {
+    /** Jatah permintaan per token per menit (baca + tulis). */
+    private const BATAS_API_PERMENIT = 120;
+
+    /** Jatah permintaan yang mengubah data, per token per menit. */
+    private const BATAS_TULIS_PERMENIT = 30;
+
+    /** Jatah percobaan token salah per alamat IP per menit. */
+    private const BATAS_TOKEN_SALAH = 20;
+
     private ?array $masjid = null;
 
     // ── Endpoint ─────────────────────────────────────────────────────────
@@ -172,8 +181,31 @@ class RestApi extends BaseController
         }
 
         $masjid = (new MasjidModel())->where('api_token', $token)->first();
+
+        // Percobaan token SALAH dibatasi per alamat IP: tanpa ini token bisa
+        // ditebak sebanyak-banyaknya secara gratis, dan audit log hanya akan
+        // mencatat banjirnya tanpa menahannya.
         if (!$masjid) {
+            if (! $this->lolosBatasLaju('api-token-salah', self::BATAS_TOKEN_SALAH, MINUTE)) {
+                return $this->galat(429, 'Terlalu banyak percobaan token. Coba lagi sebentar lagi.');
+            }
+
             return $this->galat(401, 'Token API tidak sah atau API tidak aktif untuk masjid ini.');
+        }
+
+        // Jatah per TOKEN, bukan per IP: satu integrasi yang berulah tak boleh
+        // menjatuhkan integrasi masjid lain yang kebetulan sealamat, dan pindah
+        // IP tak menghapus jejaknya.
+        if (! $this->lolosBatasLaju('api', self::BATAS_API_PERMENIT, MINUTE, $token)) {
+            return $this->galat(429, 'Terlalu banyak permintaan. Coba lagi sebentar lagi.');
+        }
+
+        // Permintaan yang MENGUBAH data diberi jatah kedua yang lebih ketat:
+        // kesalahan atau penyalahgunaan di sisi tulis jauh lebih mahal daripada
+        // di sisi baca (endpoint hapus ada di sini).
+        if (strtoupper($this->request->getMethod()) !== 'GET'
+            && ! $this->lolosBatasLaju('api-tulis', self::BATAS_TULIS_PERMENIT, MINUTE, $token)) {
+            return $this->galat(429, 'Terlalu banyak perubahan data. Coba lagi sebentar lagi.');
         }
 
         $this->masjid = $masjid;

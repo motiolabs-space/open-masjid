@@ -35,6 +35,12 @@ class Mcp extends BaseController
     /** Masjid pemilik token; diisi guard() sebelum tool mana pun berjalan. */
     private ?array $masjid = null;
 
+    /** Jatah permintaan MCP per token per menit. */
+    private const BATAS_MCP_PERMENIT = 120;
+
+    /** Jatah percobaan token salah per alamat IP per menit. */
+    private const BATAS_TOKEN_SALAH = 20;
+
     public function handle()
     {
         // Hanya POST JSON-RPC.
@@ -46,9 +52,24 @@ class Mcp extends BaseController
         // sebelum body diproses.
         $masjid = $this->masjidDariToken();
         if ($masjid === null) {
+            // Token salah dibatasi per alamat IP — sama seperti REST API, agar
+            // token MCP tak bisa ditebak berulang-ulang tanpa biaya.
+            if (! $this->lolosBatasLaju('mcp-token-salah', self::BATAS_TOKEN_SALAH, MINUTE)) {
+                return $this->response->setStatusCode(429)
+                    ->setJSON($this->galat(null, -32001, 'Terlalu banyak percobaan token. Coba lagi sebentar lagi.'));
+            }
+
             return $this->response->setStatusCode(401)
                 ->setJSON($this->galat(null, -32001, 'Token MCP tidak sah atau MCP tidak aktif untuk masjid ini.'));
         }
+
+        // Jatah per token: satu agen yang berulah tak menjatuhkan masjid lain.
+        $token = trim(preg_replace('/^Bearer\s+/i', '', trim($this->request->getHeaderLine('Authorization'))));
+        if (! $this->lolosBatasLaju('mcp', self::BATAS_MCP_PERMENIT, MINUTE, $token)) {
+            return $this->response->setStatusCode(429)
+                ->setJSON($this->galat(null, -32001, 'Terlalu banyak permintaan. Coba lagi sebentar lagi.'));
+        }
+
         $this->masjid = $masjid;
 
         // 2. Parse JSON-RPC.

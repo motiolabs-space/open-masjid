@@ -101,7 +101,7 @@
                                         <a href="<?= base_url('dashboard/schedules/edit/' . $item['id']) ?>" class="size-8 bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-lg flex items-center justify-center text-gray-500 hover:text-primary hover:border-primary transition-colors">
                                             <span class="material-symbols-outlined text-lg">edit</span>
                                         </a>
-                                        <a href="<?= base_url('dashboard/schedules/delete/' . $item['id']) ?>" onclick="return confirm('Hapus jadwal ini?')" class="size-8 bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-lg flex items-center justify-center text-gray-500 hover:text-red-500 hover:border-red-500 transition-colors">
+                                        <a href="#" onclick="return hapusLewatPost('<?= base_url('dashboard/schedules/delete/' . $item['id']) ?>', 'Hapus jadwal ini?')" class="size-8 bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-lg flex items-center justify-center text-gray-500 hover:text-red-500 hover:border-red-500 transition-colors">
                                             <span class="material-symbols-outlined text-lg">delete</span>
                                         </a>
                                     </div>

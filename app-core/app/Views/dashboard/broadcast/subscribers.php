@@ -68,7 +68,7 @@
                                     <?= date('d M Y', strtotime($s['created_at'])) ?>
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <a href="<?= base_url('dashboard/subscribers/delete/' . $s['id']) ?>" onclick="return confirm('Hapus subscriber ini?')" class="text-gray-400 hover:text-red-500 transition-colors tooltip" title="Hapus">
+                                    <a href="#" onclick="return hapusLewatPost('<?= base_url('dashboard/subscribers/delete/' . $s['id']) ?>', 'Hapus subscriber ini?')" class="text-gray-400 hover:text-red-500 transition-colors tooltip" title="Hapus">
                                         <span class="material-symbols-outlined">delete</span>
                                     </a>
                                 </td>

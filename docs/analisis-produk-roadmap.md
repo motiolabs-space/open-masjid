@@ -2,6 +2,8 @@
 
 _Audit modul, benchmark platform sejenis, dan usulan fitur. Disusun Sep 2026._
 
+_Catatan per modul ada di [docs/README.md](README.md)._
+
 Fokus arah yang diminta: **berangkat dari transparansi (atau kemudahan) laporan
 keuangan → naik ke program yang berdampak bagi masyarakat sekitar dan luas.**
 
@@ -160,8 +162,7 @@ Sumber:
 |---------|--------|----------|
 | 🔴 | **Deploy key SSH bocor** di riwayat publik (`f7923d2:github_deploy_key`) | Cabut di GitHub + `authorized_keys` server, terbitkan kunci baru. (di [go-live-checklist](go-live-checklist.md) A1) |
 | 🔴 | **`CI_ENVIRONMENT = development` di server** | Set `production` — debug toolbar membocorkan path/query/konfigurasi. (checklist A2) |
-| 🟠 | **Rate limiting belum menyeluruh** | Form publik sudah dibatasi (lihat di bawah), tapi **login masih rawan brute-force** dan endpoint tulis `api/v1/*` belum dibatasi per-token. Pasang `Throttler` CI4 di keduanya. |
-| 🟠 | **Token API/MCP tanpa masa berlaku & tanpa alert** | Audit log sudah mencatat penolakan, tapi tak ada notifikasi saat lonjakan penolakan (indikasi token bocor). Tambah alert (Telegram) ke pengurus + opsi kedaluwarsa/rotasi token. |
+| 🟠 | **Token API/MCP tanpa masa berlaku & tanpa alert** | Audit log sudah mencatat penolakan dan lajunya kini dibatasi, tapi tak ada notifikasi saat lonjakan penolakan (indikasi token bocor). Tambah alert (Telegram) ke pengurus + opsi kedaluwarsa/rotasi token. |
 | 🟢 | Sudah baik | IDOR/tenant scoping banyak diperbaiki, CSRF aktif, cek kepemilikan pada API tulis, MasjidWriter memusatkan aturan tenant. |
 
 ### Sudah diperbaiki (Sep 2026)
@@ -181,6 +182,55 @@ Hasil review kode Tahap 3–4, seluruhnya diuji ulang di lingkungan lokal:
 | 🟢 **Penanda peta di koordinat 0,0** — 3 dari 5 masjid berkoordinat kosong tampil di Teluk Guinea, memaksa `fitBounds()` menampilkan separuh dunia. | 0,0 dan koordinat di luar rentang diperlakukan sebagai "belum ada lokasi". |
 | 🟢 **Jelajah memuat seluruh masjid dalam satu halaman** | Dipaginasi 24/halaman; penyaring `q`/`provinsi` dipertahankan saat berpindah halaman. |
 | 🟢 **Penyaring provinsi memuat masjid non-aktif** | Kueri provinsi ikut dibatasi `status = active`. |
+
+### Pembatas laju — sudah menyeluruh (Sep 2026)
+
+`Throttler` CI4 (cache berkas) lewat `BaseController::lolosBatasLaju()`.
+Jatahnya dipisah per aksi + identitas, sehingga membatasi satu hal tak ikut
+mengunci yang lain.
+
+| Rute | Jatah | Identitas |
+|------|-------|-----------|
+| Login | 10 / menit **dan** 5 / 5 menit | per IP **dan** per email |
+| Lupa sandi | 3 / 10 menit **dan** 3 / jam | per IP **dan** per email |
+| Reset sandi | 10 / 10 menit | per IP |
+| Daftar masjid / jamaah | 3 / 10 menit | per IP |
+| RSVP, donasi rutin | 5 / menit | per IP |
+| Langganan push | 10 / menit | per IP |
+| REST API (baca + tulis) | 120 / menit | **per token** |
+| REST API (hanya yang mengubah data) | 30 / menit | **per token** |
+| MCP | 120 / menit | **per token** |
+| Token API/MCP salah | 20 / menit | per IP |
+
+Dua keputusan yang disengaja:
+
+- **Login yang berhasil mengembalikan jatah** (`resetBatasLaju`). Tanpa itu,
+  pengguna sah yang salah ketik beberapa kali lalu benar akan tetap tersisa
+  dalam keadaan hampir terkunci.
+- **API dibatasi per token, bukan per IP.** Satu integrasi yang berulah tak
+  boleh menjatuhkan integrasi masjid lain yang kebetulan sealamat, dan berpindah
+  IP tak menghapus jejaknya.
+- **Lupa sandi tetap membalas pesan netral** saat dibatasi — membedakan
+  balasannya justru akan membocorkan email mana yang terdaftar, hal yang justru
+  dijaga rute itu.
+
+### Penghapusan data — POST + CSRF (Sep 2026)
+
+Seluruh rute hapus dulu berupa **tautan GET**. Tautan GET yang merusak data bisa
+dipicu tanpa sepengetahuan pengurus — cukup sebuah `<img src="…/delete/7">` di
+halaman atau email mana pun selagi ia masih login — dan token CSRF tak pernah
+ikut terkirim.
+
+Kesembilan rute (program, warga, subscriber, grup siaran, pengingat, bantuan
+warga, inventaris, jadwal sholat, relawan) kini **POST + `csrf_field()`**.
+Tombolnya memakai satu formulir tersembunyi bersama di
+`partials/hapus_post.php`, disisipkan ke layout dashboard, sehingga tiap view
+cukup memanggil `hapusLewatPost(url, pesan)` — controller tak ada yang berubah.
+
+Diverifikasi: GET ke rute hapus lama → **404** (data utuh); POST tanpa token →
+**403** (data utuh); POST dengan token → terhapus.
+
+---
 
 **Sisa yang diketahui:** dedup RSVP memakai nomor WA tanpa verifikasi, jadi orang
 yang tahu nomor pendaftar lain masih bisa menimpa nama/jumlah tamunya. Menutup

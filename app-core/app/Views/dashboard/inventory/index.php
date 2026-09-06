@@ -130,9 +130,8 @@
 
 <script>
 function confirmDelete(url, name) {
-    if (confirm('Apakah Anda yakin ingin menghapus data aset "' + name + '"?')) {
-        window.location.href = url;
-    }
+    // Lewat POST + token CSRF (lihat partials/hapus_post).
+    hapusLewatPost(url, 'Apakah Anda yakin ingin menghapus data aset "' + name + '"?');
 }
 </script>
 <?= $this->endSection() ?>

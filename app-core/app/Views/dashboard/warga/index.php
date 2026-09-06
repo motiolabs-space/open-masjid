@@ -189,9 +189,9 @@
 
 <script>
 function deleteWarga(id) {
-    if(confirm('Apakah Anda yakin ingin menghapus data warga ini?')) {
-        window.location.href = '<?= base_url('dashboard/warga/delete/') ?>' + id;
-    }
+    // Lewat POST + token CSRF (lihat partials/hapus_post).
+    hapusLewatPost('<?= base_url('dashboard/warga/delete/') ?>' + id,
+        'Apakah Anda yakin ingin menghapus data warga ini?');
 }
 </script>
 <?= $this->endSection() ?>

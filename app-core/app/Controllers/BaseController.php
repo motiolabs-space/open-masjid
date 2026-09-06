@@ -55,4 +55,40 @@ abstract class BaseController extends Controller
 
         // E.g.: $this->session = service('session');
     }
+
+    /**
+     * Pembatas laju berbasis `Throttler` CI4 (penyimpanan: cache berkas).
+     *
+     * Dipakai rute yang bisa disalahgunakan berulang-ulang tanpa biaya bagi
+     * penyerang: form publik tanpa login, percobaan kata sandi, dan API
+     * ber-token. Satu jatah per `$aksi` + `$identitas`, sehingga membatasi satu
+     * hal tak ikut mengunci yang lain.
+     *
+     * @param  string $aksi      Nama jatah, mis. 'login' atau 'rsvp'.
+     * @param  string $identitas Pembeda pemakai; kosong = alamat IP pemanggil.
+     * @return bool              false bila jatah sudah habis.
+     */
+    protected function lolosBatasLaju(string $aksi, int $maks = 5, int $detik = MINUTE, string $identitas = ''): bool
+    {
+        return service('throttler')->check($this->kunciBatasLaju($aksi, $identitas), $maks, $detik) !== false;
+    }
+
+    /**
+     * Kembalikan jatah sebuah aksi ke penuh.
+     *
+     * Dipakai setelah percobaan yang SAH berhasil (mis. login benar), supaya
+     * pengguna yang sekadar salah ketik beberapa kali tidak ikut terkunci oleh
+     * jatah yang sebetulnya ditujukan untuk penebak kata sandi.
+     */
+    protected function resetBatasLaju(string $aksi, string $identitas = ''): void
+    {
+        service('throttler')->remove($this->kunciBatasLaju($aksi, $identitas));
+    }
+
+    private function kunciBatasLaju(string $aksi, string $identitas): string
+    {
+        // Di-hash: identitas bisa berupa email atau token, dan keduanya tak
+        // pantas tersimpan apa adanya sebagai nama berkas cache.
+        return 'batas-' . $aksi . '-' . md5($identitas !== '' ? $identitas : (string) $this->request->getIPAddress());
+    }
 }
