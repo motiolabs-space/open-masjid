@@ -36,7 +36,7 @@
                     <div class="relative z-10">
                         <h4 class="font-black mb-2">Ingin berkontribusi?</h4>
                         <p class="text-xs text-white/70 leading-relaxed mb-6">Punya informasi atau dokumentasi kegiatan masjid yang ingin dimuat?</p>
-                        <a href="#kontak" class="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest bg-white text-primary px-4 py-2 rounded-lg hover:bg-emerald-50 transition-colors">Hubungi Kami</a>
+                        <a href="<?= esc(base_url($masjid['username']) . '#kontak', 'attr') ?>" class="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest bg-white text-primary px-4 py-2 rounded-lg hover:bg-emerald-50 transition-colors">Hubungi Kami</a>
                     </div>
                     <span class="material-symbols-outlined absolute -bottom-6 -right-6 text-7xl opacity-10">draw</span>
                 </div>
