@@ -70,5 +70,12 @@ jobs:
             cd ${{ secrets.SITEGROUND_SSH_TARGET_PATH }}/app-core
             composer install --no-dev --optimize-autoloader
             php spark migrate
+            # Segarkan masjid contoh di /digital. Seeder ini IDEMPOTEN dan hanya
+            # menyentuh baris milik masjid ber-username 'digital', jadi aman
+            # dijalankan tiap deploy — sekaligus membuat tanggal pada laporannya
+            # ikut bergerak sehingga demo tak pernah tampak basi. Bila masjid
+            # contohnya tidak ada, seeder berhenti dengan pesan tanpa menggagalkan
+            # deploy.
+            php spark db:seed DemoMasjidSeeder
             # Tampilkan hasil akhir agar mudah diperiksa di log Actions.
             php spark migrate:status
