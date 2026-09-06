@@ -161,7 +161,7 @@ Sumber:
 | Tingkat | Temuan | Tindakan |
 |---------|--------|----------|
 | 🔴 | **Deploy key SSH bocor** di riwayat publik (`f7923d2:github_deploy_key`) | Cabut di GitHub + `authorized_keys` server, terbitkan kunci baru. (di [go-live-checklist](go-live-checklist.md) A1) |
-| 🔴 | **`CI_ENVIRONMENT = development` di server** | Set `production` — debug toolbar membocorkan path/query/konfigurasi. (checklist A2) |
+| ✅ | ~~**`CI_ENVIRONMENT = development` di server**~~ | Selesai Sep 2026 — server sudah `production`; debug toolbar tak lagi membocorkan path/query/konfigurasi. (checklist A2) |
 | 🟠 | **Token API/MCP tanpa masa berlaku & tanpa alert** | Audit log sudah mencatat penolakan dan lajunya kini dibatasi, tapi tak ada notifikasi saat lonjakan penolakan (indikasi token bocor). Tambah alert (Telegram) ke pengurus + opsi kedaluwarsa/rotasi token. |
 | 🟢 | Sudah baik | IDOR/tenant scoping banyak diperbaiki, CSRF aktif, cek kepemilikan pada API tulis, MasjidWriter memusatkan aturan tenant. |
 

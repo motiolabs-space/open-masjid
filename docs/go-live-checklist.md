@@ -29,16 +29,20 @@ Selama belum dicabut, siapa pun bisa mengunduhnya dan punya akses SSH server.
 **Verifikasi:** `git show f7923d2:github_deploy_key` masih menampilkan isi, tetapi
 kunci itu kini tak lagi diterima server (sudah dihapus dari authorized_keys).
 
-### A2. Matikan mode development
-`.env` server masih `CI_ENVIRONMENT = development` → debug toolbar menyajikan isi
-dalam server (path, query, konfigurasi) ke publik.
+### A2. Matikan mode development — ✅ SELESAI (Sep 2026)
+`.env` server sudah disetel `CI_ENVIRONMENT = production`, sehingga debug toolbar
+tak lagi menyajikan isi dalam server (path, query, konfigurasi) ke publik.
 
-- [ ] Edit `/home/customer/www/masj.id/app-core/.env`:
+Konsekuensi yang perlu diingat: dalam mode produksi galat PHP tak lagi tampil di
+layar — jejaknya ada di `app-core/writable/logs/`, jadi pastikan direktori itu
+tetap bisa ditulis server.
+
+- [x] `/home/customer/www/masj.id/app-core/.env`:
       ```
       CI_ENVIRONMENT = production
       ```
 
-**Verifikasi:**
+**Verifikasi ulang (bila ragu):**
 ```bash
 curl -s "https://masj.id/?debugbar" -o /dev/null -w "%{http_code}\n"
 # dan pastikan halaman biasa tak lagi memuat elemen debugbar
