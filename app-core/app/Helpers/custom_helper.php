@@ -56,6 +56,41 @@ if (!function_exists('pengurus_saat_ini')) {
     }
 }
 
+if (!function_exists('masjid_saat_ini')) {
+    /**
+     * Baris masjid yang sedang dibuka pengguna — dibaca dari basis data, bukan
+     * dari session.
+     *
+     * Alasannya sama seperti pengurus_saat_ini(): session hanya menyimpan nama
+     * dan username masjid sebagai salinan saat login. Menyalin logo ke sana
+     * berarti pengurus yang baru mengganti logo di menu Profil Masjid tetap
+     * melihat logo lama sampai ia logout — persis jenis kebingungan yang tak
+     * perlu ada.
+     *
+     * Hasilnya di-cache per-permintaan, jadi cukup satu kueri meski dipanggil
+     * beberapa kali dalam satu halaman.
+     *
+     * @return array|null null bila pengguna belum memilih masjid (mis. jamaah).
+     */
+    function masjid_saat_ini(): ?array
+    {
+        static $cache = null;
+        static $sudahDibaca = false;
+
+        if ($sudahDibaca) {
+            return $cache;
+        }
+        $sudahDibaca = true;
+
+        $masjidId = session()->get('masjid_id');
+        if (empty($masjidId)) {
+            return $cache = null;
+        }
+
+        return $cache = (new \App\Models\MasjidModel())->find($masjidId);
+    }
+}
+
 if (!function_exists('is_admin_masjid')) {
     /**
      * Apakah pengguna yang login adalah Admin Masjid pada masjid yang dibuka.

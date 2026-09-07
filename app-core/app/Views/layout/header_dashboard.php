@@ -4,7 +4,24 @@
     <button type="button" onclick="toggleSidebar(true)" class="lg:hidden p-2 -ml-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
         <span class="material-symbols-outlined">menu</span>
     </button>
-    <span class="material-symbols-outlined text-primary">location_on</span>
+    <?php
+        // Logo masjid menggantikan ikon pin di sini — BUKAN menggantikan logo
+        // Masj.id di sidebar. Keduanya menjawab pertanyaan yang berbeda:
+        // sidebar menjawab "aplikasi apa ini", header menjawab "masjid mana
+        // yang sedang saya kerjakan". Pertanyaan kedua penting justru karena
+        // seorang pengurus bisa mengelola lebih dari satu masjid dan berpindah
+        // konteks; salah masjid saat mencatat transaksi adalah kesalahan yang
+        // merepotkan untuk dibereskan.
+        $masjidAktif = masjid_saat_ini();
+    ?>
+    <?php if (! empty($masjidAktif['logo'])): ?>
+        <img src="<?= esc((new \App\Libraries\Storage())->url($masjidAktif['logo']), 'attr') ?>"
+             alt="Logo <?= esc($masjidAktif['name'] ?? '', 'attr') ?>"
+             class="size-8 rounded-full object-contain bg-white border border-primary/20 shrink-0">
+    <?php else: ?>
+        <?php // Masjid belum mengunggah logo (atau pengguna belum memilih masjid). ?>
+        <span class="material-symbols-outlined text-primary">location_on</span>
+    <?php endif; ?>
     <span class="text-sm font-bold text-slate-700 dark:text-slate-200"><?= session()->get('masjid_name') ?? 'Masj.id' ?></span>
     <?php if (session()->get('role') === 'superadmin'): ?>
         <a href="<?= base_url('superadmin') ?>" class="ml-4 flex items-center gap-1.5 px-3 py-1.5 bg-rose-500 text-white rounded-lg text-[10px] font-bold hover:bg-rose-600 transition-all shadow-sm">
