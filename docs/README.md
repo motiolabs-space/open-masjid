@@ -12,6 +12,7 @@ dari [analisis-produk-roadmap.md](analisis-produk-roadmap.md).
 | [go-live-checklist.md](go-live-checklist.md) | Yang wajib beres sebelum dipakai sungguhan |
 | [gtm.md](gtm.md) | **Draf** bahan diskusi go-to-market: yang sudah & belum terukur, pertanyaan terbuka |
 | [seri-konten-sosmed.md](seri-konten-sosmed.md) | Naskah 5 tulisan sosial media + daftar tangkapan layar; tampilannya di `/seri` |
+| [gtm-sosmed.md](gtm-sosmed.md) | Panduan sosial media: sasaran, pilar konten, kalender 12 pekan, carousel & caption siap pakai |
 | [masjid-contoh.md](masjid-contoh.md) | Masjid peraga di `/digital` dan **seeder**-nya (`php spark db:seed DemoMasjidSeeder`) |
 
 ## Modul

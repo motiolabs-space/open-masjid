@@ -10,7 +10,10 @@ dengan tebakan yang terlihat rapi justru berbahaya: angka karangan cenderung
 dikutip ulang sebagai fakta di rapat berikutnya.
 
 Konteks produk ada di [analisis-produk-roadmap.md](analisis-produk-roadmap.md) —
-termasuk benchmark platform sejenis beserta sumbernya.
+termasuk benchmark platform sejenis beserta sumbernya. Pelaksanaan di sisi
+sosial media ada di [gtm-sosmed.md](gtm-sosmed.md); catat bahwa kerja di sana
+**belum bisa dinilai dengan data** selama kanal akuisisi tidak dicatat (bagian 2
+dan 5 di bawah).
 
 ---
 

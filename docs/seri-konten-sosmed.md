@@ -16,6 +16,9 @@ alasannya.
 
 **Irama:** satu tulisan per pekan. Lima pekan.
 
+**Sesudah pekan 5:** lanjutannya (pekan 6–12) beserta format pendek — carousel,
+caption, hook video — ada di [gtm-sosmed.md](gtm-sosmed.md).
+
 ---
 
 ## Pekan 1 — Kepercayaan
