@@ -34,7 +34,11 @@ class Auth extends BaseController
                 'password_hash' => password_hash($this->request->getPost('password_pic'), PASSWORD_DEFAULT),
                 'role'          => 'user',
                 'register_ip'   => $ip,
-                'register_country' => $this->_getCountryFromIp($ip)
+                'register_country' => $this->_getCountryFromIp($ip),
+                // Asal kunjungan diambil dari cookie sentuhan pertama, bukan
+                // dari alamat halaman formulir — orang jarang mendaftar pada
+                // kunjungan yang sama saat ia pertama menemukan situs ini.
+                ...\App\Libraries\Acquisition::untukPendaftaran(),
             ];
             $userId = $userModel->insert($userData);
 
@@ -48,6 +52,9 @@ class Auth extends BaseController
             $masjidData = [
                 'name'     => $this->request->getPost('nama_masjid'),
                 'username' => $this->request->getPost('username_masjid'),
+                // Asal masjid ini ikut dicatat — inilah satuan yang paling
+                // menentukan bagi GTM, bukan jumlah penggunanya.
+                ...\App\Libraries\Acquisition::untukPendaftaran(),
             ];
             $masjidId = $masjidModel->insert($masjidData);
 
@@ -169,7 +176,8 @@ class Auth extends BaseController
             'password_hash' => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
             'role'          => 'user',
             'register_ip'   => $ip,
-            'register_country' => $this->_getCountryFromIp($ip)
+            'register_country' => $this->_getCountryFromIp($ip),
+            ...\App\Libraries\Acquisition::untukPendaftaran(),
         ];
 
         if ($userId = $userModel->insert($userData)) {

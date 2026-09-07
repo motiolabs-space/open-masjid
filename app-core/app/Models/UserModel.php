@@ -12,7 +12,12 @@ class UserModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['name', 'email', 'phone', 'password_hash', 'role', 'telegram_chat_id', 'last_login', 'register_ip', 'register_country'];
+    protected $allowedFields    = [
+        'name', 'email', 'phone', 'password_hash', 'role', 'telegram_chat_id',
+        'last_login', 'register_ip', 'register_country',
+        // Asal pendaftar; diisi App\Libraries\Acquisition saat mendaftar.
+        'utm_source', 'utm_medium', 'utm_campaign', 'referrer',
+    ];
 
     // Dates
     protected $useTimestamps = true;

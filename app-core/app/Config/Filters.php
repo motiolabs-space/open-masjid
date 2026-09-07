@@ -36,6 +36,7 @@ class Filters extends BaseFilters
         'performance'   => PerformanceMetrics::class,
         'dashboardGuard' => \App\Filters\DashboardGuard::class,
         'masjidAdmin'    => \App\Filters\MasjidAdmin::class,
+        'trackAcquisition' => \App\Filters\TrackAcquisition::class,
     ];
 
     /**
@@ -84,6 +85,10 @@ class Filters extends BaseFilters
             // 'api/mcp' ikut dikecualikan: agen AI memanggil dengan token Bearer,
             // bukan token CSRF. Keamanannya dijaga token per masjid + hanya-baca.
             'csrf' => ['except' => ['payment/callback', 'api/telegram/webhook/*', 'api/mcp', 'api/v1/*', 'push/subscribe']],
+            // Mengingat asal kunjungan (UTM/rujukan) supaya kanal akuisisi bisa
+            // dinilai dengan data. Global karena tautan kampanye bisa mengarah
+            // ke halaman mana saja, bukan cuma beranda.
+            'trackAcquisition',
             // 'invalidchars',
         ],
         'after' => [

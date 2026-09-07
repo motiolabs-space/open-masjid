@@ -49,7 +49,7 @@ yang tak benar-benar ada akan salah arah tanpa ketahuan.
 | Tak terukur | Sebabnya | Akibatnya bagi GTM |
 |---|---|---|
 | **Retensi & kohort** | `users.last_login` hanya menyimpan login **terakhir**; tak ada histori | Tak bisa menjawab "masjid yang daftar bulan X, berapa yang masih aktif bulan X+3" — pertanyaan paling menentukan bagi produk berbasis langganan/adopsi |
-| **Sumber akuisisi** | Pendaftaran hanya menyimpan `register_ip` & `register_country`; tak ada UTM, referrer, atau kanal | Tak bisa tahu kanal mana yang berhasil, jadi anggaran/tenaga tak bisa dialihkan berdasarkan bukti |
+| ~~**Sumber akuisisi**~~ ✅ | **Selesai Sep 2026** — UTM & rujukan dicatat saat pendaftaran, ditampilkan di **Laporan GTM › Kanal Akuisisi Masjid**. Lihat [gtm-sosmed.md](gtm-sosmed.md) untuk cara membuat tautannya. | Terjawab, **untuk pendaftar baru saja** — masjid yang sudah ada sebelum ini tampil "Tidak tercatat" |
 | **Funnel aktivasi** | Tak ada pencatatan peristiwa (event) | Tak bisa tahu di langkah mana masjid berhenti: daftar → isi profil → input transaksi pertama → publikasi laporan pertama |
 | **DAU/MAU sebagai tren** | Sama seperti retensi — hanya posisi terkini | Grafik pertumbuhan keterlibatan tak bisa dibuat tanpa mengarang |
 | **Segmen masjid** | Tak ada atribut ukuran/tipe (kampung, kampus, perumahan, korporat) | Tak bisa tahu segmen mana yang paling cepat mengadopsi |
@@ -110,15 +110,18 @@ rasio manfaat terhadap usaha:
 
 1. **Tabel peristiwa login** (`user_id`, `logged_at`) — membuka retensi, kohort,
    dan tren DAU/MAU sekaligus. Perubahan paling kecil dengan hasil terbesar.
-2. **Kanal akuisisi saat pendaftaran** — simpan UTM/referrer pada pendaftaran
-   masjid. Satu kolom, tapi tanpanya kanal tak akan pernah bisa dinilai.
+   **Kini menjadi yang paling menentukan** setelah kanal akuisisi selesai.
+2. ~~**Kanal akuisisi saat pendaftaran**~~ — ✅ **selesai Sep 2026.**
+   `App\Libraries\Acquisition` mengingat UTM/rujukan pada sentuhan PERTAMA
+   (cookie 90 hari) lalu menyerahkannya saat mendaftar, sebab orang jarang
+   mendaftar pada kunjungan yang sama saat ia menemukan situs ini.
 3. **Penanda aktivasi per masjid** — kapan transaksi pertama dicatat, kapan
    laporan pertama diterbitkan.
 4. **Segmen masjid** — satu kolom tipe (kampung/perumahan/kampus/korporat/
    yayasan), diisi saat pendaftaran.
 
-Ketiga hal pertama tidak mengubah tampilan apa pun bagi pengurus masjid; semuanya
-di sisi data.
+Seluruhnya tidak mengubah tampilan apa pun bagi pengurus masjid; semuanya di
+sisi data.
 
 ---
 

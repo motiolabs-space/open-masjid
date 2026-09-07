@@ -114,6 +114,60 @@
     </div>
 </div>
 
+<!-- Kanal akuisisi masjid -->
+<div class="mt-10">
+    <h2 class="text-lg font-black mb-1">Kanal Akuisisi Masjid</h2>
+    <p class="text-sm text-slate-500 mb-4">
+        Dari mana masjid yang mendaftar berasal, <?= esc($rentang) ?>.
+    </p>
+
+    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        <?php
+            $totalKanal = array_sum(array_column($kanal, 'jumlah'));
+            $adaTercatat = false;
+            foreach ($kanal as $k) { if ($k['sumber'] !== '') { $adaTercatat = true; break; } }
+        ?>
+        <?php if ($totalKanal === 0): ?>
+            <p class="p-6 text-sm text-slate-500">Belum ada masjid mendaftar pada rentang ini.</p>
+        <?php else: ?>
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                    <tr>
+                        <th class="px-6 py-3">Sumber</th>
+                        <th class="px-6 py-3">Medium</th>
+                        <th class="px-6 py-3 text-right">Masjid</th>
+                        <th class="px-6 py-3 text-right">Porsi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                    <?php foreach ($kanal as $k): ?>
+                        <tr>
+                            <td class="px-6 py-3 font-bold">
+                                <?= $k['sumber'] !== '' ? esc($k['sumber']) : '<span class="text-slate-400 font-medium">Tidak tercatat</span>' ?>
+                            </td>
+                            <td class="px-6 py-3 text-slate-500"><?= $k['medium'] !== '' ? esc($k['medium']) : '—' ?></td>
+                            <td class="px-6 py-3 text-right font-bold"><?= $fmt($k['jumlah']) ?></td>
+                            <td class="px-6 py-3 text-right text-slate-500"><?= round($k['jumlah'] / $totalKanal * 100) ?>%</td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+
+            <?php if (! $adaTercatat): ?>
+                <?php // Jujur soal batasnya: tanpa catatan asal, tabel ini tak
+                      // bisa dipakai menilai kanal mana pun. ?>
+                <p class="px-6 py-4 text-xs text-slate-500 border-t border-slate-100 dark:border-slate-800">
+                    Belum ada masjid dengan asal yang tercatat. Pencatatan kanal baru berjalan sejak
+                    pemasangannya — masjid yang mendaftar sebelum itu tidak punya datanya.
+                    Sebarkan tautan berpenanda seperti
+                    <code class="px-1 rounded bg-slate-100 dark:bg-slate-800">?utm_source=instagram&amp;utm_medium=social&amp;utm_campaign=pekan-1</code>
+                    agar kolom ini mulai terisi.
+                </p>
+            <?php endif; ?>
+        <?php endif; ?>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     const gtmLabel  = <?= json_encode($label) ?>;

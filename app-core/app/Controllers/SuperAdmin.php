@@ -143,8 +143,24 @@ class SuperAdmin extends BaseController
             'series' => array_map(fn ($v) => round($v, 2), $s),
         ];
 
+        // Kanal akuisisi masjid dalam jendela yang sama. Kolomnya baru terisi
+        // sejak App\Libraries\Acquisition dipasang, jadi masjid yang mendaftar
+        // sebelum itu wajar bernilai kosong — ditampilkan apa adanya sebagai
+        // "Tidak tercatat", bukan disamarkan menjadi "langsung".
+        $kanal = $db->query(
+            "SELECT COALESCE(NULLIF(utm_source,''), NULLIF(referrer,''), '') sumber,
+                    COALESCE(NULLIF(utm_medium,''), '') medium,
+                    COUNT(*) jumlah
+             FROM masjid
+             WHERE created_at >= ?
+             GROUP BY sumber, medium
+             ORDER BY jumlah DESC",
+            [$mulai]
+        )->getResultArray();
+
         $data = [
             'title'   => 'Laporan GTM - Superadmin',
+            'kanal'   => $kanal,
             'bulan'   => $bulan,
             'label'   => $label,
             'rentang' => date('M Y', strtotime($mulai)) . ' – ' . date('M Y'),

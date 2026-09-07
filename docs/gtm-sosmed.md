@@ -7,8 +7,9 @@ Melanjutkan [seri-konten-sosmed.md](seri-konten-sosmed.md) — lima tulisan panj
 di sana adalah **pekan 1–5**. Dokumen ini melanjutkannya ke pekan 6–12 dan
 menambahkan format pendek yang lebih sering dipakai sehari-hari.
 
-Konteks strategisnya di [gtm.md](gtm.md). Baca bagian "yang tidak bisa diukur"
-di sana sebelum menetapkan target apa pun.
+Konteks strategisnya di [gtm.md](gtm.md). Sejak Sep 2026 kanal akuisisi sudah
+tercatat, jadi kerja di dokumen ini **bisa dinilai dengan data** — asalkan
+tautannya berpenanda. Caranya di bagian 8.
 
 ---
 
@@ -181,26 +182,57 @@ Yang boleh dipakai sekarang: angka pada tangkapan layar masjid contoh, **selama
 tetap diberi keterangan bahwa datanya contoh** (lihat
 [masjid-contoh.md](masjid-contoh.md)).
 
-## 8. Apa yang bisa diukur — dan yang belum
+## 8. Mengukurnya
 
-Ini bagian paling penting, dan jawabannya jujur: **saat ini hampir tidak ada.**
+Sejak Sep 2026 platform **mencatat asal pendaftar**. Kanal akuisisi sudah bisa
+dinilai dengan data, bukan dugaan — dengan satu syarat: **tautan yang Anda
+sebarkan harus berpenanda.**
 
-Platform belum mencatat dari mana pendaftar datang. Pendaftaran hanya menyimpan
-alamat IP dan negara, tanpa UTM maupun referrer. Artinya seluruh kerja sosial
-media di dokumen ini **tidak bisa dinilai berhasil atau tidak** dengan data —
-hanya bisa dikira-kira.
+### Cara membuat tautannya
 
-Yang bisa dipantau sekarang, seadanya:
+Tambahkan penanda di belakang alamat mana pun:
 
-- Metrik bawaan platform sosial media (jangkauan, simpan, bagikan). **"Simpan"
-  dan "bagikan" lebih berarti daripada suka** untuk konten seperti ini.
-- Grafik akuisisi masjid di **Superadmin › Laporan GTM**, dibandingkan kasar
-  dengan pekan unggahan.
+```
+https://masj.id/digital?utm_source=instagram&utm_medium=social&utm_campaign=pekan-1
+https://masj.id/seri?utm_source=whatsapp&utm_medium=grup&utm_campaign=pekan-3
+https://masj.id/?utm_source=linkedin&utm_medium=social&utm_campaign=pekan-7
+```
 
-**Satu perubahan kecil membuka semuanya:** simpan UTM/referrer saat pendaftaran
-masjid. Satu kolom, dan sesudahnya pertanyaan "kanal mana yang berhasil" bisa
-dijawab dengan data, bukan dugaan. Ini prasyarat sebelum menaruh anggaran ke
-salah satu kanal — rinciannya di [gtm.md](gtm.md) bagian instrumentasi.
+| Penanda | Isi | Contoh |
+|---|---|---|
+| `utm_source` | **di mana** tautan dipasang | `instagram`, `whatsapp`, `linkedin` |
+| `utm_medium` | **bentuknya** | `social`, `grup`, `bio`, `story` |
+| `utm_campaign` | **materi yang mana** | `pekan-1`, `carousel-a`, `testimoni-jogja` |
 
-Sebelum itu ada, perlakukan kalender 12 pekan ini sebagai **eksperimen yang
-belum terukur**, bukan program yang sudah terbukti.
+Tulis konsisten dan huruf kecil semua. `Instagram` dan `instagram` akan terhitung
+sebagai dua kanal berbeda.
+
+Tautan boleh mengarah ke **halaman mana saja** — halaman masjid contoh, satu
+program, atau laporan — bukan hanya beranda. Pencatatannya berjalan di seluruh
+halaman publik.
+
+### Cara membacanya
+
+**Superadmin › Laporan GTM › Kanal Akuisisi Masjid.** Isinya sumber, medium,
+jumlah masjid, dan porsinya untuk rentang yang dipilih.
+
+Dua hal yang perlu diketahui saat membacanya:
+
+- **Sentuhan pertama yang dicatat, bukan yang terakhir.** Orang yang menemukan
+  lewat Instagram lalu mendaftar tiga hari kemudian lewat pencarian Google tetap
+  tercatat sebagai Instagram. Yang ingin dijawab adalah "kanal mana yang
+  memperkenalkan", bukan "halaman terakhir yang dibuka".
+- **"Tidak tercatat" wajar dan akan besar di awal.** Seluruh masjid yang
+  mendaftar sebelum pencatatan ini dipasang masuk ke sana, begitu pula pendaftar
+  yang datang langsung. Yang berarti adalah **perubahan porsinya dari bulan ke
+  bulan**, bukan angka mutlaknya.
+
+### Yang masih belum terukur
+
+- **Retensi & kohort** — belum ada histori login, jadi "masjid yang daftar bulan
+  X, berapa yang masih aktif bulan X+3" belum bisa dijawab. Ini yang paling
+  menentukan berikutnya; lihat [gtm.md](gtm.md) bagian instrumentasi.
+- **Funnel aktivasi** — di langkah mana calon berhenti.
+
+Dari sisi platform sosial media sendiri, **"simpan" dan "bagikan" lebih berarti
+daripada suka** untuk konten seperti ini.
