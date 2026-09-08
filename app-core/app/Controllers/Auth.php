@@ -380,8 +380,16 @@ class Auth extends BaseController
             return redirect()->back()->with('galat_verifikasi', 'Gagal menyiapkan tautan. Coba lagi sebentar lagi.');
         }
 
-        $this->kirimSambutan('verifikasi_email', $user['email'], $user['name'],
+        $terkirim = $this->kirimSambutan('verifikasi_email', $user['email'], $user['name'],
             'Konfirmasi alamat email Anda', ['nama' => $user['name'], 'urlMulai' => $url]);
+
+        if (! $terkirim) {
+            // Layanan email belum diatur. Mengaku "sudah dikirim" akan membuat
+            // pengurus menunggu email yang tak akan pernah datang.
+            return redirect()->back()->with('galat_verifikasi',
+                'Pengiriman email belum aktif di server ini, jadi tautan konfirmasi belum bisa dikirim. '
+                . 'Silakan hubungi pengelola Masj.id.');
+        }
 
         return redirect()->back()->with('pesan_verifikasi',
             'Email konfirmasi dikirim ulang ke ' . $user['email'] . '. Cek kotak masuk dan folder spam.');
@@ -399,7 +407,11 @@ class Auth extends BaseController
      * penyusunan view atau panggilan HTTP-nya masih bisa melempar — karena itu
      * seluruhnya dibungkus try/catch.
      */
-    private function kirimSambutan(string $templat, string $email, string $nama, string $subjek, array $data): void
+    /**
+     * @return bool Benar bila pengiriman benar-benar dijadwalkan. Salah bila
+     *              dilewati — pemanggil TIDAK boleh mengaku sudah mengirim.
+     */
+    private function kirimSambutan(string $templat, string $email, string $nama, string $subjek, array $data): bool
     {
         try {
             $mailer = new \App\Libraries\Mailer();
@@ -410,7 +422,7 @@ class Auth extends BaseController
                 // Itu disengaja: keadaan ini normal, bukan kegagalan.
                 log_message('info', 'Email sambutan dilewati: kunci Mailer belum diatur.');
 
-                return;
+                return false;
             }
 
             // HTML disusun SEKARANG, selagi konteks permintaan masih utuh —
@@ -419,7 +431,7 @@ class Auth extends BaseController
         } catch (\Throwable $e) {
             log_message('error', 'Email sambutan gagal disiapkan: ' . $e->getMessage());
 
-            return;
+            return false;
         }
 
         // Pengiriman ditunda sampai respons selesai dikirim ke browser.
@@ -454,6 +466,10 @@ class Auth extends BaseController
                 log_message('error', 'Email sambutan gagal: ' . $e->getMessage());
             }
         });
+
+        // Sejauh yang bisa diketahui pada titik ini. Kegagalan panggilan HTTP
+        // terjadi setelah respons terkirim, jadi hasilnya hanya masuk log.
+        return true;
     }
 
     private function processLogin($user)

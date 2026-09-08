@@ -57,7 +57,18 @@ if (! $pesan && ! $galat && $selesai) {
     <?php endif; ?>
 <?php endif; ?>
 
-<?php if (! $selesai): ?>
+<?php
+// Bila layanan email belum diatur, tak ada tautan yang pernah sampai dan tombol
+// "Kirim Ulang" pun tak bisa berbuat apa-apa. Menampilkan kartu yang berkata
+// "kami mengirim tautan konfirmasi" dalam keadaan itu hanya menyesatkan.
+$bisaKirim = false;
+try {
+    $bisaKirim = (new \App\Libraries\Mailer())->siap();
+} catch (\Throwable $e) {
+    $bisaKirim = false;
+}
+?>
+<?php if (! $selesai && $bisaKirim): ?>
 <div id="pengingatVerifikasi"
      class="fixed <?= ($pesan || $galat) ? 'bottom-28' : 'bottom-4' ?> right-4 z-40 max-w-sm bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-800/50 rounded-2xl shadow-xl p-4">
     <div class="flex gap-3">
