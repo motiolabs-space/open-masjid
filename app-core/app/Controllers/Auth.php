@@ -287,6 +287,12 @@ class Auth extends BaseController
         $userModel = new \App\Models\UserModel();
         $userModel->update($user['id'], ['last_login' => date('Y-m-d H:i:s')]);
 
+        // Riwayat login dicatat di sini karena SELURUH jalur masuk — formulir
+        // biasa maupun Google — bermuara ke method ini. last_login di atas
+        // hanya menyimpan yang terakhir dan selalu tertimpa; tanpa riwayat,
+        // retensi dan kohort tak bisa dihitung sama sekali.
+        (new \App\Models\UserLoginEventModel())->catat((int) $user['id'], $user['role'] ?? null);
+
         $session = session();
         
         $pengurusModel = new \App\Models\MasjidPengurusModel();

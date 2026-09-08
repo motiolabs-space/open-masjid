@@ -98,7 +98,11 @@
     </div>
     <div class="bg-amber-50 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-800/40 text-amber-800 dark:text-amber-300 rounded-xl p-3 text-xs flex gap-2 mb-4">
         <span class="material-symbols-outlined text-base shrink-0">info</span>
-        <p>Angka aktif dihitung dari <strong>login terakhir</strong> tiap pengguna — sistem tak menyimpan histori login harian, jadi ditampilkan sebagai nilai saat ini, <strong>bukan grafik tren</strong>. Bila perlu tren DAU/MAU sungguhan, kita perlu tabel log aktivitas lebih dulu.</p>
+        <?php if (! $adaRiwayat): ?>
+            <p>Angka aktif dihitung dari <strong>login terakhir</strong> tiap pengguna, jadi ditampilkan sebagai nilai saat ini, <strong>bukan grafik tren</strong>. Riwayat login sudah mulai dicatat sejak pemasangannya — tren yang sungguhan akan muncul setelah datanya terkumpul.</p>
+        <?php else: ?>
+            <p>Kartu di bawah adalah <strong>posisi terkini</strong>. Trennya kini tersedia dari riwayat login yang tercatat sejak <strong><?= esc(date('M Y', strtotime($awalRekam . '-01'))) ?></strong> — lihat kartu "Pengguna Aktif Bulanan" di atas dan tabel retensi di bawah.</p>
+        <?php endif; ?>
     </div>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
         <?php foreach ($snapshot as $s): ?>
@@ -111,6 +115,70 @@
                 <p class="text-xs text-slate-400 mt-1"><?= esc($s['sub']) ?></p>
             </div>
         <?php endforeach; ?>
+    </div>
+</div>
+
+<!-- Retensi kohort masjid -->
+<div class="mt-10">
+    <h2 class="text-lg font-black mb-1">Retensi Masjid (Kohort)</h2>
+    <p class="text-sm text-slate-500 mb-4">
+        Dari masjid yang mendaftar tiap bulan, berapa yang masih aktif pada bulan-bulan sesudahnya.
+        Aktif = ada pengurusnya yang login pada bulan itu.
+    </p>
+
+    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        <?php if (! $adaRiwayat): ?>
+            <?php // Jujur soal sebabnya, bukan sekadar "belum ada data". ?>
+            <div class="p-6">
+                <p class="text-sm font-bold mb-1">Belum bisa dihitung</p>
+                <p class="text-sm text-slate-500 leading-relaxed">
+                    Riwayat login baru mulai dicatat sejak pemasangannya. Angka retensi
+                    baru bermakna setelah ada data beberapa bulan — kolom pertama akan
+                    terisi bulan depan.
+                </p>
+            </div>
+        <?php elseif (empty($kohort)): ?>
+            <p class="p-6 text-sm text-slate-500">Belum ada masjid mendaftar pada rentang ini.</p>
+        <?php else: ?>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm whitespace-nowrap">
+                    <thead class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                        <tr>
+                            <th class="px-6 py-3">Kohort</th>
+                            <th class="px-6 py-3 text-right">Mendaftar</th>
+                            <th class="px-6 py-3 text-right">+1 bulan</th>
+                            <th class="px-6 py-3 text-right">+2 bulan</th>
+                            <th class="px-6 py-3 text-right">+3 bulan</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                        <?php foreach ($kohort as $k): ?>
+                            <tr>
+                                <td class="px-6 py-3 font-bold"><?= esc($k['bulan']) ?></td>
+                                <td class="px-6 py-3 text-right font-bold"><?= $fmt($k['jumlah']) ?></td>
+                                <?php foreach ($k['lanjut'] as $n): ?>
+                                    <td class="px-6 py-3 text-right">
+                                        <?php if ($n === null): ?>
+                                            <?php // Bulannya belum tiba — beda dari "nol yang bertahan". ?>
+                                            <span class="text-slate-300 dark:text-slate-600">—</span>
+                                        <?php else: ?>
+                                            <?php $persen = $k['jumlah'] > 0 ? round($n / $k['jumlah'] * 100) : 0; ?>
+                                            <span class="font-bold"><?= $fmt($n) ?></span>
+                                            <span class="text-xs text-slate-400 ml-1"><?= $persen ?>%</span>
+                                        <?php endif; ?>
+                                    </td>
+                                <?php endforeach; ?>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <p class="px-6 py-4 text-xs text-slate-500 border-t border-slate-100 dark:border-slate-800">
+                Tanda &mdash; berarti <strong>bulannya belum tiba atau belum terekam</strong>, bukan nol.
+                Riwayat login baru tercatat sejak <strong><?= esc(date('M Y', strtotime($awalRekam . '-01'))) ?></strong>,
+                jadi kohort sebelum itu memang tak punya datanya — bukan berarti masjidnya berhenti.
+            </p>
+        <?php endif; ?>
     </div>
 </div>
 

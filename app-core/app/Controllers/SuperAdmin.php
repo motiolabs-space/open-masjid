@@ -158,9 +158,98 @@ class SuperAdmin extends BaseController
             [$mulai]
         )->getResultArray();
 
+        // ── Retensi kohort masjid ────────────────────────────────────────
+        //
+        // Pertanyaannya: dari masjid yang mendaftar bulan X, berapa yang masih
+        // aktif pada bulan-bulan sesudahnya? Ini yang paling menentukan bagi
+        // produk yang adopsinya bertahap — masjid yang mendaftar lalu berhenti
+        // memakai lebih mahal daripada masjid yang belum mendaftar.
+        //
+        // "Aktif" = ada pengurusnya yang login pada bulan itu. Sengaja memakai
+        // riwayat login (user_login_events), BUKAN users.last_login: kolom itu
+        // hanya menyimpan login terakhir, sehingga bulan-bulan sebelumnya
+        // sudah hilang tertimpa dan kohort mustahil dihitung darinya.
+        $kohort = [];
+        $adaRiwayat = $db->tableExists('user_login_events')
+            && (int) $db->query('SELECT COUNT(*) v FROM user_login_events')->getRow()->v > 0;
+
+        // Bulan pertama riwayat login tercatat. Bulan-bulan SEBELUM ini tidak
+        // punya data sama sekali, dan menampilkannya sebagai 0% akan berbohong:
+        // pembaca akan mengira seluruh masjid lama berhenti memakai, padahal
+        // keaktifan mereka memang tak pernah direkam. Bedakan "tidak aktif"
+        // dari "tidak terekam".
+        $awalRekam = $adaRiwayat
+            ? (string) $db->query("SELECT DATE_FORMAT(MIN(logged_at), '%Y-%m') v FROM user_login_events")->getRow()->v
+            : null;
+
+        if ($adaRiwayat) {
+            // Bulan pendaftaran tiap masjid, dibatasi jendela yang dipilih.
+            $daftar = $db->query(
+                "SELECT id, DATE_FORMAT(created_at, '%Y-%m') ym FROM masjid WHERE created_at >= ?",
+                [$mulai]
+            )->getResultArray();
+
+            $anggota = [];
+            foreach ($daftar as $r) {
+                $anggota[$r['ym']][] = (int) $r['id'];
+            }
+
+            // Bulan-bulan saat tiap masjid tercatat aktif.
+            $aktif = [];
+            foreach ($db->query(
+                "SELECT DISTINCT mp.masjid_id, DATE_FORMAT(e.logged_at, '%Y-%m') ym
+                 FROM user_login_events e
+                 JOIN masjid_pengurus mp ON mp.user_id = e.user_id
+                 WHERE e.logged_at >= ?",
+                [$mulai]
+            )->getResultArray() as $r) {
+                $aktif[(int) $r['masjid_id']][$r['ym']] = true;
+            }
+
+            ksort($anggota);
+            foreach ($anggota as $ym => $ids) {
+                $baris = ['bulan' => date('M y', strtotime($ym . '-01')), 'jumlah' => count($ids), 'lanjut' => []];
+
+                // Bulan ke-0 adalah bulan pendaftarannya sendiri; yang menarik
+                // justru bulan-bulan SESUDAHNYA.
+                for ($n = 1; $n <= 3; $n++) {
+                    $target = date('Y-m', strtotime($ym . '-01 +' . $n . ' months'));
+                    if ($target > date('Y-m')) {
+                        $baris['lanjut'][] = null;   // belum tiba, bukan nol
+                        continue;
+                    }
+                    if ($awalRekam !== null && $target < $awalRekam) {
+                        $baris['lanjut'][] = null;   // belum terekam, juga bukan nol
+                        continue;
+                    }
+                    $masih = 0;
+                    foreach ($ids as $id) {
+                        if (! empty($aktif[$id][$target])) {
+                            $masih++;
+                        }
+                    }
+                    $baris['lanjut'][] = $masih;
+                }
+                $kohort[] = $baris;
+            }
+        }
+
+        // Tren DAU/MAU sungguhan — baru mungkin setelah ada riwayat login.
+        $trenAktif = [];
+        if ($adaRiwayat) {
+            $trenAktif = $deret(
+                "SELECT DATE_FORMAT(logged_at, '%Y-%m') ym, COUNT(DISTINCT user_id) v
+                 FROM user_login_events WHERE logged_at >= ? GROUP BY ym",
+                [$mulai]
+            );
+        }
+
         $data = [
             'title'   => 'Laporan GTM - Superadmin',
             'kanal'   => $kanal,
+            'kohort'  => $kohort,
+            'adaRiwayat' => $adaRiwayat,
+            'awalRekam'  => $awalRekam,
             'bulan'   => $bulan,
             'label'   => $label,
             'rentang' => date('M Y', strtotime($mulai)) . ' – ' . date('M Y'),
@@ -173,6 +262,9 @@ class SuperAdmin extends BaseController
                 $kartuTren('Program Baru', 'event', 'amber', $programBaru, 'flow'),
                 $kartuTren('Donasi Masuk', 'volunteer_activism', 'rose', $donasi, 'rupiah'),
                 $kartuTren('Transaksi Keuangan', 'receipt_long', 'indigo', $transaksi, 'flow'),
+                // Hanya ditampilkan bila riwayat login sudah terisi; tanpa itu
+                // grafiknya hanya deretan nol yang menyesatkan.
+                ...($adaRiwayat ? [$kartuTren('Pengguna Aktif Bulanan', 'group_add', 'emerald', $trenAktif, 'flow')] : []),
             ],
             'snapshot' => [
                 ['judul' => 'Pengguna Aktif Bulanan', 'sub' => 'MAU · 30 hari terakhir', 'ikon' => 'trending_up', 'warna' => 'emerald', 'nilai' => $mau],

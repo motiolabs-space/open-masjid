@@ -47,6 +47,13 @@ class SendReminders extends BaseCommand
             CLI::write("Draf impor CSV lama dipangkas: {$draf}.", 'dark_gray');
         }
 
+        // Riwayat login juga: barisnya bertambah tiap orang masuk, jadi tanpa
+        // pemangkasan ia tumbuh tanpa batas.
+        $login = (new \App\Models\UserLoginEventModel())->pangkasLama();
+        if ($login > 0) {
+            CLI::write("Riwayat login lama dipangkas: {$login}.", 'dark_gray');
+        }
+
         // Pengingat donasi rutin (ke WA personal donatur) — diproses lebih dulu
         // dan terpisah dari pengingat grup, sebab masjid bisa punya pledge tanpa
         // punya grup mana pun (return dini di bawah tak boleh melewatinya).

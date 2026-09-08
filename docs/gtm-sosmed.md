@@ -7,9 +7,13 @@ Melanjutkan [seri-konten-sosmed.md](seri-konten-sosmed.md) — lima tulisan panj
 di sana adalah **pekan 1–5**. Dokumen ini melanjutkannya ke pekan 6–12 dan
 menambahkan format pendek yang lebih sering dipakai sehari-hari.
 
-Konteks strategisnya di [gtm.md](gtm.md). Sejak Sep 2026 kanal akuisisi sudah
-tercatat, jadi kerja di dokumen ini **bisa dinilai dengan data** — asalkan
-tautannya berpenanda. Caranya di bagian 8.
+Konteks strategisnya di [gtm.md](gtm.md). Sejak Sep 2026 kanal akuisisi **dan**
+retensi sudah tercatat, jadi kerja di dokumen ini bisa dinilai dengan data —
+asalkan tautannya berpenanda. Caranya di bagian 8.
+
+Retensi bahkan lebih menentukan daripada kanal: masjid yang datang lewat kampanye
+lalu berhenti memakai berarti kampanyenya menarik orang yang salah, bukan
+berhasil.
 
 ---
 
