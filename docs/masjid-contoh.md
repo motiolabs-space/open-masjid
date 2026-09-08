@@ -67,6 +67,21 @@ Kegiatan**, dan **Keuangan**.
 Angka transaksinya dibuat dari benih acak tetap, jadi tampilannya konsisten
 setiap kali seeder dijalankan — bukan berubah-ubah acak.
 
+## Dikeluarkan dari Laporan GTM
+
+Sejak Sep 2026 masjid contoh **tidak ikut dihitung** dalam angka apa pun di
+Superadmin › Laporan GTM — akuisisi, donasi, transaksi, funnel aktivasi, maupun
+retensi kohort.
+
+Alasannya terlihat begitu dicek: sebelum dikeluarkan, **seluruh angka "Donasi
+Masuk" platform berasal dari donasi fiktif masjid ini** (Rp 71,5 juta), begitu
+pula 95% transaksinya. Laporan pertumbuhan yang memuat uang karangan akan
+menyesatkan keputusan tanpa ketahuan. Masjid contoh juga bukan pelanggan yang
+diakuisisi, jadi ia memang tak pantas menghuni funnel maupun kohort.
+
+Penyaringnya ada di `SuperAdmin::gtm`, memakai `DemoMasjidSeeder::USERNAME`
+sebagai sumber kebenaran — bukan id yang ditulis keras.
+
 ## Soal kejujuran data
 
 Halaman ini **publik** dan berisi angka keuangan serta nama donatur yang

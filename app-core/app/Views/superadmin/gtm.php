@@ -118,6 +118,76 @@
     </div>
 </div>
 
+<!-- Funnel aktivasi masjid -->
+<div class="mt-10">
+    <h2 class="text-lg font-black mb-1">Aktivasi Masjid</h2>
+    <p class="text-sm text-slate-500 mb-4">
+        Sejauh mana masjid yang mendaftar benar-benar memakainya, <?= esc($rentang) ?>.
+        Dihitung dari data yang sudah ada, jadi berlaku juga untuk masjid lama.
+    </p>
+
+    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        <?php if ($funnelTotal === 0): ?>
+            <p class="p-6 text-sm text-slate-500">Belum ada masjid mendaftar pada rentang ini.</p>
+        <?php else: ?>
+            <div class="p-6 space-y-4">
+                <?php foreach ($funnel as $f): ?>
+                    <?php $persen = $funnelTotal > 0 ? round($f['jumlah'] / $funnelTotal * 100) : 0; ?>
+                    <div>
+                        <div class="flex items-baseline justify-between gap-4 mb-1.5">
+                            <div class="min-w-0">
+                                <span class="font-bold text-sm"><?= esc($f['tahap']) ?></span>
+                                <span class="text-xs text-slate-400 ml-2"><?= esc($f['catatan']) ?></span>
+                            </div>
+                            <div class="shrink-0 text-sm">
+                                <span class="font-black"><?= $fmt($f['jumlah']) ?></span>
+                                <span class="text-slate-400 text-xs ml-1"><?= $persen ?>%</span>
+                            </div>
+                        </div>
+                        <div class="h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                            <div class="h-full rounded-full bg-primary" style="width: <?= $persen ?>%"></div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-800 grid sm:grid-cols-2 gap-4 text-sm">
+                <div>
+                    <p class="text-slate-500 text-xs mb-1">Mendaftar lalu diam</p>
+                    <p class="font-black text-lg">
+                        <?= $fmt($funnelDiam) ?>
+                        <span class="text-xs font-medium text-slate-400">
+                            dari <?= $fmt($funnelTotal) ?> masjid
+                        </span>
+                    </p>
+                    <p class="text-xs text-slate-500 mt-1">
+                        Tak pernah mencatat transaksi, program, berita, maupun menerima donasi.
+                    </p>
+                </div>
+                <div>
+                    <p class="text-slate-500 text-xs mb-1">Jeda sampai transaksi pertama</p>
+                    <p class="font-black text-lg">
+                        <?php if ($jedaTengah === null): ?>
+                            <span class="text-slate-300 dark:text-slate-600">—</span>
+                        <?php else: ?>
+                            <?= $fmt($jedaTengah) ?> <span class="text-xs font-medium text-slate-400">hari (median)</span>
+                        <?php endif; ?>
+                    </p>
+                    <p class="text-xs text-slate-500 mt-1">
+                        Dari mendaftar sampai transaksi pertama dicatat.
+                    </p>
+                </div>
+            </div>
+
+            <p class="px-6 pb-4 text-xs text-slate-500">
+                Tahapan ini <strong>tidak berjenjang ketat</strong> — sebuah masjid bisa menerbitkan
+                program tanpa pernah mencatat transaksi. Bacalah tiap baris sebagai capaian
+                tersendiri, bukan corong yang harus mengecil berurutan.
+            </p>
+        <?php endif; ?>
+    </div>
+</div>
+
 <!-- Retensi kohort masjid -->
 <div class="mt-10">
     <h2 class="text-lg font-black mb-1">Retensi Masjid (Kohort)</h2>

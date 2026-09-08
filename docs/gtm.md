@@ -50,7 +50,7 @@ yang tak benar-benar ada akan salah arah tanpa ketahuan.
 |---|---|---|
 | ~~**Retensi & kohort**~~ ✅ | **Selesai Sep 2026** — tabel `user_login_events` mencatat tiap login; retensi kohort masjid tampil di **Laporan GTM › Retensi Masjid**. | — |
 | ~~**Sumber akuisisi**~~ ✅ | **Selesai Sep 2026** — UTM & rujukan dicatat saat pendaftaran, ditampilkan di **Laporan GTM › Kanal Akuisisi Masjid**. Lihat [gtm-sosmed.md](gtm-sosmed.md) untuk cara membuat tautannya. | Terjawab, **untuk pendaftar baru saja** — masjid yang sudah ada sebelum ini tampil "Tidak tercatat" |
-| **Funnel aktivasi** | Tak ada pencatatan peristiwa (event) | Tak bisa tahu di langkah mana masjid berhenti: daftar → isi profil → input transaksi pertama → publikasi laporan pertama |
+| ~~**Funnel aktivasi**~~ ✅ | **Selesai Sep 2026** — diturunkan dari stempel waktu yang sudah ada, jadi berlaku surut untuk seluruh masjid lama. Tampil di **Laporan GTM › Aktivasi Masjid**. | — |
 | ~~**DAU/MAU sebagai tren**~~ ✅ | **Selesai Sep 2026** — ikut terbuka oleh `user_login_events`; kartu "Pengguna Aktif Bulanan" kini bergaris tren. | — |
 | **Segmen masjid** | Tak ada atribut ukuran/tipe (kampung, kampus, perumahan, korporat) | Tak bisa tahu segmen mana yang paling cepat mengadopsi |
 | **Biaya & pendapatan** | Tak ada model harga di produk | Unit economics belum bisa dibicarakan sama sekali |
@@ -114,16 +114,24 @@ Diurutkan menurut rasio manfaat terhadap usaha. Dua yang pertama sudah terpasang
    **pertama** disimpan di cookie 90 hari lalu ikut tercatat saat mendaftar,
    sebab orang jarang mendaftar pada kunjungan yang sama saat ia pertama
    menemukan situs ini.
-3. **Penanda aktivasi per masjid** — kapan transaksi pertama dicatat, kapan
-   laporan pertama diterbitkan. **Belum dikerjakan.** Ini yang berikutnya paling
-   berguna: retensi menjawab "masih dipakai atau tidak", aktivasi menjawab
-   "sempat benar-benar dipakai atau tidak".
+3. ✅ **Penanda aktivasi per masjid** — terpasang Sep 2026. **Tanpa kolom baru
+   maupun migrasi**: seluruhnya diturunkan dari stempel waktu yang sudah ada
+   (transaksi, program, berita, donasi pertama). Karena itu ia berlaku SURUT
+   untuk masjid lama — tak ada masa "belum terekam" seperti pada retensi — dan
+   tak ada jalur masuk yang bisa terlewat mencatat, entah lewat dashboard,
+   impor CSV, API, maupun MCP.
 4. **Segmen masjid** — satu kolom tipe (kampung/perumahan/kampus/korporat/
    yayasan), diisi saat pendaftaran. **Belum dikerjakan.**
 
 Tidak ada yang mengubah tampilan bagi pengurus masjid; semuanya di sisi data.
 
-> **Keduanya baru mulai mencatat sejak dipasang.** Masjid yang mendaftar sebelum
+> **Masjid contoh (`/digital`) dikeluarkan dari seluruh angka di Laporan GTM.**
+> Isinya dibuat-buat sebagai peraga, dan sebelum dikeluarkan ia menyumbang
+> **100% angka "Donasi Masuk" platform** (Rp 71,5 juta fiktif) serta 95%
+> transaksinya. Laporan pertumbuhan yang memuat uang karangan akan menyesatkan
+> keputusan tanpa ketahuan.
+>
+> **Riwayat login dan kanal akuisisi baru mulai mencatat sejak dipasang.** Masjid yang mendaftar sebelum
 > Sep 2026 tidak punya asal maupun riwayat keaktifan. Di laporan hal itu
 > ditampilkan apa adanya sebagai **"—"** dan **"Tidak tercatat"** — bukan sebagai
 > 0%. Membedakan "tidak aktif" dari "tidak terekam" itu penting: yang pertama

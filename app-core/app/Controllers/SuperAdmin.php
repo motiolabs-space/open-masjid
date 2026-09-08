@@ -71,6 +71,27 @@ class SuperAdmin extends BaseController
         $db   = \Config\Database::connect();
         $base = date('Y-m-01');
 
+        // Masjid contoh (/digital) DIKELUARKAN dari seluruh angka di halaman ini.
+        //
+        // Isinya sengaja dibuat-buat oleh DemoMasjidSeeder sebagai peraga, dan
+        // membiarkannya ikut terhitung membuat laporan pertumbuhan berbohong:
+        // sebelum dikeluarkan, SELURUH angka "Donasi Masuk" platform — Rp 71,5
+        // juta — berasal dari donasi fiktif masjid ini, begitu pula 95%
+        // transaksinya. Keputusan yang diambil dari angka seperti itu akan salah
+        // arah tanpa ketahuan.
+        //
+        // Masjid contoh juga bukan pelanggan yang diakuisisi, jadi ia memang tak
+        // pantas menghuni funnel maupun kohort.
+        $demo = $db->table('masjid')
+            ->select('id')
+            ->where('username', \App\Database\Seeds\DemoMasjidSeeder::USERNAME)
+            ->get()->getRowArray();
+        $demoId = $demo ? (int) $demo['id'] : 0;
+
+        // Potongan penyaring; kosong bila masjid contoh memang tak ada.
+        $tanpaDemo      = $demoId ? " AND masjid_id <> {$demoId}" : '';   // tabel anak
+        $tanpaDemoId    = $demoId ? " AND id <> {$demoId}" : '';          // tabel masjid
+
         // Sumbu waktu: satu ember per bulan, dari (bulan-1) bulan lalu s.d. bulan ini.
         $ym = [];
         $label = [];
@@ -91,9 +112,9 @@ class SuperAdmin extends BaseController
         };
 
         // Hitungan sebelum jendela waktu, jadi kumulatif tidak dimulai dari nol.
-        $awal = function (string $table, string $col) use ($db, $mulai): float {
+        $awal = function (string $table, string $col, string $extra = '') use ($db, $mulai): float {
             return (float) ($db->query(
-                "SELECT COUNT(*) v FROM {$table} WHERE {$col} < ?",
+                "SELECT COUNT(*) v FROM {$table} WHERE {$col} < ? {$extra}",
                 [$mulai]
             )->getRow()->v ?? 0);
         };
@@ -111,17 +132,17 @@ class SuperAdmin extends BaseController
             "SELECT DATE_FORMAT({$col}, '%Y-%m') ym, {$agg} v FROM {$table} "
             . "WHERE {$col} >= ? {$extra} GROUP BY ym";
 
-        $masjidBaru   = $deret($q('masjid', 'created_at'), [$mulai]);
+        $masjidBaru   = $deret($q('masjid', 'created_at', 'COUNT(*)', $tanpaDemoId), [$mulai]);
         $penggunaBaru = $deret($q('users', 'created_at'), [$mulai]);
-        $wargaBaru    = $deret($q('masjid_warga', 'created_at'), [$mulai]);
-        $programBaru  = $deret($q('masjid_programs', 'created_at'), [$mulai]);
-        $transaksi    = $deret($q('masjid_finance_transactions', 'date'), [$mulai]);
+        $wargaBaru    = $deret($q('masjid_warga', 'created_at', 'COUNT(*)', $tanpaDemo), [$mulai]);
+        $programBaru  = $deret($q('masjid_programs', 'created_at', 'COUNT(*)', $tanpaDemo), [$mulai]);
+        $transaksi    = $deret($q('masjid_finance_transactions', 'date', 'COUNT(*)', $tanpaDemo), [$mulai]);
         $donasi       = $deret(
-            $q('masjid_donations', 'paid_at', 'COALESCE(SUM(amount),0)', "AND status IN ('paid','success','settlement')"),
+            $q('masjid_donations', 'paid_at', 'COALESCE(SUM(amount),0)', "AND status IN ('paid','success','settlement')" . $tanpaDemo),
             [$mulai]
         );
 
-        $totalMasjid   = $kumulatif($masjidBaru, $awal('masjid', 'created_at'));
+        $totalMasjid   = $kumulatif($masjidBaru, $awal('masjid', 'created_at', $tanpaDemoId));
         $totalPengguna = $kumulatif($penggunaBaru, $awal('users', 'created_at'));
 
         // Posisi terkini (snapshot, tanpa histori harian yang tersimpan).
@@ -129,7 +150,8 @@ class SuperAdmin extends BaseController
         $mau      = (int) $db->query("SELECT COUNT(*) v FROM users WHERE last_login >= ?", [date('Y-m-d H:i:s', strtotime('-30 days'))])->getRow()->v;
         $dau      = (int) $db->query("SELECT COUNT(*) v FROM users WHERE last_login >= ?", [date('Y-m-d H:i:s', strtotime('-1 days'))])->getRow()->v;
         $masjidAktif = (int) $db->query(
-            "SELECT COUNT(DISTINCT mp.masjid_id) v FROM masjid_pengurus mp JOIN users u ON u.id = mp.user_id WHERE u.last_login >= ?",
+            "SELECT COUNT(DISTINCT mp.masjid_id) v FROM masjid_pengurus mp JOIN users u ON u.id = mp.user_id
+             WHERE u.last_login >= ?" . ($demoId ? " AND mp.masjid_id <> {$demoId}" : ''),
             [date('Y-m-d H:i:s', strtotime('-30 days'))]
         )->getRow()->v;
 
@@ -152,7 +174,7 @@ class SuperAdmin extends BaseController
                     COALESCE(NULLIF(utm_medium,''), '') medium,
                     COUNT(*) jumlah
              FROM masjid
-             WHERE created_at >= ?
+             WHERE created_at >= ?{$tanpaDemoId}
              GROUP BY sumber, medium
              ORDER BY jumlah DESC",
             [$mulai]
@@ -185,7 +207,7 @@ class SuperAdmin extends BaseController
         if ($adaRiwayat) {
             // Bulan pendaftaran tiap masjid, dibatasi jendela yang dipilih.
             $daftar = $db->query(
-                "SELECT id, DATE_FORMAT(created_at, '%Y-%m') ym FROM masjid WHERE created_at >= ?",
+                "SELECT id, DATE_FORMAT(created_at, '%Y-%m') ym FROM masjid WHERE created_at >= ?{$tanpaDemoId}",
                 [$mulai]
             )->getResultArray();
 
@@ -244,9 +266,97 @@ class SuperAdmin extends BaseController
             );
         }
 
+        // ── Funnel aktivasi masjid ───────────────────────────────────────
+        //
+        // Retensi menjawab "masih dipakai atau tidak". Aktivasi menjawab
+        // pertanyaan sebelumnya: "sempat benar-benar dipakai atau tidak" —
+        // yang membedakan masjid yang mendaftar lalu diam dari masjid yang
+        // mencoba lalu menyerah. Dua sebab dengan penanganan sangat berbeda.
+        //
+        // SENGAJA DITURUNKAN dari stempel waktu yang sudah ada, bukan dari
+        // kolom penanda baru. Akibatnya funnel ini berlaku SURUT untuk seluruh
+        // masjid lama — tidak ada masa "belum terekam" seperti pada retensi —
+        // dan tak ada jalur masuk yang bisa terlewat mencatat, entah lewat
+        // dashboard, impor CSV, API, maupun MCP.
+        $tahapan = [
+            'transaksi' => ['tabel' => 'masjid_finance_transactions', 'kolom' => 'created_at'],
+            'program'   => ['tabel' => 'masjid_programs',             'kolom' => 'created_at'],
+            'berita'    => ['tabel' => 'masjid_news',                 'kolom' => 'created_at'],
+            'donasi'    => ['tabel' => 'masjid_donations',            'kolom' => 'paid_at'],
+        ];
+
+        $pertama = [];   // [nama tahap][masjid_id] => waktu paling awal
+        foreach ($tahapan as $nama => $t) {
+            if (! $db->tableExists($t['tabel'])) {
+                continue;
+            }
+            foreach ($db->query(
+                "SELECT masjid_id, MIN({$t['kolom']}) awal FROM {$t['tabel']}
+                 WHERE {$t['kolom']} IS NOT NULL GROUP BY masjid_id"
+            )->getResultArray() as $r) {
+                $pertama[$nama][(int) $r['masjid_id']] = $r['awal'];
+            }
+        }
+
+        $masjidJendela = $db->query(
+            "SELECT id, created_at, logo, foto_utama, address FROM masjid WHERE created_at >= ?{$tanpaDemoId}",
+            [$mulai]
+        )->getResultArray();
+
+        $jumlahFunnel = count($masjidJendela);
+        $capai = ['profil' => 0, 'transaksi' => 0, 'konten' => 0, 'donasi' => 0];
+        $jeda  = [];   // hari dari mendaftar sampai transaksi pertama
+        $diam  = 0;    // mendaftar tetapi tak pernah mengisi apa pun
+
+        foreach ($masjidJendela as $row) {
+            $id = (int) $row['id'];
+
+            // Profil hanya bisa dinilai dari keadaan SEKARANG — tak ada stempel
+            // waktu kapan ia dilengkapi. Cukup untuk funnel, tak cukup untuk tren.
+            if (! empty($row['logo']) || ! empty($row['foto_utama']) || ! empty($row['address'])) {
+                $capai['profil']++;
+            }
+
+            $adaTransaksi = isset($pertama['transaksi'][$id]);
+            $adaKonten    = isset($pertama['program'][$id]) || isset($pertama['berita'][$id]);
+            $adaDonasi    = isset($pertama['donasi'][$id]);
+
+            if ($adaTransaksi) {
+                $capai['transaksi']++;
+                $hari = (strtotime($pertama['transaksi'][$id]) - strtotime($row['created_at'])) / 86400;
+                if ($hari >= 0) {
+                    $jeda[] = $hari;
+                }
+            }
+            if ($adaKonten) {
+                $capai['konten']++;
+            }
+            if ($adaDonasi) {
+                $capai['donasi']++;
+            }
+            if (! $adaTransaksi && ! $adaKonten && ! $adaDonasi) {
+                $diam++;
+            }
+        }
+
+        sort($jeda);
+        $tengah = $jeda === [] ? null : (int) round($jeda[intdiv(count($jeda), 2)]);
+
+        $funnel = [
+            ['tahap' => 'Mendaftar',                  'jumlah' => $jumlahFunnel,        'catatan' => 'Seluruh masjid pada rentang ini'],
+            ['tahap' => 'Melengkapi profil',          'jumlah' => $capai['profil'],    'catatan' => 'Ada logo, foto, atau alamat'],
+            ['tahap' => 'Menerbitkan program/berita', 'jumlah' => $capai['konten'],    'catatan' => 'Halaman publiknya punya isi'],
+            ['tahap' => 'Mencatat transaksi pertama', 'jumlah' => $capai['transaksi'], 'catatan' => 'Inti produk mulai dipakai'],
+            ['tahap' => 'Menerima donasi pertama',    'jumlah' => $capai['donasi'],    'catatan' => 'Rantai lengkap sampai dana masuk'],
+        ];
+
         $data = [
             'title'   => 'Laporan GTM - Superadmin',
             'kanal'   => $kanal,
+            'funnel'      => $funnel,
+            'funnelDiam'  => $diam,
+            'funnelTotal' => $jumlahFunnel,
+            'jedaTengah'  => $tengah,
             'kohort'  => $kohort,
             'adaRiwayat' => $adaRiwayat,
             'awalRekam'  => $awalRekam,
