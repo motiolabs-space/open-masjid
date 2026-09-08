@@ -33,6 +33,11 @@ $routes->post('/register/jamaah', 'Auth::registerJamaah');
 $routes->get('/forgot-password', 'Auth::showForgotPassword');
 $routes->post('/forgot-password', 'Auth::sendResetLink');
 $routes->get('/reset-password/(:segment)', 'Auth::showResetPassword/$1');
+// Verifikasi email. Sengaja TIDAK di balik dashboardGuard: tautannya kerap
+// dibuka di perangkat lain yang belum login, dan token acaknya sendiri yang
+// menjadi bukti.
+$routes->get('verifikasi-email/(:segment)', 'Auth::verifikasiEmail/$1');
+$routes->post('verifikasi-email/kirim-ulang', 'Auth::kirimUlangVerifikasi', ['filter' => 'dashboardGuard']);
 $routes->post('/reset-password', 'Auth::doResetPassword');
 $routes->get('dashboard', 'Admin::index');
 $routes->post('subscribe', 'Home::subscribe');

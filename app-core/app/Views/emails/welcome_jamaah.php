@@ -25,11 +25,15 @@
     </p>
 
     <div style="text-align:center;margin:24px 0">
-        <a href="<?= esc($urlCari, 'attr') ?>"
+        <a href="<?= esc($urlMulai, 'attr') ?>"
            style="display:inline-block;background:#065F46;color:#ffffff;text-decoration:none;font-weight:bold;padding:12px 28px;border-radius:8px;font-size:14px">
-            Cari Masjid Anda
+            Konfirmasi &amp; Cari Masjid
         </a>
     </div>
+
+    <p style="font-size:12px;line-height:1.6;color:#6b7280;margin:0 0 20px;text-align:center">
+        Tombol di atas sekalian mengesahkan alamat email ini.
+    </p>
 
     <p style="font-size:13px;line-height:1.6;color:#374151;margin:0 0 20px">
         Masjid Anda belum terdaftar? Tunjukkan

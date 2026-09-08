@@ -54,6 +54,12 @@ class SendReminders extends BaseCommand
             CLI::write("Riwayat login lama dipangkas: {$login}.", 'dark_gray');
         }
 
+        // Token verifikasi email yang sudah terpakai atau kedaluwarsa.
+        $verif = \App\Libraries\EmailVerification::pangkasLama();
+        if ($verif > 0) {
+            CLI::write("Token verifikasi lama dipangkas: {$verif}.", 'dark_gray');
+        }
+
         // Pengingat donasi rutin (ke WA personal donatur) — diproses lebih dulu
         // dan terpisah dari pengingat grup, sebab masjid bisa punya pledge tanpa
         // punya grup mana pun (return dini di bawah tak boleh melewatinya).

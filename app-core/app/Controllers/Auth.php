@@ -104,7 +104,10 @@ class Auth extends BaseController
                     'nama'         => $userData['name'],
                     'namaMasjid'   => $masjidData['name'],
                     'urlMasjid'    => base_url($masjidData['username']),
-                    'urlDashboard' => base_url('dashboard/profil'),
+                    // Tautan verifikasi; bila penerbitannya gagal, tombol tetap
+                    // berguna sebagai jalan ke dashboard.
+                    'urlMulai'     => \App\Libraries\EmailVerification::terbitkan((int) $userId, $userData['email'])
+                                      ?? base_url('dashboard/profil'),
                     'urlContoh'    => base_url(\App\Database\Seeds\DemoMasjidSeeder::USERNAME),
                 ]
             );
@@ -213,7 +216,8 @@ class Auth extends BaseController
                 'Selamat bergabung di Masj.id',
                 [
                     'nama'      => $userData['name'],
-                    'urlCari'   => base_url('jelajah'),
+                    'urlMulai'  => \App\Libraries\EmailVerification::terbitkan((int) $userId, $userData['email'])
+                                   ?? base_url('jelajah'),
                     'urlContoh' => base_url(\App\Database\Seeds\DemoMasjidSeeder::USERNAME),
                 ]
             );
@@ -308,6 +312,79 @@ class Auth extends BaseController
         $exists = $userModel->where('email', $email)->first();
 
         return $this->response->setJSON(['available' => !$exists]);
+    }
+
+    /**
+     * Menukar tautan verifikasi dari email menjadi status terverifikasi.
+     *
+     * Tidak menuntut pengguna sedang login: tautan kerap dibuka di perangkat
+     * lain — ponsel, padahal mendaftarnya dari laptop. Memaksanya login dulu
+     * hanya menambah gesekan tanpa menambah keamanan, sebab token acak 32 byte
+     * itu sendiri yang menjadi buktinya.
+     */
+    public function verifikasiEmail(string $token)
+    {
+        $hasil = \App\Libraries\EmailVerification::tukarkan($token);
+        $masuk = (bool) session()->get('isLoggedIn');
+        $tujuan = $masuk ? 'dashboard' : 'login';
+
+        // Halaman login menampilkan flash 'success'/'error' umum, sedangkan
+        // halaman dashboard tidak — di sana pesan dirender partial verifikasi
+        // lewat kunci tersendiri. Tanpa pemisahan ini pesannya hilang diam-diam,
+        // dan justru pesan galat yang paling perlu terbaca: hanya di situ
+        // pengguna diberi tahu cara meminta tautan baru.
+        $kunciOk = $masuk ? 'pesan_verifikasi' : 'success';
+        $kunciGalat = $masuk ? 'galat_verifikasi' : 'error';
+
+        switch ($hasil['status']) {
+            case 'ok':
+            case 'sudah':
+                return redirect()->to($tujuan)
+                    ->with($kunciOk, 'Terima kasih, alamat email Anda sudah dikonfirmasi.');
+
+            case 'kedaluwarsa':
+            case 'terpakai':
+                return redirect()->to($tujuan)->with($kunciGalat,
+                    'Tautan konfirmasi sudah tidak berlaku. Silakan minta kirim ulang dari dashboard.');
+
+            default:
+                return redirect()->to($tujuan)->with($kunciGalat, 'Tautan konfirmasi tidak dikenali.');
+        }
+    }
+
+    /** Mengirim ulang email konfirmasi untuk pengguna yang sedang login. */
+    public function kirimUlangVerifikasi()
+    {
+        $userId = session()->get('user_id');
+        if (empty($userId)) {
+            return redirect()->to('login');
+        }
+
+        // Rute ini mengirim email atas permintaan; tanpa rem ia bisa dipakai
+        // membanjiri kotak masuk sendiri sekaligus menghabiskan kuota layanan.
+        if (! $this->lolosBatasLaju('kirim-ulang-verifikasi', 3, 10 * MINUTE)) {
+            return redirect()->back()->with('galat_verifikasi',
+                'Terlalu sering meminta kirim ulang. Silakan tunggu beberapa menit.');
+        }
+
+        $user = (new UserModel())->find($userId);
+        if (! $user) {
+            return redirect()->to('login');
+        }
+        if (! empty($user['email_verified_at'])) {
+            return redirect()->back()->with('pesan_verifikasi', 'Email Anda memang sudah terkonfirmasi.');
+        }
+
+        $url = \App\Libraries\EmailVerification::terbitkan((int) $userId, $user['email']);
+        if ($url === null) {
+            return redirect()->back()->with('galat_verifikasi', 'Gagal menyiapkan tautan. Coba lagi sebentar lagi.');
+        }
+
+        $this->kirimSambutan('verifikasi_email', $user['email'], $user['name'],
+            'Konfirmasi alamat email Anda', ['nama' => $user['name'], 'urlMulai' => $url]);
+
+        return redirect()->back()->with('pesan_verifikasi',
+            'Email konfirmasi dikirim ulang ke ' . $user['email'] . '. Cek kotak masuk dan folder spam.');
     }
 
     /**

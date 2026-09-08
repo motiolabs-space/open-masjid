@@ -39,12 +39,20 @@
         layak dibagikan &mdash; tidak perlu langsung lengkap.
     </p>
 
+    <?php // Satu tombol, dua tugas: mengesahkan alamat email sekaligus
+          // mengantar ke langkah pertama. Meminta dua klik terpisah untuk dua
+          // urusan yang sama-sama sepele hanya menambah gesekan. ?>
     <div style="text-align:center;margin:24px 0">
-        <a href="<?= esc($urlDashboard, 'attr') ?>"
+        <a href="<?= esc($urlMulai, 'attr') ?>"
            style="display:inline-block;background:#065F46;color:#ffffff;text-decoration:none;font-weight:bold;padding:12px 28px;border-radius:8px;font-size:14px">
-            Mulai Isi Data Masjid
+            Konfirmasi &amp; Mulai Isi Data
         </a>
     </div>
+
+    <p style="font-size:12px;line-height:1.6;color:#6b7280;margin:0 0 20px;text-align:center">
+        Tombol di atas sekalian mengesahkan alamat email ini, supaya kami bisa
+        membantu memulihkan akses bila suatu saat Anda lupa kata sandi.
+    </p>
 
     <p style="font-size:13px;font-weight:bold;color:#111827;margin:24px 0 8px">Tiga langkah pertama</p>
     <ol style="font-size:13px;line-height:1.7;color:#374151;margin:0 0 20px;padding-left:20px">

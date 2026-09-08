@@ -89,5 +89,6 @@
     });
     </script>
     <?= $this->include('partials/hapus_post') ?>
+    <?= $this->include('partials/verifikasi_email') ?>
     <?= $this->renderSection('scripts') ?>
 </body></html>

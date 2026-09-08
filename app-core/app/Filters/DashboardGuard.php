@@ -55,6 +55,9 @@ class DashboardGuard implements FilterInterface
             'dashboard/masjid-saya',    // masjid yang diikuti (+ follow/unfollow)
             'dashboard/program-diikuti',
             'dashboard/riwayat-donasi',
+            // Konfirmasi email berlaku untuk semua peran, termasuk jamaah.
+            // Tanpa baris ini jamaah tertolak saat menekan "Kirim Ulang".
+            'verifikasi-email',
         ];
 
         $allowed = in_array($uri, $allowedExact, true);
