@@ -93,6 +93,22 @@ class Auth extends BaseController
                 'masjid_username' => $masjidData['username'],
             ]);
 
+            // Email sambutan ke PIC. Tugasnya memancing langkah pertama —
+            // mayoritas masjid mendaftar lalu tak pernah mengisi apa pun.
+            $this->kirimSambutan(
+                'welcome_masjid',
+                $userData['email'],
+                $userData['name'],
+                'Halaman ' . $masjidData['name'] . ' sudah aktif di Masj.id',
+                [
+                    'nama'         => $userData['name'],
+                    'namaMasjid'   => $masjidData['name'],
+                    'urlMasjid'    => base_url($masjidData['username']),
+                    'urlDashboard' => base_url('dashboard/profil'),
+                    'urlContoh'    => base_url(\App\Database\Seeds\DemoMasjidSeeder::USERNAME),
+                ]
+            );
+
             // 4. Send Telegram Notification
             try {
                 $userModel = new \App\Models\UserModel();
@@ -190,6 +206,18 @@ class Auth extends BaseController
                 'role'       => 'jamaah'
             ]);
 
+            $this->kirimSambutan(
+                'welcome_jamaah',
+                $userData['email'],
+                $userData['name'],
+                'Selamat bergabung di Masj.id',
+                [
+                    'nama'      => $userData['name'],
+                    'urlCari'   => base_url('jelajah'),
+                    'urlContoh' => base_url(\App\Database\Seeds\DemoMasjidSeeder::USERNAME),
+                ]
+            );
+
             return redirect()->to('dashboard')->with('success', 'Pendaftaran berhasil. Selamat datang!');
         }
 
@@ -280,6 +308,75 @@ class Auth extends BaseController
         $exists = $userModel->where('email', $email)->first();
 
         return $this->response->setJSON(['available' => !$exists]);
+    }
+
+    /**
+     * Mengirim email sambutan. Sengaja TIDAK pernah menggagalkan pendaftaran.
+     *
+     * Pendaftaran sudah tersimpan saat method ini dipanggil. Bila layanan email
+     * sedang mati atau kuncinya belum diatur, yang benar adalah pendaftar tetap
+     * masuk ke dashboard — bukan melihat galat untuk sesuatu yang sudah berhasil.
+     * Kegagalannya dicatat ke log supaya tetap bisa ditelusuri.
+     *
+     * Mailer::kirim() memang mengembalikan false alih-alih melempar, tapi
+     * penyusunan view atau panggilan HTTP-nya masih bisa melempar — karena itu
+     * seluruhnya dibungkus try/catch.
+     */
+    private function kirimSambutan(string $templat, string $email, string $nama, string $subjek, array $data): void
+    {
+        try {
+            $mailer = new \App\Libraries\Mailer();
+            if (! $mailer->siap()) {
+                // Kunci email belum diatur — lazim di lingkungan pengembangan.
+                // Dicatat pada tingkat info, jadi TIDAK muncul dengan setelan
+                // logger.threshold = 4 di .env proyek ini (error ke atas saja).
+                // Itu disengaja: keadaan ini normal, bukan kegagalan.
+                log_message('info', 'Email sambutan dilewati: kunci Mailer belum diatur.');
+
+                return;
+            }
+
+            // HTML disusun SEKARANG, selagi konteks permintaan masih utuh —
+            // view() butuh itu. Yang ditunda hanya panggilan HTTP-nya.
+            $html = view('emails/' . $templat, $data);
+        } catch (\Throwable $e) {
+            log_message('error', 'Email sambutan gagal disiapkan: ' . $e->getMessage());
+
+            return;
+        }
+
+        // Pengiriman ditunda sampai respons selesai dikirim ke browser.
+        //
+        // Mailer memberi batas 20 detik untuk panggilan HTTP-nya. Bila layanan
+        // email sedang lambat atau mati, tanpa penundaan ini pendaftar akan
+        // menatap layar menunggu sampai 20 detik SETELAH menekan "Daftar" —
+        // padahal masjidnya sudah tersimpan sejak tadi. Sebagian akan mengira
+        // gagal lalu menekan ulang atau pergi, dan itu persis kebocoran
+        // aktivasi yang sedang coba ditutup oleh email ini.
+        //
+        // fastcgi_finish_request() menutup koneksi lebih dulu bila tersedia
+        // (php-fpm). Di lingkungan lain fungsi ini tidak ada, dan pengiriman
+        // tetap berjalan di shutdown — setidaknya keluarannya sudah terkirim.
+        register_shutdown_function(static function () use ($mailer, $email, $nama, $subjek, $html) {
+            // Nama fungsinya berbeda per SAPI: php-fpm memakai yang pertama,
+            // LiteSpeed yang kedua. Apache mod_php tak punya keduanya — di sana
+            // koneksi tetap terbuka, tetapi pendaftarannya sendiri sudah aman
+            // tersimpan sejak sebelum email disentuh.
+            foreach (['fastcgi_finish_request', 'litespeed_finish_request'] as $tutup) {
+                if (function_exists($tutup)) {
+                    $tutup();
+                    break;
+                }
+            }
+
+            try {
+                if (! $mailer->kirim($email, $nama, $subjek, $html)) {
+                    log_message('error', 'Email sambutan gagal terkirim ke ' . $email . ': ' . $mailer->pesanGalat());
+                }
+            } catch (\Throwable $e) {
+                log_message('error', 'Email sambutan gagal: ' . $e->getMessage());
+            }
+        });
     }
 
     private function processLogin($user)

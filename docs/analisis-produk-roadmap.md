@@ -40,7 +40,7 @@ keuangan → naik ke program yang berdampak bagi masyarakat sekitar dan luas.**
 
 | Prioritas | Item | Catatan |
 |-----------|------|---------|
-| 🔴 | **Email selamat datang, verifikasi registrasi, laporan rutin mingguan** | Fondasi `Mailer` sudah ada; tinggal template + pemicu. (Sempat direncanakan, belum jadi.) |
+| 🟠 | **Verifikasi registrasi, laporan rutin mingguan** | Fondasi `Mailer` sudah ada; tinggal template + pemicu. **Email sambutan sudah jadi** (Sep 2026) — untuk masjid maupun jamaah, dikirim setelah respons agar tak menahan pendaftaran. |
 | ✅ | ~~**Kwitansi donasi otomatis**~~ | Selesai Sep 2026 — lihat Tahap 1. |
 | ✅ | ~~**Modul Zakat**~~ | Selesai Sep 2026 — kalkulator, jenis zakat pada donasi, 8 asnaf pada mustahik, laporan zakat terpisah. Lihat Tahap 2. |
 | ✅ | ~~**Laporan Dampak program**~~ | Selesai Sep 2026 — penerima manfaat, cerita dampak, foto bukti, saklar publikasi. Lihat Tahap 3. |
